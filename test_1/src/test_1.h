@@ -9,6 +9,6 @@
 
 int main(void);
 int get_time_ns(struct timespec timeStruct);
-double calculate_time_ns(struct timespec timeStructStart, struct timespec timeStructFinish);
+unsigned long long calculate_time_ns(struct timespec timeStructStart, struct timespec timeStructFinish);
 
 #endif /* TEST_1_H_ */

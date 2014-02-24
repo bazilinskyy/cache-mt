@@ -16,22 +16,21 @@
 #include "mach_gettime.h"
 #include "test_1.h"
 
-#define MAX_POWER 19
+#define MAX_POWER 20
 #define BILLION  1000000000L;
 #define DEBUG
 
 int main(void) {
-	printf("POWER %1f \n", pow(2.0, MAX_POWER));
-
-	double time[(int) pow(2.0, (double) MAX_POWER)];
+	unsigned long long time[MAX_POWER];
 	struct timespec start, stop;
-	for (double n = 1.0; n < (int) pow(2.0, (double) MAX_POWER); n *= 2.0) {
+	int i = 0;
+	for (long n = 1.0; n < pow(2.0, (double) MAX_POWER); n *= 2.0) {
 
 #ifdef DEBUG
 //		if (fmod(n, 100000.0) == 0) {
 //			printf("%.0f ", n);
 //		}
-		printf("%.0f ", n);
+		printf("%ld ", n);
 #endif
 		// Calculate start time
 		get_time_ns(start);
@@ -48,10 +47,15 @@ int main(void) {
 		get_time_ns(stop);
 
 		// Record difference
-		time[(int) n] = calculate_time_ns(start, stop);
+		time[i] = calculate_time_ns(start, stop);
+		i++;
 	}
 #ifdef DEBUG
-	printf("\nSize %d", sizeof(time) / sizeof(time[0]));
+	printf("\nRESULTS:\n");
+	for (int var = 1; var < MAX_POWER; ++var) {
+		printf("%.0f,%llu\n", pow(2.0, (double) var), time[var]);
+	}
+
 #endif
 
 	return EXIT_SUCCESS;
@@ -65,7 +69,7 @@ int get_time_ns(struct timespec timeStruct) {
 	 return 1;
 }
 
-double calculate_time_ns(struct timespec timeStructStart, struct timespec timeStructFinish) {
-	double accum = ( timeStructFinish.tv_sec - timeStructStart.tv_sec ) + (double)( timeStructFinish.tv_nsec - timeStructStart.tv_nsec ) / (double)BILLION;
+unsigned long long calculate_time_ns(struct timespec timeStructStart, struct timespec timeStructFinish) {
+	unsigned long long accum = ( timeStructFinish.tv_sec - timeStructStart.tv_sec ) + (double)( timeStructFinish.tv_nsec - timeStructStart.tv_nsec ) / (double)BILLION;
 	return accum;
 }
