@@ -2,7 +2,7 @@
  * test_1.h
  *
  *  Created on: Feb 24, 2014
- *      Author: Pavlo Bazilinskyy <pavlo.bazilinskyy@gmail.com>
+ *  Author: Pavlo Bazilinskyy <pavlo.bazilinskyy@gmail.com>
  */
 #ifndef TEST_1_H_
 #define TEST_1_H_

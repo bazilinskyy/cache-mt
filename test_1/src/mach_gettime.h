@@ -2,9 +2,9 @@
  * mach_gettime.h
  *
  *  Created on: Feb 24, 2014
- *      Author: Pavlo Bazilinskyy <pavlo.bazilinskyy@gmail.com>
+ *  Author: Pavlo Bazilinskyy <pavlo.bazilinskyy@gmail.com>
  *
- *  from: http://stackoverflow.com/questions/11680461/monotonic-clock-on-osx
+ *  Based on: http://stackoverflow.com/questions/11680461/monotonic-clock-on-osx
  */
 #include <sys/types.h>
 #include <sys/_types/_timespec.h>

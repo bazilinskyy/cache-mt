@@ -2,7 +2,9 @@
  * mach_gettime.c
  *
  *  Created on: Feb 24, 2014
- *      Author: Pavlo Bazilinskyy <pavlo.bazilinskyy@gmail.com>
+ *  Author: Pavlo Bazilinskyy <pavlo.bazilinskyy@gmail.com>
+ *
+ *  Based on: http://stackoverflow.com/questions/11680461/monotonic-clock-on-osx
  */
 
 #include "mach_gettime.h"
@@ -11,11 +13,9 @@
 #define MT_NANO (+1.0E-9)
 #define MT_GIGA UINT64_C(1000000000)
 
-// TODO create a list of timers,
 static double mt_timebase = 0.0;
 static uint64_t mt_timestart = 0;
 
-// TODO be more careful in a multithreaded environement
 int clock_gettime(clockid_t clk_id, struct timespec *tp)
 {
     kern_return_t retval = KERN_SUCCESS;
