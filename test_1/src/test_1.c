@@ -46,7 +46,7 @@
 
 #include "test_1.h"
 
-#define MAX_POWER 24
+#define MAX_POWER 20
 #define BILLION  1000000000L
 //#define DEBUG
 #define SHOW_RESULTS
@@ -56,7 +56,8 @@ int main(void) {
 	unsigned long long time[MAX_POWER];
 	struct timespec start, stop;
 	int i = 0;
-	for (long n = 1.0; n < pow(2.0, (double) MAX_POWER); n *= 2.0) {
+	long n;
+	for (n = 1.0; n < pow(2.0, (double) MAX_POWER); n *= 2.0) {
 
 #ifdef DEBUG
 		printf("%d. %ld ", i+1, n);
@@ -71,7 +72,8 @@ int main(void) {
 		// Run experiment
 		unsigned char testAr[(int) n];
 		unsigned char testCh;
-		for (double i = 0.0; i < n; i++) {
+		double i;
+		for (i = 0.0; i < n; i++) {
 			testAr[(int) n] = CHAR_TO_ADD;
 			testCh = testAr[(int) n];
 		}
@@ -84,15 +86,15 @@ int main(void) {
 		}
 
 		// Record difference
-		time[i] = calculate_time_ns(start, stop);
+		time[(int) i] = calculate_time_ns(start, stop);
 		i++; // Iterate for easier access to array
 	}
 
 	// Output results
 #ifdef SHOW_RESULTS
 	printf("\nRESULTS:\n");
-	for (int var = 0; var < MAX_POWER; ++var) {
-		printf("%.0f,%llu\n", pow(2.0, (double) var), time[var]);
+	for (i = 0; i < MAX_POWER; ++i) {
+		printf("%.0f,%llu\n", pow(2.0, (double) i), time[i]);
 	}
 
 #endif
