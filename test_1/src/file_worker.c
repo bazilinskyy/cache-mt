@@ -33,10 +33,10 @@
 // Output time array into a CSV file
 void write_to_csv(unsigned long long time[], char *labelX, char *labelY) {
 	// Open filestream
-	FILE *f = fopen(CSV_FILE, "rb+");
-	if(f == NULL) //if file does not exist, create it
+	FILE *f = fopen(CSV_FILE, "wb"); //if file does not exist, create it
+	if(f == NULL)
 	{
-	    f = fopen(CSV_FILE, "wb");
+		printf("Could not create file.");
 	}
 
 	// Write to file
@@ -48,6 +48,9 @@ void write_to_csv(unsigned long long time[], char *labelX, char *labelY) {
 		fprintf(f, "%.0f,%llu\n", pow(2.0, (double) i), time[i]);
 	}
 
+
 	// Close filestream
 	fclose(f);
+
+//	printf ("%s %s", labelX, labelY);
 }

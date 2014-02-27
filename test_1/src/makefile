@@ -50,8 +50,8 @@ ifeq ($(UNAME_S),Linux)
 	LIBS += -lrt
 endif
 ifeq ($(UNAME_S),Darwin)
-	DEPS += mach_gettime.h
-	OBJ  += mach_gettime.o
+	DEPS += mac_clock_gettime.h
+	OBJ  += mac_clock_gettime.o
 endif
 
 %.o: %.c $(DEPS)

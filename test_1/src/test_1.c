@@ -51,8 +51,8 @@ int main(void) {
 		// Run experiment
 		unsigned char testAr[(int) n]; // Array for manipulating data
 		unsigned char testCh; // 1 byte of data
-		double j;
-		for (j = 0.0; j < n; j++) { // Write and read 1 byte n times
+		int j;
+		for (j = 0; j < n; j++) { // Write and read 1 byte n times
 			testAr[(int) n] = CHAR_TO_ADD; // Write 1 byte
 			testCh = testAr[(int) n]; // Read 1 byte
 		}

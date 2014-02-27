@@ -31,7 +31,7 @@
 #ifndef CONF_H_
 #define CONF_H_
 
-#define MAX_POWER 23
+#define MAX_POWER 24
 #define BILLION  1000000000L
 //#define DEBUG
 #define SHOW_RESULTS
@@ -39,8 +39,8 @@
 #define CHAR_TO_ADD 'a'
 //#define _POSIX_C_SOURCE >= 199309L
 #ifdef __APPLE__
-	#define CSV_FILE "out/test_1_i7.csv"
+	#define CSV_FILE "../out/test_1_i7.csv"
 #else
-	#define CSV_FILE "out/test_1_xeon.csv"
+	#define CSV_FILE "../out/test_1_xeon.csv"
 #endif
 #endif /* CONF_H_ */

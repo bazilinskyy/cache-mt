@@ -1,6 +1,6 @@
 /*
  ============================================================================================
- Name        : mach_gettime.c
+ Name        : mac_clock_gettime.c
  Author      : Pavlo Bazilinskyy
  Version     : 0.1
  Copyright   : Copyright (c) 2014, Pavlo Bazilinskyy <pavlo.bazilinskyy@gmail.com>
@@ -29,7 +29,7 @@
  ============================================================================================
  */
 #ifdef __APPLE__
-	#include "mach_gettime.h"
+	#include "mac_clock_gettime.h"
 	#include <mach/mach_time.h>
 
 	#define MT_NANO (+1.0E-9)
@@ -55,7 +55,7 @@
 			tp->tv_sec = diff * MT_NANO;
 			tp->tv_nsec = diff - (tp->tv_sec * MT_GIGA);
 		}
-		else // other clk_ids are mapped to the coresponding mach clock_service
+		else // other clk_ids are mapped to the corresponding mach clock_service
 		{
 			clock_serv_t cclock;
 			mach_timespec_t mts;
