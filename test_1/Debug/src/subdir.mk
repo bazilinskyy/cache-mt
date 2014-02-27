@@ -3,10 +3,6 @@
 ################################################################################
 
 # Add inputs and outputs from these tool invocations to the build variables 
-O_SRCS += \
-../src/mach_gettime.o \
-../src/test_1.o 
-
 C_SRCS += \
 ../src/mach_gettime.c \
 ../src/test_1.c 

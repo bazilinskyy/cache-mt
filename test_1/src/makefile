@@ -28,27 +28,27 @@
 # ============================================================================
 
 
-CC = gcc
-IFLAGS = -I
+CC =gcc
+IFLAGS =-I
 WFLAG1 = -Wall
 WFLAG2 = -Werror
 WFLAG3 = -Wextra
 #WFLAGS = $(WFLAG1) $(WFLAG2) $(WFLAG3)
 #WFLAGS = $(WFLAG1)
 OFLAGS = -g -O3
-SFLAG1 = -std=c99
+#SFLAG1 = -std=c99
 SFLAG2 = -m64
 SFLAGS = $(SFLAG1) $(SFLAG2)
 DFLAGS = # -Doptions
 UFLAGS = # Set on make command line only
 CFLAGS = $(SFLAGS) $(DFLAGS) $(IFLAGS) $(OFLAGS) $(WFLAGS) $(UFLAGS)
-LIBS = -lm
+LIBS =-lm
 DEPS = test_1.h
 OBJ  = test_1.o
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
-	LIBS +=-lrt
+	LIBS += -lrt
 endif
 ifeq ($(UNAME_S),Darwin)
 	DEPS += mach_gettime.h
@@ -56,7 +56,7 @@ ifeq ($(UNAME_S),Darwin)
 endif
 
 %.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(CC) -c -o $@ $< $(CFLAGS) $(LIBS)
 
 test_1: $(OBJ)
 	gcc -o $@ $^ $(CFLAGS) $(LIBS)

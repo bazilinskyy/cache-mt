@@ -46,11 +46,12 @@
 
 #include "test_1.h"
 
-#define MAX_POWER 20
+#define MAX_POWER 2
 #define BILLION  1000000000L
 //#define DEBUG
 #define SHOW_RESULTS
 #define CHAR_TO_ADD 'a'
+//#define _POSIX_C_SOURCE >= 199309L
 
 int main(void) {
 	unsigned long long time[MAX_POWER];
