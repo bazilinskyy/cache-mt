@@ -43,23 +43,23 @@ int main(void) {
 #endif
 		// Calculate start time
 		//get_time_ns(start);
-		if( clock_gettime( CLOCK_REALTIME, &start) == -1 ) {
+		if( clock_gettime( CLOCK_MONOTONIC, &start) == -1 ) {
 			perror( "clock gettime" );
 			return 0;
 		}
 
 		// Run experiment
-		unsigned char testAr[(int) n];
-		unsigned char testCh;
+		unsigned char testAr[(int) n]; // Array for manipulating data
+		unsigned char testCh; // 1 byte of data
 		double j;
-		for (j = 0.0; j < n; j++) {
-			testAr[(int) n] = CHAR_TO_ADD;
-			testCh = testAr[(int) n];
+		for (j = 0.0; j < n; j++) { // Write and read 1 byte n times
+			testAr[(int) n] = CHAR_TO_ADD; // Write 1 byte
+			testCh = testAr[(int) n]; // Read 1 byte
 		}
 
 		// Calculate finish time
 		//get_time_ns(stop);
-		if( clock_gettime( CLOCK_REALTIME, &stop) == -1 ) {
+		if( clock_gettime( CLOCK_MONOTONIC, &stop) == -1 ) {
 			perror( "clock gettime" );
 			return 0;
 		}
