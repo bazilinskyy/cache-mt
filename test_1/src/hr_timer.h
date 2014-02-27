@@ -1,5 +1,5 @@
 /*
- ============================================================================
+ ============================================================================================
  Name        : hr_timer.h
  Author      : Pavlo Bazilinskyy
  Version     : 0.1
@@ -24,9 +24,8 @@
  	 	 	   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  	 	 	   THE SOFTWARE.
 
- Description : Header for the high-resolution timer
- Target		 : MacBook Air with i7 and Xeon 5130
- ============================================================================
+ Description : Header for the cross-platform high-resolution timer for performance measurements
+ ============================================================================================
  */
 #ifndef HR_TIMER_H_
 #define HR_TIMER_H_

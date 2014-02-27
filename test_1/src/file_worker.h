@@ -1,6 +1,6 @@
 /*
  ============================================================================================
- Name        : mach_gettime.h
+ Name        : file_worker.h
  Author      : Pavlo Bazilinskyy
  Version     : 0.1
  Copyright   : Copyright (c) 2014, Pavlo Bazilinskyy <pavlo.bazilinskyy@gmail.com>
@@ -24,36 +24,12 @@
  	 	 	   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  	 	 	   THE SOFTWARE.
 
- Description : Header for the clock_gettime for Mac OS
- Based on	 : http://stackoverflow.com/questions/11680461/monotonic-clock-on-osx
+ Description : Header for file I/O for performance measurements
  ============================================================================================
  */
-#ifdef __APPLE__
+#ifndef FILE_WORKER_H_
+#define FILE_WORKER_H_
 
-	#include <sys/types.h>
-	#include <sys/_types/_timespec.h>
-	#include <mach/mach.h>
-	#include <mach/clock.h>
 
-	#ifndef mach_time_h
-	#define mach_time_h
 
-	/* The opengroup spec isn't clear on the mapping from REALTIME to CALENDAR
-	 being appropriate or not.
-	 http://pubs.opengroup.org/onlinepubs/009695299/basedefs/time.h.html */
-
-	// XXX only supports a single timer
-	#define TIMER_ABSTIME -1
-	#define CLOCK_REALTIME CALENDAR_CLOCK
-	#define CLOCK_MONOTONIC SYSTEM_CLOCK
-
-	typedef int clockid_t;
-
-	/* the mach kernel uses struct mach_timespec, so struct timespec
-		is loaded from <sys/_types/_timespec.h> for compatability */
-	// struct timespec { time_t tv_sec; long tv_nsec; };
-
-	int clock_gettime(clockid_t clk_id, struct timespec *tp);
-
-	#endif
-#endif
+#endif /* FILE_WORKER_H_ */
