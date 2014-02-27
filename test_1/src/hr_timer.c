@@ -1,6 +1,6 @@
 /*
  ============================================================================
- Name        : test_1.c
+ Name        : hr_timer.c
  Author      : Pavlo Bazilinskyy
  Version     : 0.1
  Copyright   : Copyright (c) 2014, Pavlo Bazilinskyy <pavlo.bazilinskyy@gmail.com>
@@ -24,61 +24,40 @@
  	 	 	   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  	 	 	   THE SOFTWARE.
 
- Description : Test 1 (measuring cache latency)
+ Description : Header for the high-resolution timer
  Target		 : MacBook Air with i7 and Xeon 5130
  ============================================================================
  */
 
-#include "test_1.h"
+#include "hr_timer.h"
 
-int main(void) {
-	unsigned long long time[MAX_POWER];
-	struct timespec start, stop;
-	int i = 0;
-	long n;
-	for (n = 1.0; n < pow(2.0, (double) MAX_POWER); n *= 2.0) {
-
-#ifdef DEBUG
-		printf("%d. %ld ", i+1, n);
-#endif
-		// Calculate start time
-		//get_time_ns(start);
-		if( clock_gettime( CLOCK_REALTIME, &start) == -1 ) {
-			perror( "clock gettime" );
-			return 0;
-		}
-
-		// Run experiment
-		unsigned char testAr[(int) n];
-		unsigned char testCh;
-		double j;
-		for (j = 0.0; j < n; j++) {
-			testAr[(int) n] = CHAR_TO_ADD;
-			testCh = testAr[(int) n];
-		}
-
-		// Calculate finish time
-		//get_time_ns(stop);
-		if( clock_gettime( CLOCK_REALTIME, &stop) == -1 ) {
-			perror( "clock gettime" );
-			return 0;
-		}
-
-		// Record difference
-		time[(int) i] = calculate_time_ns(start, stop);
-		i++; // Iterate for easier access to array
-	}
-
-	// Output results
-#ifdef SHOW_RESULTS
-	printf("\nRESULTS:\n");
-	for (i = 0; i < MAX_POWER; ++i) {
-		printf("%.0f,%llu\n", pow(2.0, (double) i), time[i]);
-	}
-
-#endif
-
-	return EXIT_SUCCESS;
+// Get time in nanoseconds
+int get_time_ns(struct timespec timeStruct) {
+	 if( clock_gettime( CLOCK_REALTIME, &timeStruct) == -1 ) {
+	      perror( "clock gettime" );
+	      return 0;
+	 }
+	 printf("Inside call: %ld ", timeStruct.tv_nsec);
+	 return 1;
 }
 
+unsigned long long calculate_time_ns(struct timespec start, struct timespec end) {
+//	unsigned long long accum = ( timeStructFinish.tv_sec - timeStructStart.tv_sec ) + (double)( timeStructFinish.tv_nsec - timeStructStart.tv_nsec ) / (double)BILLION;
+	struct timespec temp;
+	if ((end.tv_nsec - start.tv_nsec) < 0)
+	{
+			temp.tv_sec = end.tv_sec - start.tv_sec - 1;
+			temp.tv_nsec = BILLION + end.tv_nsec - start.tv_nsec;
+	}
+	else
+	{
+			temp.tv_sec = end.tv_sec - start.tv_sec;
+			temp.tv_nsec = end.tv_nsec - start.tv_nsec;
+	}
 
+#ifdef DEBUG
+	printf("TIME: %lld.%.9ld\n", (long long)temp.tv_sec, temp.tv_nsec);
+#endif
+
+	return BILLION*temp.tv_sec + temp.tv_nsec;
+}

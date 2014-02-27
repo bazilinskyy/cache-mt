@@ -1,6 +1,6 @@
 /*
  ============================================================================
- Name        : test_1.c
+ Name        : hr_timer.h
  Author      : Pavlo Bazilinskyy
  Version     : 0.1
  Copyright   : Copyright (c) 2014, Pavlo Bazilinskyy <pavlo.bazilinskyy@gmail.com>
@@ -24,61 +24,31 @@
  	 	 	   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  	 	 	   THE SOFTWARE.
 
- Description : Test 1 (measuring cache latency)
+ Description : Header for the high-resolution timer
  Target		 : MacBook Air with i7 and Xeon 5130
  ============================================================================
  */
+#ifndef HR_TIMER_H_
+#define HR_TIMER_H_
 
-#include "test_1.h"
-
-int main(void) {
-	unsigned long long time[MAX_POWER];
-	struct timespec start, stop;
-	int i = 0;
-	long n;
-	for (n = 1.0; n < pow(2.0, (double) MAX_POWER); n *= 2.0) {
-
-#ifdef DEBUG
-		printf("%d. %ld ", i+1, n);
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <math.h>
+#ifdef __APPLE__
+	#include "mach_gettime.h"
+#elif __linux // For future use
+    // linux
+#elif __unix // all unices not caught above
+    // Unix
+#elif __posix
+    // POSIX
 #endif
-		// Calculate start time
-		//get_time_ns(start);
-		if( clock_gettime( CLOCK_REALTIME, &start) == -1 ) {
-			perror( "clock gettime" );
-			return 0;
-		}
+#include "conf.h"
 
-		// Run experiment
-		unsigned char testAr[(int) n];
-		unsigned char testCh;
-		double j;
-		for (j = 0.0; j < n; j++) {
-			testAr[(int) n] = CHAR_TO_ADD;
-			testCh = testAr[(int) n];
-		}
+// Get time in nanoseconds
+int get_time_ns(struct timespec timeStruct);
+// From http://stackoverflow.com/questions/13950290/clock-gettime-nanoseconds-calculation
+unsigned long long calculate_time_ns(struct timespec start, struct timespec end);
 
-		// Calculate finish time
-		//get_time_ns(stop);
-		if( clock_gettime( CLOCK_REALTIME, &stop) == -1 ) {
-			perror( "clock gettime" );
-			return 0;
-		}
-
-		// Record difference
-		time[(int) i] = calculate_time_ns(start, stop);
-		i++; // Iterate for easier access to array
-	}
-
-	// Output results
-#ifdef SHOW_RESULTS
-	printf("\nRESULTS:\n");
-	for (i = 0; i < MAX_POWER; ++i) {
-		printf("%.0f,%llu\n", pow(2.0, (double) i), time[i]);
-	}
-
-#endif
-
-	return EXIT_SUCCESS;
-}
-
-
+#endif /* HR_TIMER_H_ */

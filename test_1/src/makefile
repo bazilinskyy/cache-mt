@@ -43,8 +43,8 @@ DFLAGS = # -Doptions
 UFLAGS = # Set on make command line only
 CFLAGS = $(SFLAGS) $(DFLAGS) $(IFLAGS) $(OFLAGS) $(WFLAGS) $(UFLAGS)
 LIBS =-lm
-DEPS = test_1.h
-OBJ  = test_1.o
+DEPS = test_1.h hr_timer.h
+OBJ  = test_1.o hr_timer.o
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
