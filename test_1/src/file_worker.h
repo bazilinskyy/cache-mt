@@ -30,6 +30,10 @@
 #ifndef FILE_WORKER_H_
 #define FILE_WORKER_H_
 
+#include <stdio.h>
+#include "conf.h"
+#include <math.h>
 
+void write_to_csv(unsigned long long time[], char *labelX, char *labelY); // Output time array into a CSV file
 
 #endif /* FILE_WORKER_H_ */

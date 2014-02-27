@@ -29,3 +29,25 @@
  */
 
 #include "file_worker.h"
+
+// Output time array into a CSV file
+void write_to_csv(unsigned long long time[], char *labelX, char *labelY) {
+	// Open filestream
+	FILE *f = fopen(CSV_FILE, "rb+");
+	if(f == NULL) //if file does not exist, create it
+	{
+	    f = fopen(CSV_FILE, "wb");
+	}
+
+	// Write to file
+	// Write headers
+	fprintf(f, "%s,%s\n", labelX, labelY);
+	// Write timing information
+	int i = 0;
+	for (i = 0; i < MAX_POWER; ++i) {
+		fprintf(f, "%.0f,%llu\n", pow(2.0, (double) i), time[i]);
+	}
+
+	// Close filestream
+	fclose(f);
+}

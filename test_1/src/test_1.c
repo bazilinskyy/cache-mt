@@ -75,9 +75,14 @@ int main(void) {
 	for (i = 0; i < MAX_POWER; ++i) {
 		printf("%.0f,%llu\n", pow(2.0, (double) i), time[i]);
 	}
-
 #endif
 
+#ifdef OUTPUT_TO_FILE
+	// Write to file
+	write_to_csv(time, "N", "Time");
+#endif
+
+	// Everything is good, return Success code
 	return EXIT_SUCCESS;
 }
 

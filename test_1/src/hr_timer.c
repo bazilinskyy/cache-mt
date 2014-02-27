@@ -32,7 +32,8 @@
 
 // Get time in nanoseconds
 int get_time_ns(struct timespec timeStruct) {
-	 if( clock_gettime( CLOCK_REALTIME, &timeStruct) == -1 ) {
+	 //TODO more hr function discussed by Brian, assembly code
+	 if( clock_gettime( CLOCK_MONOTONIC, &timeStruct) == -1 ) {
 	      perror( "clock gettime" );
 	      return 0;
 	 }
