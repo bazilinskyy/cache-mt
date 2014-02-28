@@ -34,8 +34,8 @@ WFLAG2 = -Werror
 WFLAG3 = -Wextra
 #WFLAGS = $(WFLAG1) $(WFLAG2) $(WFLAG3)
 #WFLAGS = $(WFLAG1)
-OFLAGS = -g -O3
-#SFLAG1 = -std=c99
+#OFLAGS = -g -O3
+SFLAG1 = -std=c99
 SFLAG2 = -m64
 SFLAGS = $(SFLAG1) $(SFLAG2)
 DFLAGS = # -Doptions
@@ -50,8 +50,8 @@ ifeq ($(UNAME_S),Linux)
 	LIBS += -lrt
 endif
 ifeq ($(UNAME_S),Darwin)
-	DEPS += mac_clock_gettime.h
-	OBJ  += mac_clock_gettime.o
+	DEPS += mach_gettime.h
+	OBJ  += mach_gettime.o
 endif
 
 %.o: %.c $(DEPS)

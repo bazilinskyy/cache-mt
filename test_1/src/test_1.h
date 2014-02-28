@@ -36,7 +36,7 @@
 #include <unistd.h>
 #include <math.h>
 #ifdef __APPLE__
-	#include "mac_clock_gettime.h"
+	#include "mach_gettime.h"
 #elif __linux // For future use
     // linux
 #elif __unix // all unices not caught above
@@ -50,7 +50,5 @@
 #include "file_worker.h"
 
 int main(void);
-int get_time_ns(struct timespec timeStruct);
-unsigned long long calculate_time_ns(struct timespec timeStructStart, struct timespec timeStructFinish);
 
 #endif /* TEST_1_H_ */

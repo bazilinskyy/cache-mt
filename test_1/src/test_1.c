@@ -65,21 +65,22 @@ int main(void) {
 		}
 
 		// Record difference
+		printf("%d\n", i);
 		time[(int) i] = calculate_time_ns(start, stop);
 		i++; // Iterate for easier access to array
 	}
-
 	// Output results
 #ifdef SHOW_RESULTS
 	printf("\nRESULTS:\n");
 	for (i = 0; i < MAX_POWER; ++i) {
-		printf("%.0f,%llu\n", pow(2.0, (double) i), time[i]);
+		printf("%d. %.0f - %llu\n", i+1, pow(2.0, (double) i), time[i]);
 	}
 #endif
 
+
 #ifdef OUTPUT_TO_FILE
 	// Write to file
-	write_to_csv(time, "N", "Time");
+	write_to_csv(time);
 #endif
 
 	// Everything is good, return Success code
