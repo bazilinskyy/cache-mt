@@ -38,15 +38,8 @@ int main(void) {
 	long n;
 	for (n = 1.0; n < pow(2.0, (double) MAX_POWER); n *= 2.0) {
 
-#ifdef DEBUG
-		printf("%d. %ld ", i+1, n);
-#endif
 		// Calculate start time
-		//get_time_ns(start);
-		if( clock_gettime( CLOCK_MONOTONIC, &start) == -1 ) {
-			perror( "clock gettime" );
-			return 0;
-		}
+		get_time_ns(&start);
 
 		// Run experiment
 		unsigned char testAr[(int) n]; // Array for manipulating data
@@ -58,20 +51,15 @@ int main(void) {
 		}
 
 		// Calculate finish time
-		//get_time_ns(stop);
-		if( clock_gettime( CLOCK_MONOTONIC, &stop) == -1 ) {
-			perror( "clock gettime" );
-			return 0;
-		}
+		get_time_ns(&stop);
 
 		// Record difference
-		printf("%d\n", i);
 		time[(int) i] = calculate_time_ns(start, stop);
 		i++; // Iterate for easier access to array
 	}
 	// Output results
 #ifdef SHOW_RESULTS
-	printf("\nRESULTS:\n");
+	printf("\nRESULTS - %d:\n", MAX_POWER);
 	for (i = 0; i < MAX_POWER; ++i) {
 		printf("%d. %.0f - %llu\n", i+1, pow(2.0, (double) i), time[i]);
 	}

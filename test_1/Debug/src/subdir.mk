@@ -4,9 +4,6 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 O_SRCS += \
-../src/file_worker.o \
-../src/hr_timer.o \
-../src/mach_gettime.o \
 ../src/test_1.o 
 
 C_SRCS += \

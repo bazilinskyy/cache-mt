@@ -31,13 +31,12 @@
 #include "hr_timer.h"
 
 // Get time in nanoseconds
-int get_time_ns(struct timespec timeStruct) {
+int get_time_ns(struct timespec *timeStruct) {
 	 //TODO more hr function discussed by Brian, assembly code
-	 if( clock_gettime( CLOCK_MONOTONIC, &timeStruct) == -1 ) {
+	 if( clock_gettime( CLOCK_MONOTONIC, timeStruct) == -1 ) {
 	      perror( "clock gettime" );
 	      return 0;
 	 }
-	 printf("Inside call: %ld ", timeStruct.tv_nsec);
 	 return 1;
 }
 
@@ -54,10 +53,6 @@ unsigned long long calculate_time_ns(struct timespec start, struct timespec end)
 			temp.tv_sec = end.tv_sec - start.tv_sec;
 			temp.tv_nsec = end.tv_nsec - start.tv_nsec;
 	}
-
-#ifdef DEBUG
-	printf("TIME: %lld.%.9ld\n", (long long)temp.tv_sec, temp.tv_nsec);
-#endif
 
 	return BILLION*temp.tv_sec + temp.tv_nsec;
 }
