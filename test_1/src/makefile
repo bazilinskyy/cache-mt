@@ -57,6 +57,7 @@ endif
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS) $(LIBS)
 
+# Changed from $(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 test_1: $(OBJ)
 	$(CC) -o $@ $^ $(LIBS)
 

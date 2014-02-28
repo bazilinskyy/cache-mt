@@ -4,27 +4,27 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 O_SRCS += \
+../src/clock_gettime_mac.o \
 ../src/file_worker.o \
 ../src/hr_timer.o \
-../src/mach_gettime.o \
 ../src/test_1.o 
 
 C_SRCS += \
+../src/clock_gettime_mac.c \
 ../src/file_worker.c \
 ../src/hr_timer.c \
-../src/mach_gettime.c \
 ../src/test_1.c 
 
 OBJS += \
+./src/clock_gettime_mac.o \
 ./src/file_worker.o \
 ./src/hr_timer.o \
-./src/mach_gettime.o \
 ./src/test_1.o 
 
 C_DEPS += \
+./src/clock_gettime_mac.d \
 ./src/file_worker.d \
 ./src/hr_timer.d \
-./src/mach_gettime.d \
 ./src/test_1.d 
 
 
