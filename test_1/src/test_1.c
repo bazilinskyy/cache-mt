@@ -37,7 +37,6 @@ int main(void) {
 	int i = 0;
 	long n;
 	for (n = 1.0; n < pow(2.0, (double) MAX_POWER); n *= 2.0) {
-
 		// Calculate start time
 		get_time_ns(&start);
 

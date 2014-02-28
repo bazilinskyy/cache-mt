@@ -32,18 +32,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <unistd.h>
-#include <math.h>
-#ifdef __APPLE__
-	#include "mach_gettime.h"
-#elif __linux // For future use
-    // linux
-#elif __unix // all unices not caught above
-    // Unix
-#elif __posix
-    // POSIX
-#endif
+//#include <math.h>
 // Custom includes
 #include "hr_timer.h"
 #include "conf.h"

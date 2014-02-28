@@ -1,6 +1,6 @@
 /*
  ============================================================================================
- Name        : mach_gettime.h
+ Name        : clock_gettime_mac.c
  Author      : Pavlo Bazilinskyy
  Version     : 0.1
  Copyright   : Copyright (c) 2014, Pavlo Bazilinskyy <pavlo.bazilinskyy@gmail.com>
@@ -24,36 +24,50 @@
  	 	 	   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  	 	 	   THE SOFTWARE.
 
- Description : Header for the clock_gettime for Mac OS
+ Description : clock_gettime for Mac OS
  Based on	 : http://stackoverflow.com/questions/11680461/monotonic-clock-on-osx
  ============================================================================================
  */
 #ifdef __APPLE__
+	#include "clock_gettime_mac.h"
+	#include <mach/mach_time.h>
 
-	#include <sys/types.h>
-	#include <sys/_types/_timespec.h>
-	#include <mach/mach.h>
-	#include <mach/clock.h>
+	#define MT_NANO (+1.0E-9)
+	#define MT_GIGA UINT64_C(1000000000)
 
-	#ifndef mach_time_h
-	#define mach_time_h
+	static double mt_timebase = 0.0;
+	static uint64_t mt_timestart = 0;
 
-	/* The opengroup spec isn't clear on the mapping from REALTIME to CALENDAR
-	 being appropriate or not.
-	 http://pubs.opengroup.org/onlinepubs/009695299/basedefs/time.h.html */
+	int clock_gettime(clockid_t clk_id, struct timespec *tp)
+	{
+		kern_return_t retval = KERN_SUCCESS;
+		if( clk_id == TIMER_ABSTIME)
+		{
+			if (!mt_timestart) {
+				mach_timebase_info_data_t tb = { 0 };
+				mach_timebase_info(&tb);
+				mt_timebase = tb.numer;
+				mt_timebase /= tb.denom;
+				mt_timestart = mach_absolute_time();
+			}
 
-	// XXX only supports a single timer
-	#define TIMER_ABSTIME -1
-	#define CLOCK_REALTIME CALENDAR_CLOCK
-	#define CLOCK_MONOTONIC SYSTEM_CLOCK
+			double diff = (mach_absolute_time() - mt_timestart) * mt_timebase;
+			tp->tv_sec = diff * MT_NANO;
+			tp->tv_nsec = diff - (tp->tv_sec * MT_GIGA);
+		}
+		else // other clk_ids are mapped to the coresponding mach clock_service
+		{
+			clock_serv_t cclock;
+			mach_timespec_t mts;
 
-	typedef int clockid_t;
+			host_get_clock_service(mach_host_self(), clk_id, &cclock);
+			retval = clock_get_time(cclock, &mts);
+			mach_port_deallocate(mach_task_self(), cclock);
 
-	/* the mach kernel uses struct mach_timespec, so struct timespec
-		is loaded from <sys/_types/_timespec.h> for compatability */
-	// struct timespec { time_t tv_sec; long tv_nsec; };
+			tp->tv_sec = mts.tv_sec;
+			tp->tv_nsec = mts.tv_nsec;
+		}
 
-	int clock_gettime(clockid_t clk_id, struct timespec *tp);
-
-	#endif
+		return retval;
+	}
 #endif

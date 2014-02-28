@@ -34,8 +34,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <math.h>
+#include <time.h>
 #ifdef __APPLE__
-	#include "mach_gettime.h"
+	#include "clock_gettime_mac.h"
 #elif __linux // For future use
     // linux
 #elif __unix // all unices not caught above

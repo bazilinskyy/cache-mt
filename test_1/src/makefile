@@ -35,30 +35,30 @@ WFLAG3 = -Wextra
 #WFLAGS = $(WFLAG1) $(WFLAG2) $(WFLAG3)
 #WFLAGS = $(WFLAG1)
 #OFLAGS = -g -O3
-SFLAG1 = -std=c99
-SFLAG2 = -m64
+#SFLAG1 = -std=c99
+#SFLAG2 = -m64
 SFLAGS = $(SFLAG1) $(SFLAG2)
 DFLAGS = # -Doptions
 UFLAGS = # Set on make command line only
 CFLAGS = $(SFLAGS) $(DFLAGS) $(IFLAGS) $(OFLAGS) $(WFLAGS) $(UFLAGS)
 LIBS =-lm
-DEPS = test_1.h hr_timer.h file_worker.h
-OBJ  = test_1.o hr_timer.o file_worker.o
+DEPS =test_1.h hr_timer.h file_worker.h conf.h
+OBJ  =test_1.o hr_timer.o file_worker.o
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
 	LIBS += -lrt
 endif
 ifeq ($(UNAME_S),Darwin)
-	DEPS += mach_gettime.h
-	OBJ  += mach_gettime.o
+	DEPS += clock_gettime_mac.h
+	OBJ  += clock_gettime_mac.o
 endif
 
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS) $(LIBS)
 
 test_1: $(OBJ)
-	gcc -o $@ $^ $(CFLAGS) $(LIBS)
+	$(CC) -o $@ $^ $(LIBS)
 
 .PHONY: clean
 
