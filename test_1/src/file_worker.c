@@ -33,23 +33,24 @@
 // Output time array into a CSV file
 void write_to_csv(unsigned long long time[]) {
 	// Open filestream
-	printf("%s", CSV_FILE);
-	FILE *f = fopen(CSV_FILE, "ab+");
+	FILE *f = fopen(CSV_FILE, "wb+");
 	if(f == NULL) //if file does not exist, create it
 	{
-	    f = fopen(CSV_FILE, "wb");
+	    printf("Error creating file.\n");
 	}
 
 	// Write to file
 	// Write headers
-	fprintf(f, "N,Time\n");
+	fprintf(f, "N,Time");
 	// Write timing information
 	int i = 0;
 	for (i = 0; i < MAX_POWER; ++i) {
-		fprintf(f, "%.0f,%llu\n", pow(2.0, (double) i), time[i]);
+		fprintf(f, "\n%.0f,%llu", pow(2.0, (double) i), time[i]);
 	}
 
 	// Close filestream
 	fclose(f);
-	printf("boo3");
+#ifdef DEBUG
+		printf("Finished writing to file.\n");
+#endif
 }

@@ -33,7 +33,7 @@
 
 #define MAX_POWER 23
 #define BILLION  1000000000L
-//#define DEBUG
+#define DEBUG
 #define SHOW_RESULTS
 #define OUTPUT_TO_FILE // Output measurements into a CSV file
 #define CHAR_TO_ADD 'a'
