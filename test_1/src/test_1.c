@@ -36,24 +36,36 @@ int main(void) {
 	struct timespec start, stop;
 	int i = 0;
 	long n;
+
+	// Run experiments
 	for (n = 1.0; n < pow(2.0, (double) MAX_POWER); n *= 2.0) {
-		// Calculate start time
-		get_time_ns(&start);
-
-		// Run experiment
 		unsigned char testAr[(int) n]; // Array for manipulating data
-		unsigned char testCh; // 1 byte of data
-		int j;
-		for (j = 0; j < n; j++) { // Write and read 1 byte n times
-			testAr[(int) n] = CHAR_TO_ADD; // Write 1 byte
-			testCh = testAr[(int) n]; // Read 1 byte
+		unsigned char testCh = ' '; // 1 byte of data
+		//Warm up cache
+#ifdef WARM_CACHE
+		experiment(testAr, testCh, 0);
+#endif
+		// Run each experiment for TIMES_RUN_EXPERIMENT times
+		int expI = 0;
+		unsigned long long currentTime[TIMES_RUN_EXPERIMENT];
+		for (expI = 0; expI < TIMES_RUN_EXPERIMENT; ++expI) {
+			// Run experiment
+
+			int j;
+			// Calculate start time
+			get_time_ns(&start);
+			for (j = 0; j < n; j++) { // Write and read 1 byte n times
+				experiment(testAr, testCh, n);
+			}
+
+			// Calculate finish time
+			get_time_ns(&stop);
+			currentTime[expI] = calculate_time_ns(start, stop); // Record how much time this iteration took
+
+			// Now compare received result with MIN and MAX
 		}
-
-		// Calculate finish time
-		get_time_ns(&stop);
-
 		// Record difference
-		time[(int) i] = calculate_time_ns(start, stop);
+		time[(int) i] = currentTime[0]; //TODO record processed result instead
 		i++; // Iterate for easier access to array
 	}
 	// Output results
@@ -74,4 +86,8 @@ int main(void) {
 	return EXIT_SUCCESS;
 }
 
-
+// Experiment itself, aslo used for warming up cache
+void experiment (unsigned char *testAr, unsigned char testCh, int n) {
+	testAr[(int) n] = CHAR_TO_ADD; // Write 1 byte
+	testCh = testAr[(int) n]; // Read 1 byte
+}

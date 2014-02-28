@@ -40,5 +40,6 @@
 #include "file_worker.h"
 
 int main(void);
+void experiment (unsigned char *testAr, unsigned char testCh, int n);
 
 #endif /* TEST_1_H_ */

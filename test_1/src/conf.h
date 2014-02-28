@@ -31,13 +31,18 @@
 #ifndef CONF_H_
 #define CONF_H_
 
+// Configure experiment
 #define MAX_POWER 23
-#define BILLION  1000000000L
+#define WARM_CACHE
+#define TIMES_RUN_EXPERIMENT 2
+
+// Output
 #define DEBUG
 #define SHOW_RESULTS
 #define OUTPUT_TO_FILE // Output measurements into a CSV file
+
+#define BILLION  1000000000L
 #define CHAR_TO_ADD 'a'
-//#define _POSIX_C_SOURCE >= 199309L
 #ifdef __APPLE__
 	#define CSV_FILE "test_1_i7.csv"
 #else
