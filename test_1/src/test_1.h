@@ -41,6 +41,6 @@
 
 int main(void);
 void experiment (unsigned char *testAr, unsigned char testCh, int n);
-unsigned long long average_time(unsigned long long *time); // Calcualte average time of running experiment
+unsigned long long average_time(unsigned long long *time, int timesRun); // Calcualte average time of running experiment
 
 #endif /* TEST_1_H_ */

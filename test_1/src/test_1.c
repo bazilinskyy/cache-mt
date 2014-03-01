@@ -48,6 +48,7 @@ int main(void) {
 		// Run each experiment for TIMES_RUN_EXPERIMENT times
 		int expI = 0;
 		unsigned long long currentTime[TIMES_RUN_EXPERIMENT];
+		int experimentsRunSuccessfully = 0; // Record how many times the experiment was run successfully
 		for (expI = 0; expI < TIMES_RUN_EXPERIMENT; ++expI) {
 			// Run experiment
 
@@ -61,11 +62,30 @@ int main(void) {
 			// Calculate finish time
 			get_time_ns(&stop);
 			// Record difference
-			currentTime[expI] = calculate_time_ns(start, stop); // Record how much time this iteration took
+			unsigned long long tempTime = calculate_time_ns(start, stop); // Calculate how much time this run took
 
+			// Disregard experiment if comparison of it with MIN and MAX makes it invalid
+			//TODO verify with Stephen
+			unsigned long long minTime = n * 1;   // Lower bound for the duration of the run
+			unsigned long long maxTime = n * 10000; // Upper bound for the duration of the run
+			if (tempTime < minTime || tempTime > maxTime) { // Disregard this run if it does not meet timing requirements
+				continue;
+			} else if ( 1 == 0) { // Disregard this run if pagefaults were detected
+				//TODO detection of pagefaults
+				continue;
+			} else if ( 1 == 0) { // Disregard this run if voluntary context switches were detected
+				//TODO detection of context switches
+				continue;
+			} else if ( 1 == 0) { // Disregard this run if interrupts were detected
+				//TODO detection of interrputs
+				continue;
+			} else { // Everything it fine, record this run as successful
+				currentTime[expI] = tempTime; // Record how much time this iteration took
+				experimentsRunSuccessfully++;
+			}
 		}
 		// Calculate average time of running the experiment
-		time[(int) i] = average_time(currentTime);
+		time[(int) i] = average_time(currentTime, experimentsRunSuccessfully);
 		// Now compare received result with MIN and MAX
 		//TODO record processed result instead
 		i++; // Iterate for easier access to array
@@ -94,14 +114,14 @@ void experiment (unsigned char *testAr, unsigned char testCh, int n) {
 }
 
 // Calculate average time of running the experiment
-unsigned long long average_time(unsigned long long *time) {
-	if (TIMES_RUN_EXPERIMENT == 0) // avoid division
+unsigned long long average_time(unsigned long long *time, int timesRun) {
+	if (timesRun == 0) // avoid division
 		return 0;
 	// Loop through times of all runs of the experiment
 	int i;
 	unsigned long long avTime = 0;
-	for (i = 0; i < TIMES_RUN_EXPERIMENT; ++i) {
+	for (i = 0; i < timesRun; ++i) {
 		avTime += time[i];
 	}
-	return avTime / TIMES_RUN_EXPERIMENT;
+	return avTime / timesRun;
 }
