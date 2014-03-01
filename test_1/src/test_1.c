@@ -60,12 +60,14 @@ int main(void) {
 
 			// Calculate finish time
 			get_time_ns(&stop);
+			// Record difference
 			currentTime[expI] = calculate_time_ns(start, stop); // Record how much time this iteration took
 
-			// Now compare received result with MIN and MAX
 		}
-		// Record difference
-		time[(int) i] = currentTime[0]; //TODO record processed result instead
+		// Calculate average time of running the experiment
+		time[(int) i] = average_time(currentTime);
+		// Now compare received result with MIN and MAX
+		//TODO record processed result instead
 		i++; // Iterate for easier access to array
 	}
 	// Output results
@@ -75,7 +77,6 @@ int main(void) {
 		printf("%d. %.0f - %llu\n", i+1, pow(2.0, (double) i), time[i]);
 	}
 #endif
-
 
 #ifdef OUTPUT_TO_FILE
 	// Write to file
@@ -90,4 +91,17 @@ int main(void) {
 void experiment (unsigned char *testAr, unsigned char testCh, int n) {
 	testAr[(int) n] = CHAR_TO_ADD; // Write 1 byte
 	testCh = testAr[(int) n]; // Read 1 byte
+}
+
+// Calculate average time of running the experiment
+unsigned long long average_time(unsigned long long *time) {
+	if (TIMES_RUN_EXPERIMENT == 0) // avoid division
+		return 0;
+	// Loop through times of all runs of the experiment
+	int i;
+	unsigned long long avTime = 0;
+	for (i = 0; i < TIMES_RUN_EXPERIMENT; ++i) {
+		avTime += time[i];
+	}
+	return avTime / TIMES_RUN_EXPERIMENT;
 }
