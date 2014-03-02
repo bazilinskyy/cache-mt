@@ -54,3 +54,39 @@ void write_to_csv(unsigned long long time[]) {
 		printf("Finished writing to file.\n");
 #endif
 }
+
+unsigned long long search_in_file(char *f, char *str, int find_numeric) {
+	FILE *fp;
+	char temp[512];
+
+	// Open file
+	if((fp = fopen(f, "r")) == NULL) {
+		return(-1);
+	}
+
+	// Search for str and extract numeric
+	while(fgets(temp, 512, fp) != NULL) {
+		if((strstr(temp, str)) != NULL) {
+			if (find_numeric) {
+				unsigned long long number = find_num_in_str(temp);
+				return number;
+			} else {
+				printf("A match found\n.");
+				printf("\n%s\n", temp);
+			}
+		}
+	}
+
+	//Close the file if still open.
+	if(fp) {
+		fclose(fp);
+	}
+   	return(0);
+}
+
+// Find a numeric in a string
+unsigned long long find_num_in_str(char *str) {
+	unsigned long long num = -1;
+	sscanf(str,"%*[^0-9]%llu", &num);
+	return num;
+}

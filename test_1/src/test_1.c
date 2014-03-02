@@ -37,6 +37,10 @@ int main(void) {
 	int i = 0;
 	long n;
 
+//	while (1 == 1) {
+//		printf ("hello\n");
+//	}
+
 	// Run experiments
 	for (n = 1.0; n < pow(2.0, (double) MAX_POWER); n *= 2.0) {
 		unsigned char testAr[(int) n]; // Array for manipulating data
@@ -50,9 +54,26 @@ int main(void) {
 		unsigned long long currentTime[TIMES_RUN_EXPERIMENT];
 		int experimentsRunSuccessfully = 0; // Record how many times the experiment was run successfully
 		for (expI = 0; expI < TIMES_RUN_EXPERIMENT; ++expI) {
-			// Run experiment
-
 			int j;
+			unsigned long long interruptsBefore = 0;
+			unsigned long long interruptsAfter = 0;
+			unsigned long long pageFaultsMinorBefore = 0;
+			unsigned long long pageFaultsMinorAfter = 0;
+			unsigned long long pageFaultsMajorBefore = 0;
+			unsigned long long pageFaultsMajorAfter = 0;
+			unsigned long long contextSwitchesBefore = 0;
+			unsigned long long contextSwitchesAfter = 0;
+			// Get readings on interrupts, pagefaults and context switched before running the experiment
+#ifndef __APPLE__
+			//Info: http://www.centos.org/docs/5/html/Deployment_Guide-en-US/s1-proc-topfiles.html
+			interruptsBefore = search_in_file("/proc/interrupts", "LOC:", 1);
+			//TODO detection of pagefaults minor
+			//TODO detection of pagefaults major
+			//TODO detection of context switches
+#else
+			//TODO read for Mac OS
+#endif
+			// Run experiment
 			// Calculate start time
 			get_time_ns(&start);
 			for (j = 0; j < n; j++) { // Write and read 1 byte n times
@@ -61,6 +82,15 @@ int main(void) {
 
 			// Calculate finish time
 			get_time_ns(&stop);
+			// Get readings on interrupts, pagefaults and context switched before running the experiment
+#ifndef __APPLE__
+			interruptsAfter = search_in_file("/proc/interrupts", "LOC:", 1);
+			//TODO detection of pagefaults minor
+			//TODO detection of pagefaults major
+			//TODO detection of context switches
+#else
+			//TODO read for Mac OS
+#endif
 			// Record difference
 			unsigned long long tempTime = calculate_time_ns(start, stop); // Calculate how much time this run took
 
@@ -70,14 +100,13 @@ int main(void) {
 			unsigned long long maxTime = n * 10000; // Upper bound for the duration of the run
 			if (tempTime < minTime || tempTime > maxTime) { // Disregard this run if it does not meet timing requirements
 				continue;
-			} else if ( 1 == 0) { // Disregard this run if pagefaults were detected
-				//TODO detection of pagefaults
+			} else if (pageFaultsMinorAfter - pageFaultsMinorBefore > ALLOWED_PAGEFAULTS_MINOR) { // Disregard this run if minor pagefaults were detected
 				continue;
-			} else if ( 1 == 0) { // Disregard this run if voluntary context switches were detected
-				//TODO detection of context switches
+			} else if (pageFaultsMajorAfter - pageFaultsMajorBefore > ALLOWED_PAGEFAULTS_MAJOR) { // Disregard this run if major pagefaults were detected
 				continue;
-			} else if ( 1 == 0) { // Disregard this run if interrupts were detected
-				//TODO detection of interrputs
+			} else if (contextSwitchesAfter - contextSwitchesBefore > ALLOWED_CONTEXT_SWITCHES) { // Disregard this run if voluntary context switches were detected
+				continue;
+			} else if (interruptsAfter - interruptsBefore > ALLOWED_INTERRUPTS) { // Disregard this run if interrupts were detected
 				continue;
 			} else { // Everything it fine, record this run as successful
 				currentTime[expI] = tempTime; // Record how much time this iteration took
@@ -85,9 +114,7 @@ int main(void) {
 			}
 		}
 		// Calculate average time of running the experiment
-		time[(int) i] = average_time(currentTime, experimentsRunSuccessfully);
-		// Now compare received result with MIN and MAX
-		//TODO record processed result instead
+		time[(int) i] = average_time(currentTime, experimentsRunSuccessfully); // 0 denotes a failed experiment (number of successful runs = 0)
 		i++; // Iterate for easier access to array
 	}
 	// Output results
