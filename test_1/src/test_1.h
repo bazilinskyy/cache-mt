@@ -30,15 +30,22 @@
 #ifndef TEST_1_H_
 #define TEST_1_H_
 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-//#include <math.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+// Pthread
+#include <pthread.h>
+#include <sched.h>
+#include <errno.h>
 // Custom includes
 #include "hr_timer.h"
 #include "conf.h"
 #include "file_worker.h"
+
 
 // Process ID
 #ifndef __APPLE__
@@ -47,7 +54,10 @@
 #endif
 
 int main(void);
+int pthread_main(int thread_num); // Main run in the pthread
 void experiment (unsigned char *testAr, unsigned char testCh, int n);
-unsigned long long average_time(unsigned long long *time, int timesRun); // Calcualte average time of running experiment
+unsigned long long average_time(unsigned long long *time, int timesRun); // Calculate average time of running experiment
+int pin_thread_to_core(int coreId); // Pin Pthread to core
+int set_highest_process_priority(void); // Set priority of the current to be the highest
 
 #endif /* TEST_1_H_ */

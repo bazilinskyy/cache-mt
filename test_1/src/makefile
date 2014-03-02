@@ -47,7 +47,7 @@ OBJ  =test_1.o hr_timer.o file_worker.o
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
-	LIBS += -lrt
+	LIBS += -lrt -lpthread
 endif
 ifeq ($(UNAME_S),Darwin)
 	DEPS += clock_gettime_mac.h

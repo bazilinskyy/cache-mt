@@ -32,10 +32,43 @@
 #include "test_1.h"
 
 int main(void) {
+
+	// Set process priority to the highest possible value
+#ifdef SET_HIGHEST_PRIORITY
+	set_highest_process_priority();
+#endif
+
+	// TODO fix pthreads on Mac OS
+#ifndef __APPLE__
+    pthread_t thread1;
+    int rc;
+
+    // Run in pthread
+    int i = 1;
+    rc = pthread_create(&thread1, NULL, pthread_main, (void *)i);
+    if (rc){
+        printf("ERROR; return code from pthread_create() is %d\n", rc);
+        exit(-1);
+    }
+    pthread_join(thread1, NULL);
+#else
+    pthread_main(1);
+#endif
+	// Everything is good, return Success code
+	return EXIT_SUCCESS;
+}
+
+// Function run in the thread
+int pthread_main(int thread_num) {
 	unsigned long long time[MAX_POWER];
 	struct timespec start, stop;
 	int i = 0;
 	long n;
+
+	// Sort out thread affinity
+#if PROCESS_AFFINITY == PIN_TO_ONE_CPU
+	pin_thread_to_core(PIN_TO_CPU); // Pin this pthread to PIN_TO_CPU
+#endif
 
 //	while (1 == 1) {
 //		printf("My current process id/pid is %d\n", getpid());
@@ -47,7 +80,7 @@ int main(void) {
 		unsigned char testCh = ' '; // 1 byte of data
 		//Warm up cache
 #ifdef WARM_CACHE
-		experiment(testAr, testCh, 0);
+		experiment(testAr, testCh, 0); // Call experiment function once to warm up cache
 #endif
 		// Run each experiment for TIMES_RUN_EXPERIMENT times
 		int expI = 0;
@@ -87,9 +120,8 @@ int main(void) {
 #else
 			//TODO read for Mac OS
 #endif
-			// Run experiment
-			// Calculate start time
-			get_time_ns(&start);
+			// Run experiment function
+			get_time_ns(&start); // Calculate start time
 			for (j = 0; j < n; j++) { // Write and read 1 byte n times
 				experiment(testAr, testCh, n);
 			}
@@ -144,8 +176,7 @@ int main(void) {
 	write_to_csv(time);
 #endif
 
-	// Everything is good, return Success code
-	return EXIT_SUCCESS;
+	return 1;
 }
 
 // Experiment itself, aslo used for warming up cache
@@ -165,4 +196,29 @@ unsigned long long average_time(unsigned long long *time, int timesRun) {
 		avTime += time[i];
 	}
 	return avTime / timesRun;
+}
+
+// Pin thread to a particular core
+int pin_thread_to_core(int coreId) {
+#ifndef __APPLE__
+   int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
+   if (coreId < 0 || coreId >= num_cores)
+      return EINVAL;
+
+   cpu_set_t cpuset;
+   CPU_ZERO(&cpuset);
+   CPU_SET(coreId, &cpuset);
+
+   pthread_t current_thread = pthread_self();
+   return pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
+#else
+   return -1;
+#endif
+}
+
+// Set priority of the current to be the highest
+// From: http://stackoverflow.com/questions/29621/change-own-process-priority-in-c
+int set_highest_process_priority(void) {
+	setpriority(PRIO_PROCESS, 0, -20); // TODO set to FIFO real time process
+	return 1;
 }

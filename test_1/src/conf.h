@@ -33,8 +33,11 @@
 
 // Configure experiment
 #define MAX_POWER 23
+#define SET_HIGHEST_PRIORITY
 #define WARM_CACHE
-#define TIMES_RUN_EXPERIMENT 2
+#define PROCESS_AFFINITY PIN_TO_ONE_CPU
+#define PIN_TO_CPU 0
+#define TIMES_RUN_EXPERIMENT 10
 #define ALLOWED_INTERRUPTS 100 //TODO ask Stephen: multiply by a number of bytes written/read?
 #define ALLOWED_CONTEXT_SWITCHES 100 //TODO ask Stephen: multiply by a number of bytes written/read?
 #define ALLOWED_PAGEFAULTS_MINOR 100 //TODO ask Stephen: multiply by a number of bytes written/read?
