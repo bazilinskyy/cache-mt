@@ -38,7 +38,7 @@ int main(void) {
 	long n;
 
 //	while (1 == 1) {
-//		printf ("hello\n");
+//		printf("My current process id/pid is %d\n", getpid());
 //	}
 
 	// Run experiments
@@ -63,13 +63,27 @@ int main(void) {
 			unsigned long long pageFaultsMajorAfter = 0;
 			unsigned long long contextSwitchesBefore = 0;
 			unsigned long long contextSwitchesAfter = 0;
-			// Get readings on interrupts, pagefaults and context switched before running the experiment
 #ifndef __APPLE__
+			// Get process ID
+			int processId = getpid();
+
+			// Create path to the proc/PID file
+			char fileName[100];
+			char buf[100];
+			char buf2[100] = "/proc/";
+			snprintf(buf, 100, "%d", processId);
+			snprintf(fileName, 100, "%s%s", buf2, buf);
+
+			// Get readings on interrupts, pagefaults and context switched before running the experiment
+
 			//Info: http://www.centos.org/docs/5/html/Deployment_Guide-en-US/s1-proc-topfiles.html
 			interruptsBefore = search_in_file("/proc/interrupts", "LOC:", 1);
-			//TODO detection of pagefaults minor
-			//TODO detection of pagefaults major
-			//TODO detection of context switches
+			pageFaultsMinorBefore = search_in_file("/proc/vmstat", "pgfault:", 1);
+			pageFaultsMajorBefore = search_in_file("/proc/vmstat", "pgmajfault:", 1);
+			// Add status to the name of the file
+			char fileNameStatus[100];
+			snprintf(fileNameStatus, 100, "%s%s", fileName, "/status");
+			contextSwitchesBefore = search_in_file(fileNameStatus, "voluntary_ctxt_switches:", 1);
 #else
 			//TODO read for Mac OS
 #endif
@@ -85,9 +99,9 @@ int main(void) {
 			// Get readings on interrupts, pagefaults and context switched before running the experiment
 #ifndef __APPLE__
 			interruptsAfter = search_in_file("/proc/interrupts", "LOC:", 1);
-			//TODO detection of pagefaults minor
-			//TODO detection of pagefaults major
-			//TODO detection of context switches
+			pageFaultsMinorAfter = search_in_file("/proc/vmstat", "pgfault:", 1);
+			pageFaultsMajorAfter = search_in_file("/proc/vmstat", "pgmajfault:", 1);
+			contextSwitchesAfter = search_in_file(fileNameStatus, "voluntary_ctxt_switches:", 1);
 #else
 			//TODO read for Mac OS
 #endif

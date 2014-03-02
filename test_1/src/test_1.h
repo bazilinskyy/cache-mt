@@ -33,11 +33,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 //#include <math.h>
 // Custom includes
 #include "hr_timer.h"
 #include "conf.h"
 #include "file_worker.h"
+
+// Process ID
+#ifndef __APPLE__
+	#include <sys/types.h>
+	#include <unistd.h>
+#endif
 
 int main(void);
 void experiment (unsigned char *testAr, unsigned char testCh, int n);
