@@ -40,6 +40,20 @@ int get_time_ns(struct timespec *timeStruct) {
 	 return 1;
 }
 
+// Get time in nanoseconds
+int get_time_res(struct timespec *timeStruct) {
+#ifndef __APPLE__
+
+	 if( clock_getres( CLOCK_MONOTONIC, timeStruct) == -1 ) {
+	      perror( "clock getres" );
+	      return 0;
+	 }
+	 return 1;
+#else // Does not work on Mac OS
+	 return 0;
+#endif
+}
+
 unsigned long long calculate_time_ns(struct timespec start, struct timespec end) {
 //	unsigned long long accum = ( timeStructFinish.tv_sec - timeStructStart.tv_sec ) + (double)( timeStructFinish.tv_nsec - timeStructStart.tv_nsec ) / (double)BILLION;
 	struct timespec temp;

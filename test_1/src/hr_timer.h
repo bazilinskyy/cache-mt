@@ -48,6 +48,8 @@
 
 // Get time in nanoseconds
 int get_time_ns(struct timespec *timeStruct);
+// Get time resolution
+int get_time_res(struct timespec *timeStruct);
 // From http://stackoverflow.com/questions/13950290/clock-gettime-nanoseconds-calculation
 unsigned long long calculate_time_ns(struct timespec start, struct timespec end);
 

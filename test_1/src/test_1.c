@@ -65,6 +65,28 @@ int pthread_main(int thread_num) {
 	int i = 0;
 	long n;
 
+	// Test clock_gettime
+	struct timespec start1, start2, start3;
+	get_time_ns(&start1);
+	get_time_ns(&start2);
+	get_time_ns(&start3);
+
+	while (calculate_time_ns(start1, start2) == 0ull) {
+		get_time_ns(&start2);
+	}
+	get_time_ns(&start3);
+	while (calculate_time_ns(start2, start3) == 0ull) {
+		get_time_ns(&start3);
+	}
+
+	printf("TIME. Time: %ld %ld %ld.", BILLION*start1.tv_sec + start1.tv_nsec, BILLION*start2.tv_sec + start2.tv_nsec, BILLION*start3.tv_sec + start3.tv_nsec);
+	printf(" Diff: %llu %llu\n", calculate_time_ns(start1, start2), calculate_time_ns(start2, start3));
+
+	// Test clock_getres
+	struct timespec startres1;
+	get_time_res(&startres1);
+	printf("RESULTION. time: %ld\n", BILLION*startres1.tv_sec + startres1.tv_nsec);
+
 	// Sort out thread affinity
 #if PROCESS_AFFINITY == PIN_TO_ONE_CPU
 	pin_thread_to_core(PIN_TO_CPU); // Pin this pthread to PIN_TO_CPU
@@ -76,7 +98,12 @@ int pthread_main(int thread_num) {
 
 	// Run experiments
 	for (n = 1.0; n < pow(2.0, (double) MAX_POWER); n *= 2.0) {
-		unsigned char testAr[(int) n]; // Array for manipulating data
+//		unsigned char testAr[(int) n];
+		unsigned char *testAr = malloc(sizeof(unsigned char) * n * 2);
+		if (testAr == NULL){ // Array for manipulating data
+			printf("Error with allocating space for the array\n");
+			exit(1);
+		}
 		unsigned char testCh = ' '; // 1 byte of data
 		//Warm up cache
 #ifdef WARM_CACHE
@@ -147,12 +174,24 @@ int pthread_main(int thread_num) {
 			if (tempTime < minTime || tempTime > maxTime) { // Disregard this run if it does not meet timing requirements
 				continue;
 			} else if (pageFaultsMinorAfter - pageFaultsMinorBefore > ALLOWED_PAGEFAULTS_MINOR) { // Disregard this run if minor pagefaults were detected
+#ifdef DEBUG
+				printf("PFMIN. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expI, pageFaultsMinorBefore, pageFaultsMinorAfter,  ALLOWED_PAGEFAULTS_MINOR);
+#endif
 				continue;
 			} else if (pageFaultsMajorAfter - pageFaultsMajorBefore > ALLOWED_PAGEFAULTS_MAJOR) { // Disregard this run if major pagefaults were detected
+#ifdef DEBUG
+				printf("PFMAJ. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expI, pageFaultsMajorBefore, pageFaultsMajorAfter,  ALLOWED_PAGEFAULTS_MAJOR);
+#endif
 				continue;
 			} else if (contextSwitchesAfter - contextSwitchesBefore > ALLOWED_CONTEXT_SWITCHES) { // Disregard this run if voluntary context switches were detected
+#ifdef DEBUG
+				printf("CS. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expI, contextSwitchesBefore, contextSwitchesAfter,  ALLOWED_CONTEXT_SWITCHES);
+#endif
 				continue;
 			} else if (interruptsAfter - interruptsBefore > ALLOWED_INTERRUPTS) { // Disregard this run if interrupts were detected
+#ifdef DEBUG
+				printf("INT. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expI, interruptsBefore, interruptsAfter,  ALLOWED_INTERRUPTS);
+#endif
 				continue;
 			} else { // Everything it fine, record this run as successful
 				currentTime[expI] = tempTime; // Record how much time this iteration took
@@ -162,6 +201,8 @@ int pthread_main(int thread_num) {
 		// Calculate average time of running the experiment
 		time[(int) i] = average_time(currentTime, experimentsRunSuccessfully); // 0 denotes a failed experiment (number of successful runs = 0)
 		i++; // Iterate for easier access to array
+
+		free(testAr);// free memory allocated for the array
 	}
 	// Output results
 #ifdef SHOW_RESULTS
