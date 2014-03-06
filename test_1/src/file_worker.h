@@ -35,8 +35,57 @@
 #include <math.h>
 #include <string.h>
 
+
+// Based on code from Stephen Brown
+struct proc_stats {
+    int pid;			// %d
+    char comm[256];		// %s
+    char state;			// %c
+    int ppid;			// %d
+    int pgrp;			// %d
+    int session;		// %d
+    int tty_nr;			// %d
+    int tpgid;			// %d
+    unsigned long flags;	// %lu
+    unsigned long long minflt;	// %lu
+    unsigned long long cminflt;	// %lu
+    unsigned long long majflt;	// %lu
+    unsigned long long cmajflt;	// %lu
+    unsigned long utime;	// %lu
+    unsigned long stime; 	// %lu
+    long cutime;		// %ld
+    long cstime;		// %ld
+    long priority;		// %ld
+    long nice;			// %ld
+    long num_threads;		// %ld
+    long itrealvalue;		// %ld
+    unsigned long starttime;	// %lu
+    unsigned long vsize;	// %lu
+    long rss;			// %ld
+    unsigned long rlim;		// %lu
+    unsigned long startcode;	// %lu
+    unsigned long endcode;	// %lu
+    unsigned long startstack;	// %lu
+    unsigned long kstkesp;	// %lu
+    unsigned long kstkeip;	// %lu
+    unsigned long signal;	// %lu
+    unsigned long blocked;	// %lu
+    unsigned long sigignore;	// %lu
+    unsigned long sigcatch;	// %lu
+    unsigned long wchan;	// %lu
+    unsigned long nswap;	// %lu
+    unsigned long cnswap;	// %lu
+    int exit_signal;		// %d
+    int processor;		// %d
+    unsigned long rt_priority;	// %lu
+    unsigned long policy;	// %lu
+    unsigned long long delayacct_blkio_ticks;	// %llu
+};
+
 void write_to_csv(unsigned long long time[]); // Output time array into a CSV file
 unsigned long long search_in_file(char *f, char *str, int find_numeric); // Search for a string in the file fname
 unsigned long long find_num_in_str(char *str); // Find a numeric in a string
+unsigned long get_page_fault(int choice);
+int read_stat(int pid, struct proc_stats *s);
 
 #endif /* FILE_WORKER_H_ */

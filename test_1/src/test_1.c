@@ -138,8 +138,12 @@ int pthread_main(int thread_num) {
 
 			//Info: http://www.centos.org/docs/5/html/Deployment_Guide-en-US/s1-proc-topfiles.html
 			interruptsBefore = search_in_file("/proc/interrupts", "LOC:", 1);
-			pageFaultsMinorBefore = search_in_file("/proc/vmstat", "pgfault:", 1);
-			pageFaultsMajorBefore = search_in_file("/proc/vmstat", "pgmajfault:", 1);
+//			pageFaultsMinorBefore = search_in_file("/proc/vmstat", "pgfault:", 1);
+			pageFaultsMinorBefore = read_stat(1);
+			printf("Min before: %llu", pageFaultsMinorBefore);
+//			pageFaultsMajorBefore = search_in_file("/proc/vmstat", "pgmajfault:", 1);
+			pageFaultsMajorBefore = read_stat(2);
+			printf("Maj before: %llu", pageFaultsMajorBefore);
 			// Add status to the name of the file
 			char fileNameStatus[100];
 			snprintf(fileNameStatus, 100, "%s%s", fileName, "/status");
@@ -158,8 +162,12 @@ int pthread_main(int thread_num) {
 			// Get readings on interrupts, pagefaults and context switched before running the experiment
 #ifndef __APPLE__
 			interruptsAfter = search_in_file("/proc/interrupts", "LOC:", 1);
-			pageFaultsMinorAfter = search_in_file("/proc/vmstat", "pgfault:", 1);
-			pageFaultsMajorAfter = search_in_file("/proc/vmstat", "pgmajfault:", 1);
+//			pageFaultsMinorAfter = search_in_file("/proc/vmstat", "pgfault:", 1);
+			pageFaultsMinorAfter = read_stat(1);
+			printf("Min after: %llu", pageFaultsMinorAfter);
+//			pageFaultsMajorAfter = search_in_file("/proc/vmstat", "pgmajfault:", 1);
+			pageFaultsMajorAfter = read_stat(2);
+			printf("Maj after: %llu", pageFaultsMinorAfter);
 			contextSwitchesAfter = search_in_file(fileNameStatus, "voluntary_ctxt_switches:", 1);
 #else
 			//TODO read for Mac OS
