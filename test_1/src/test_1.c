@@ -32,7 +32,12 @@
 #include "test_1.h"
 
 int main(void) {
-	// Testing rdrsc
+	// Testing different aspects of the system/testing environment
+
+	// Testing interrupt time
+	test_interrupt_time();
+
+// Testing rdrsc
 //	unsigned long long t[32], prev;
 //	int i;
 //	for (i = 0; i < 32; i++)
@@ -173,26 +178,26 @@ int pthread_main(int thread_num) {
 
 			//Info: http://www.centos.org/docs/5/html/Deployment_Guide-en-US/s1-proc-topfiles.html
 			interruptsBefore = search_in_file("/proc/interrupts", "LOC:", 1);
-	#ifdef DETAILED_DEBUG
+#ifdef DETAILED_DEBUG
 			printf("INT B: %llu :: ", interruptsBefore);
-	#endif
+#endif
 			//			pageFaultsMinorBefore = search_in_file("/proc/vmstat", "pgfault:", 1);
 			pageFaultsMinorBefore = get_page_fault(1);
-	#ifdef DETAILED_DEBUG
+#ifdef DETAILED_DEBUG
 			printf("PF Min B: %llu :: ", pageFaultsMinorBefore);
-	#endif
+#endif
 			//			pageFaultsMajorBefore = search_in_file("/proc/vmstat", "pgmajfault:", 1);
 			pageFaultsMajorBefore = get_page_fault(2);
-	#ifdef DETAILED_DEBUG
+#ifdef DETAILED_DEBUG
 			printf("PF Maj B: %llu :: ", pageFaultsMajorBefore);
-	#endif
+#endif
 			// Add status to the name of the file
 			char fileNameStatus[100];
 			snprintf(fileNameStatus, 100, "%s%s", fileName, "/status");
 			contextSwitchesBefore = search_in_file(fileNameStatus, "voluntary_ctxt_switches:", 1);
-	#ifdef DETAILED_DEBUG
+#ifdef DETAILED_DEBUG
 			printf("CS B: %lul\n", pageFaultsMajorBefore);
-	#endif
+#endif
 #else
 			//TODO read for Mac OS
 #endif
@@ -208,27 +213,27 @@ int pthread_main(int thread_num) {
 //			printf("BEFORE READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
 			interruptsAfter = search_in_file("/proc/interrupts", "LOC:", 1);
 //			printf("AFTER READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
-	#ifdef DETAILED_DEBUG
+#ifdef DETAILED_DEBUG
 			printf("INT A: %llu :: ", interruptsAfter);
-	#endif
+#endif
 //			printf("\nBEFORE READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
 			pageFaultsMinorAfter = get_page_fault(1);
 //			printf("AFTER READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
-	#ifdef DETAILED_DEBUG
+#ifdef DETAILED_DEBUG
 			printf("PF Min A: %llu :: ", pageFaultsMinorAfter);
-	#endif
+#endif
 //			printf("\nBEFORE READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
 			pageFaultsMajorAfter = get_page_fault(2);
 //			printf("AFTER READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
-	#ifdef DETAILED_DEBUG
+#ifdef DETAILED_DEBUG
 			printf("PF Maj A: %llu :: ", pageFaultsMajorAfter);
-	#endif
+#endif
 //			printf("\nBEFORE READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
 			contextSwitchesAfter = search_in_file(fileNameStatus, "voluntary_ctxt_switches:", 1);
 //			printf("AFTER READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
-	#ifdef DETAILED_DEBUG
+#ifdef DETAILED_DEBUG
 			printf("CS A: %lul\n", pageFaultsMajorAfter);
-	#endif
+#endif
 #else
 			//TODO read for Mac OS
 #endif
@@ -349,4 +354,71 @@ int pin_thread_to_core(int coreId) {
 int set_highest_process_priority(void) {
 	setpriority(PRIO_PROCESS, 0, -20); // TODO set to FIFO real time process
 	return 1;
+}
+
+// Record how much time one interrupt takes on the testing system
+void test_interrupt_time(void) {
+	struct timespec start, stop;
+	int run = 10;
+	int numBytes = 4;
+
+	// Record time run times
+	unsigned long long *time = malloc(sizeof(unsigned long long) * run * 2); // Record times of experiments in the run.
+	if (time == NULL) {
+		printf("Error with allocating space for the array\n");
+		exit(1);
+	}
+
+	int i = 0;
+	for (i = 0; i < run; ++i) {
+		unsigned long long interruptsBefore;
+		unsigned long long interruptsAfter;
+
+		// First record time when interrupts occur
+		do {
+			interruptsBefore = search_in_file("/proc/interrupts", "LOC:", 1);
+
+			get_time_ns(&start); // Record time before causing the interrupt
+
+			// Write numBytes
+			int j = 0;
+			for (j = 0; j < numBytes; ++j) {
+				unsigned char ch = 'a';
+			}
+
+			get_time_ns(&stop); // Record time after causing the interrupt
+
+			interruptsAfter = search_in_file("/proc/interrupts", "LOC:", 1);
+		} while (interruptsAfter - interruptsBefore == 0 || interruptsAfter - interruptsBefore > 1000);
+
+		int numInterrupts = interruptsAfter - interruptsBefore; // How many interrupts occurred
+		unsigned long long timeWithInterupts = calculate_time_ns(start, stop); // Record time with interrupts
+
+		do {
+			interruptsBefore = search_in_file("/proc/interrupts", "LOC:", 1);
+
+			get_time_ns(&start); // Record time before causing the interrupt
+
+			// Write numBytes
+			int j = 0;
+			for (j = 0; j < numBytes; ++j) {
+				unsigned char ch = 'a';
+			}
+
+			get_time_ns(&stop); // Record time after causing the interrupt
+
+			interruptsAfter = search_in_file("/proc/interrupts", "LOC:", 1);
+		} while (interruptsAfter - interruptsBefore != 0);
+		printf("B %llu A %llu\n", interruptsBefore, interruptsAfter);
+
+
+		unsigned long long timeWithoutInterupts = calculate_time_ns(start, stop); // Record time without interrupts
+
+		printf("With %llu Without %llu Num %d\n", timeWithInterupts, timeWithoutInterupts, numInterrupts);
+
+		time[i] = (timeWithInterupts - timeWithoutInterupts) / numInterrupts; // Record time difference over a number of interrupts
+	}
+	printf("1 interrupt takes (average from %d runs): %llu\n", run, average_time(time, run));
+
+	free(time);
 }

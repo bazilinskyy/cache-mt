@@ -57,7 +57,8 @@ int main(void);
 int pthread_main(int thread_num); // Main run in the pthread
 void experiment (unsigned char *testAr, unsigned char testCh, int n);
 unsigned long long average_time(unsigned long long *time, int timesRun); // Calculate average time of running experiment
-int pin_thread_to_core(int coreId); // Pin Pthread to core
+int pin_thread_to_core(int coreId); // Pin pthread to core
 int set_highest_process_priority(void); // Set priority of the current to be the highest
+void test_interrupt_time (void); // Record how much time one interrupt takes on the testing system
 
 #endif /* TEST_1_H_ */
