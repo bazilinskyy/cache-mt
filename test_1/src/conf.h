@@ -41,11 +41,12 @@
 // Every time reads a file it generates 1
 #define ALLOWED_INTERRUPTS 2
 #define ALLOWED_CONTEXT_SWITCHES 0
-#define ALLOWED_PAGEFAULTS_MINOR 0
+#define ALLOWED_PAGEFAULTS_MINOR 5
 #define ALLOWED_PAGEFAULTS_MAJOR 0
 
 // Output
 #define DEBUG
+//#define DETAILED_DEBUG
 #define SHOW_RESULTS
 #define OUTPUT_TO_FILE // Output measurements into a CSV file
 

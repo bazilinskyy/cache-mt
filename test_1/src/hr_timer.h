@@ -35,6 +35,7 @@
 #include <unistd.h>
 #include <math.h>
 #include <time.h>
+#include <pthread.h>
 #ifdef __APPLE__
 	#include "clock_gettime_mac.h"
 #elif __linux // For future use
@@ -52,5 +53,6 @@ int get_time_ns(struct timespec *timeStruct);
 int get_time_res(struct timespec *timeStruct);
 // From http://stackoverflow.com/questions/13950290/clock-gettime-nanoseconds-calculation
 unsigned long long calculate_time_ns(struct timespec start, struct timespec end);
+unsigned long long rdtsc(void); //  Get time with rdtsc, if it is enabled in the kernel
 
 #endif /* HR_TIMER_H_ */

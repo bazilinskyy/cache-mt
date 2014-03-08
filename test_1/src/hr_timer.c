@@ -43,7 +43,6 @@ int get_time_ns(struct timespec *timeStruct) {
 // Get time in nanoseconds
 int get_time_res(struct timespec *timeStruct) {
 #ifndef __APPLE__
-
 	 if( clock_getres( CLOCK_MONOTONIC, timeStruct) == -1 ) {
 	      perror( "clock getres" );
 	      return 0;
@@ -69,4 +68,13 @@ unsigned long long calculate_time_ns(struct timespec start, struct timespec end)
 	}
 
 	return BILLION*temp.tv_sec + temp.tv_nsec;
+}
+
+unsigned long long rdtsc(void) {
+   unsigned long a,b;
+   unsigned long long temp;
+   __asm__ __volatile__("rdtsc" : "=a" (a), "=d" (b):: "memory", "%ebx", "%ecx");
+   temp = b;
+   temp = (temp<<32) | a;
+   return temp;
 }

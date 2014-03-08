@@ -4,25 +4,25 @@
  Author      : Pavlo Bazilinskyy
  Version     : 0.1
  Copyright   : Copyright (c) 2014, Pavlo Bazilinskyy <pavlo.bazilinskyy@gmail.com>
- 	 	 	   School of Computer Science, National University of Ireland, Maynooth
+ School of Computer Science, National University of Ireland, Maynooth
 
- 	 	 	   Permission is hereby granted, free of charge, to any person obtaining a copy
- 	 	 	   of this software and associated documentation files (the "Software"), to deal
- 	 	 	   in the Software without restriction, including without limitation the rights
- 	 	 	   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- 	 	 	   copies of the Software, and to permit persons to whom the Software is
- 	 	 	   furnished to do so, subject to the following conditions:
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
 
- 	 	 	   The above copyright notice and this permission notice shall be included in
- 	 	 	   all copies or substantial portions of the Software.
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
 
- 	 	 	   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- 	 	 	   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- 	 	 	   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- 	 	 	   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- 	 	 	   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- 	 	 	   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- 	 	 	   THE SOFTWARE.
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
 
  Description : Test 1 (measuring cache latency)
  Target		 : MacBook Air with i7 and Xeon 5130
@@ -32,27 +32,37 @@
 #include "test_1.h"
 
 int main(void) {
+	// Testing rdrsc
+//	unsigned long long t[32], prev;
+//	int i;
+//	for (i = 0; i < 32; i++)
+//		t[i] = rdtsc();
+//	prev = t[0];
+//	for (i = 1; i < 32; i++) {
+//		printf("%llu [%llu]\n", t[i], t[i] - prev);
+//		prev = t[i];
+//	}
+//	printf("Total=%llu\n", t[32 - 1] - t[0]);
 
-	// Set process priority to the highest possible value
+// Set process priority to the highest possible value
 #ifdef SET_HIGHEST_PRIORITY
 	set_highest_process_priority();
 #endif
 
 	// TODO fix pthreads on Mac OS
 #ifndef __APPLE__
-    pthread_t thread1;
-    int rc;
+	pthread_t thread1;
+	int rc;
 
-    // Run in pthread
-    int i = 1;
-    rc = pthread_create(&thread1, NULL, pthread_main, (void *)i);
-    if (rc){
-        printf("ERROR; return code from pthread_create() is %d\n", rc);
-        exit(-1);
-    }
-    pthread_join(thread1, NULL);
+	// Run in pthread
+	rc = pthread_create(&thread1, NULL, pthread_main, (void *)1);
+	if (rc) {
+		printf("ERROR; return code from pthread_create() is %d\n", rc);
+		exit(-1);
+	}
+	pthread_join(thread1, NULL);
 #else
-    pthread_main(1);
+	pthread_main(1);
 #endif
 	// Everything is good, return Success code
 	return EXIT_SUCCESS;
@@ -60,7 +70,16 @@ int main(void) {
 
 // Function run in the thread
 int pthread_main(int thread_num) {
-	unsigned long long time[MAX_POWER];
+	unsigned long long *time = malloc(sizeof(unsigned long long) * MAX_POWER); // Record time for clean runs.
+	if (time == NULL) { // Array for manipulating data
+		printf("Error with allocating space for the array\n");
+		exit(1);
+	}
+	unsigned long long *time_dirty = malloc(sizeof(unsigned long long) * MAX_POWER); // Record time for dirty runs.
+	if (time_dirty == NULL) { // Array for manipulating data
+		printf("Error with allocating space for the array\n");
+		exit(1);
+	}
 	struct timespec start, stop;
 	int i = 0;
 	long n;
@@ -79,13 +98,16 @@ int pthread_main(int thread_num) {
 		get_time_ns(&start3);
 	}
 
-	printf("TIME. Time: %ld %ld %ld.", BILLION*start1.tv_sec + start1.tv_nsec, BILLION*start2.tv_sec + start2.tv_nsec, BILLION*start3.tv_sec + start3.tv_nsec);
+	printf("TIME. Time: %ld %ld %ld.", BILLION * start1.tv_sec + start1.tv_nsec,
+	BILLION * start2.tv_sec + start2.tv_nsec,
+	BILLION * start3.tv_sec + start3.tv_nsec);
 	printf(" Diff: %llu %llu\n", calculate_time_ns(start1, start2), calculate_time_ns(start2, start3));
 
 	// Test clock_getres
 	struct timespec startres1;
 	get_time_res(&startres1);
-	printf("RESULTION. time: %ld\n", BILLION*startres1.tv_sec + startres1.tv_nsec);
+	printf("RESULTION. time: %ld\n",
+	BILLION * startres1.tv_sec + startres1.tv_nsec);
 
 	// Sort out thread affinity
 #if PROCESS_AFFINITY == PIN_TO_ONE_CPU
@@ -100,7 +122,7 @@ int pthread_main(int thread_num) {
 	for (n = 1.0; n < pow(2.0, (double) MAX_POWER); n *= 2.0) {
 //		unsigned char testAr[(int) n];
 		unsigned char *testAr = malloc(sizeof(unsigned char) * n * 2);
-		if (testAr == NULL){ // Array for manipulating data
+		if (testAr == NULL) { // Array for manipulating data
 			printf("Error with allocating space for the array\n");
 			exit(1);
 		}
@@ -114,6 +136,10 @@ int pthread_main(int thread_num) {
 		unsigned long long currentTime[TIMES_RUN_EXPERIMENT];
 		int experimentsRunSuccessfully = 0; // Record how many times the experiment was run successfully
 		for (expI = 0; expI < TIMES_RUN_EXPERIMENT; ++expI) {
+#ifdef DETAILED_DEBUG
+			printf("* Iteration: %d Bytes: %.0f Experiment: %d\n", i + 1,
+					pow(2.0, (double) i), expI + 1);
+#endif
 			int j;
 			unsigned long long interruptsBefore = 0;
 			unsigned long long interruptsAfter = 0;
@@ -138,16 +164,26 @@ int pthread_main(int thread_num) {
 
 			//Info: http://www.centos.org/docs/5/html/Deployment_Guide-en-US/s1-proc-topfiles.html
 			interruptsBefore = search_in_file("/proc/interrupts", "LOC:", 1);
-//			pageFaultsMinorBefore = search_in_file("/proc/vmstat", "pgfault:", 1);
-			pageFaultsMinorBefore = read_stat(1);
-			printf("Min before: %llu", pageFaultsMinorBefore);
-//			pageFaultsMajorBefore = search_in_file("/proc/vmstat", "pgmajfault:", 1);
-			pageFaultsMajorBefore = read_stat(2);
-			printf("Maj before: %llu", pageFaultsMajorBefore);
+#ifdef DETAILED_DEBUG
+			printf("INT B: %llu :: ", interruptsBefore);
+#endif
+			//			pageFaultsMinorBefore = search_in_file("/proc/vmstat", "pgfault:", 1);
+			pageFaultsMinorBefore = get_page_fault(1);
+#ifdef DETAILED_DEBUG
+			printf("PF Min B: %llu :: ", pageFaultsMinorBefore);
+#endif
+			//			pageFaultsMajorBefore = search_in_file("/proc/vmstat", "pgmajfault:", 1);
+			pageFaultsMajorBefore = get_page_fault(2);
+#ifdef DETAILED_DEBUG
+			printf("PF Maj B: %llu :: ", pageFaultsMajorBefore);
+#endif
 			// Add status to the name of the file
 			char fileNameStatus[100];
 			snprintf(fileNameStatus, 100, "%s%s", fileName, "/status");
 			contextSwitchesBefore = search_in_file(fileNameStatus, "voluntary_ctxt_switches:", 1);
+#ifdef DETAILED_DEBUG
+			printf("CS B: %lul\n", pageFaultsMajorBefore);
+#endif
 #else
 			//TODO read for Mac OS
 #endif
@@ -161,14 +197,30 @@ int pthread_main(int thread_num) {
 			get_time_ns(&stop);
 			// Get readings on interrupts, pagefaults and context switched before running the experiment
 #ifndef __APPLE__
+//			printf("BEFORE READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
 			interruptsAfter = search_in_file("/proc/interrupts", "LOC:", 1);
-//			pageFaultsMinorAfter = search_in_file("/proc/vmstat", "pgfault:", 1);
-			pageFaultsMinorAfter = read_stat(1);
-			printf("Min after: %llu", pageFaultsMinorAfter);
-//			pageFaultsMajorAfter = search_in_file("/proc/vmstat", "pgmajfault:", 1);
-			pageFaultsMajorAfter = read_stat(2);
-			printf("Maj after: %llu", pageFaultsMinorAfter);
+//			printf("AFTER READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
+#ifdef DETAILED_DEBUG
+			printf("INT A: %llu :: ", interruptsAfter);
+#endif
+//			printf("\nBEFORE READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
+			pageFaultsMinorAfter = get_page_fault(1);
+//			printf("AFTER READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
+#ifdef DETAILED_DEBUG
+			printf("PF Min A: %llu :: ", pageFaultsMinorAfter);
+#endif
+//			printf("\nBEFORE READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
+			pageFaultsMajorAfter = get_page_fault(2);
+//			printf("AFTER READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
+#ifdef DETAILED_DEBUG
+			printf("PF Maj A: %llu :: ", pageFaultsMajorAfter);
+#endif
+//			printf("\nBEFORE READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
 			contextSwitchesAfter = search_in_file(fileNameStatus, "voluntary_ctxt_switches:", 1);
+//			printf("AFTER READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
+#ifdef DETAILED_DEBUG
+			printf("CS A: %lul\n", pageFaultsMajorAfter);
+#endif
 #else
 			//TODO read for Mac OS
 #endif
@@ -177,28 +229,32 @@ int pthread_main(int thread_num) {
 
 			// Disregard experiment if comparison of it with MIN and MAX makes it invalid
 			//TODO verify with Stephen
-			unsigned long long minTime = n * 1;   // Lower bound for the duration of the run
+			unsigned long long minTime = n * 1; // Lower bound for the duration of the run
 			unsigned long long maxTime = n * 10000; // Upper bound for the duration of the run
 			if (tempTime < minTime || tempTime > maxTime) { // Disregard this run if it does not meet timing requirements
 				continue;
 			} else if (pageFaultsMinorAfter - pageFaultsMinorBefore > ALLOWED_PAGEFAULTS_MINOR) { // Disregard this run if minor pagefaults were detected
 #ifdef DEBUG
-				printf("PFMIN. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expI, pageFaultsMinorBefore, pageFaultsMinorAfter,  ALLOWED_PAGEFAULTS_MINOR);
+				printf("PFMIN. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expI, pageFaultsMinorBefore, pageFaultsMinorAfter,
+				ALLOWED_PAGEFAULTS_MINOR);
 #endif
 				continue;
 			} else if (pageFaultsMajorAfter - pageFaultsMajorBefore > ALLOWED_PAGEFAULTS_MAJOR) { // Disregard this run if major pagefaults were detected
 #ifdef DEBUG
-				printf("PFMAJ. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expI, pageFaultsMajorBefore, pageFaultsMajorAfter,  ALLOWED_PAGEFAULTS_MAJOR);
+				printf("PFMAJ. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expI, pageFaultsMajorBefore, pageFaultsMajorAfter,
+				ALLOWED_PAGEFAULTS_MAJOR);
 #endif
 				continue;
 			} else if (contextSwitchesAfter - contextSwitchesBefore > ALLOWED_CONTEXT_SWITCHES) { // Disregard this run if voluntary context switches were detected
 #ifdef DEBUG
-				printf("CS. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expI, contextSwitchesBefore, contextSwitchesAfter,  ALLOWED_CONTEXT_SWITCHES);
+				printf("CS. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expI, contextSwitchesBefore, contextSwitchesAfter,
+				ALLOWED_CONTEXT_SWITCHES);
 #endif
 				continue;
 			} else if (interruptsAfter - interruptsBefore > ALLOWED_INTERRUPTS) { // Disregard this run if interrupts were detected
 #ifdef DEBUG
-				printf("INT. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expI, interruptsBefore, interruptsAfter,  ALLOWED_INTERRUPTS);
+				printf("INT. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expI, interruptsBefore, interruptsAfter,
+				ALLOWED_INTERRUPTS);
 #endif
 				continue;
 			} else { // Everything it fine, record this run as successful
@@ -210,13 +266,13 @@ int pthread_main(int thread_num) {
 		time[(int) i] = average_time(currentTime, experimentsRunSuccessfully); // 0 denotes a failed experiment (number of successful runs = 0)
 		i++; // Iterate for easier access to array
 
-		free(testAr);// free memory allocated for the array
+		free(testAr); // free memory allocated for the array
 	}
 	// Output results
 #ifdef SHOW_RESULTS
 	printf("\nRESULTS - %d:\n", MAX_POWER);
 	for (i = 0; i < MAX_POWER; ++i) {
-		printf("%d. %.0f - %llu\n", i+1, pow(2.0, (double) i), time[i]);
+		printf("%d. %.0f - %llu\n", i + 1, pow(2.0, (double) i), time[i]);
 	}
 #endif
 
@@ -225,11 +281,14 @@ int pthread_main(int thread_num) {
 	write_to_csv(time);
 #endif
 
+	// Free memory and exit
+	free(time_dirty);
+	free(time);
 	return 1;
 }
 
 // Experiment itself, aslo used for warming up cache
-void experiment (unsigned char *testAr, unsigned char testCh, int n) {
+void experiment(unsigned char *testAr, unsigned char testCh, int n) {
 	testAr[(int) n] = CHAR_TO_ADD; // Write 1 byte
 	testCh = testAr[(int) n]; // Read 1 byte
 }
@@ -250,18 +309,18 @@ unsigned long long average_time(unsigned long long *time, int timesRun) {
 // Pin thread to a particular core
 int pin_thread_to_core(int coreId) {
 #ifndef __APPLE__
-   int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
-   if (coreId < 0 || coreId >= num_cores)
-      return EINVAL;
+	int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
+	if (coreId < 0 || coreId >= num_cores)
+	return EINVAL;
 
-   cpu_set_t cpuset;
-   CPU_ZERO(&cpuset);
-   CPU_SET(coreId, &cpuset);
+	cpu_set_t cpuset;
+	CPU_ZERO(&cpuset);
+	CPU_SET(coreId, &cpuset);
 
-   pthread_t current_thread = pthread_self();
-   return pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
+	pthread_t current_thread = pthread_self();
+	return pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
 #else
-   return -1;
+	return -1;
 #endif
 }
 

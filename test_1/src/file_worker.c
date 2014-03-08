@@ -102,18 +102,17 @@ int read_stat(int pid, struct proc_stats *s) {
 unsigned long get_page_fault(int choice) {
 #ifndef __APPLE__
 	struct proc_stats statsData;
-	pid_t self;
-	self = getpid(); // Process ID
+	int self = getpid(); // Process ID
 
 	// Read data from the stats file
 	read_stat(self, &statsData);
 
 	if (choice == 1) {
-		return statsData->minflt;
+		return statsData.minflt;
 //		return statsData->cminflt);
 
 	} else if (choice == 2) {
-		return statsData->majflt;
+		return statsData.majflt;
 //	    return statsData->cmajflt;
 	}
 
