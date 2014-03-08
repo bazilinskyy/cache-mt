@@ -46,15 +46,17 @@
 
 // Output
 #define DEBUG
-//#define DETAILED_DEBUG
+#define DETAILED_DEBUG
 #define SHOW_RESULTS
 #define OUTPUT_TO_FILE // Output measurements into a CSV file
 
 #define BILLION  1000000000L
 #define CHAR_TO_ADD 'a'
 #ifdef __APPLE__
-	#define CSV_FILE "test_1_i7.csv"
+	#define CSV_FILE_CLEAN "test_1_i7_clean.csv"
+	#define CSV_FILE_DIRTY "test_1_i7_dirty.csv"
 #else
-	#define CSV_FILE "test_1_xeon.csv"
+	#define CSV_FILE_CLEAN "test_1_xeon_clean.csv"
+	#define CSV_FILE_DIRTY "test_1_xeon_dirty.csv"
 #endif
 #endif /* CONF_H_ */

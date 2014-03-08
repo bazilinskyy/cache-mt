@@ -71,12 +71,12 @@ int main(void) {
 // Function run in the thread
 int pthread_main(int thread_num) {
 	unsigned long long *time = malloc(sizeof(unsigned long long) * MAX_POWER); // Record time for clean runs.
-	if (time == NULL) { // Array for manipulating data
+	if (time == NULL) {
 		printf("Error with allocating space for the array\n");
 		exit(1);
 	}
-	unsigned long long *time_dirty = malloc(sizeof(unsigned long long) * MAX_POWER); // Record time for dirty runs.
-	if (time_dirty == NULL) { // Array for manipulating data
+	unsigned long long *timeDirty = malloc(sizeof(unsigned long long) * MAX_POWER); // Record time for dirty runs.
+	if (timeDirty == NULL) {
 		printf("Error with allocating space for the array\n");
 		exit(1);
 	}
@@ -133,7 +133,16 @@ int pthread_main(int thread_num) {
 #endif
 		// Run each experiment for TIMES_RUN_EXPERIMENT times
 		int expI = 0;
-		unsigned long long currentTime[TIMES_RUN_EXPERIMENT];
+		unsigned long long *currentTime = malloc(sizeof(unsigned long long) * TIMES_RUN_EXPERIMENT); // Record times of experiments in the run.
+		if (time == NULL) {
+			printf("Error with allocating space for the array\n");
+			exit(1);
+		}
+		unsigned long long *currentTimeDirty = malloc(sizeof(unsigned long long) * TIMES_RUN_EXPERIMENT); // Record times of experiments in the run.
+		if (time == NULL) {
+			printf("Error with allocating space for the array\n");
+			exit(1);
+		}
 		int experimentsRunSuccessfully = 0; // Record how many times the experiment was run successfully
 		for (expI = 0; expI < TIMES_RUN_EXPERIMENT; ++expI) {
 #ifdef DETAILED_DEBUG
@@ -226,6 +235,8 @@ int pthread_main(int thread_num) {
 #endif
 			// Record difference
 			unsigned long long tempTime = calculate_time_ns(start, stop); // Calculate how much time this run took
+			// Record dirty time
+			currentTimeDirty[expI] = tempTime; // Record how much time this iteration took
 
 			// Disregard experiment if comparison of it with MIN and MAX makes it invalid
 			//TODO verify with Stephen
@@ -264,25 +275,35 @@ int pthread_main(int thread_num) {
 		}
 		// Calculate average time of running the experiment
 		time[(int) i] = average_time(currentTime, experimentsRunSuccessfully); // 0 denotes a failed experiment (number of successful runs = 0)
+		timeDirty[(int) i] = average_time(currentTimeDirty, TIMES_RUN_EXPERIMENT); // 0 denotes a failed experiment (number of successful runs = 0)
 		i++; // Iterate for easier access to array
 
+		// Free memory
+		free(currentTime);
+		free(currentTimeDirty);
 		free(testAr); // free memory allocated for the array
 	}
 	// Output results
 #ifdef SHOW_RESULTS
-	printf("\nRESULTS - %d:\n", MAX_POWER);
+	printf("\nRESULTS Clean - %d:\n", MAX_POWER);
 	for (i = 0; i < MAX_POWER; ++i) {
 		printf("%d. %.0f - %llu\n", i + 1, pow(2.0, (double) i), time[i]);
+	}
+
+	printf("\nRESULTS Dirty - %d:\n", MAX_POWER);
+	for (i = 0; i < MAX_POWER; ++i) {
+		printf("%d. %.0f - %llu\n", i + 1, pow(2.0, (double) i), timeDirty[i]);
 	}
 #endif
 
 #ifdef OUTPUT_TO_FILE
 	// Write to file
-	write_to_csv(time);
+	write_to_csv(time, 1);
+	write_to_csv(timeDirty, 2);
 #endif
 
 	// Free memory and exit
-	free(time_dirty);
+	free(timeDirty);
 	free(time);
 	return 1;
 }

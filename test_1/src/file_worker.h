@@ -82,7 +82,7 @@ struct proc_stats {
     unsigned long long delayacct_blkio_ticks;	// %llu
 };
 
-void write_to_csv(unsigned long long time[]); // Output time array into a CSV file
+void write_to_csv(unsigned long long *time, int type); // Output time array into a CSV file
 unsigned long long search_in_file(char *f, char *str, int find_numeric); // Search for a string in the file fname
 unsigned long long find_num_in_str(char *str); // Find a numeric in a string
 unsigned long get_page_fault(int choice);

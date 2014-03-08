@@ -122,10 +122,16 @@ unsigned long get_page_fault(int choice) {
 #endif
 }
 
-// Output time array into a CSV file
-void write_to_csv(unsigned long long time[]) {
+// Output time array into a CSV file. Type: 1 - clean, 2 - dirty
+void write_to_csv(unsigned long long *time, int type) {
 	// Open filestream
-	FILE *f = fopen(CSV_FILE, "wb+");
+	FILE *f;
+	if (type == 1) {
+		f = fopen(CSV_FILE_CLEAN, "wb+");
+	} else {
+		f = fopen(CSV_FILE_DIRTY, "wb+");
+	}
+
 	if(f == NULL) //if file does not exist, create it
 	{
 	    printf("Error creating file.\n");
@@ -143,7 +149,7 @@ void write_to_csv(unsigned long long time[]) {
 	// Close filestream
 	fclose(f);
 #ifdef DEBUG
-		printf("Finished writing to file.\n");
+		printf("Finished writing to file %d.\n", type);
 #endif
 }
 
