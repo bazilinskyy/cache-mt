@@ -45,8 +45,8 @@
 #define ALLOWED_PAGEFAULTS_MAJOR 0
 
 // Output
-#define DEBUG
-#define DETAILED_DEBUG
+//#define DEBUG
+//#define DETAILED_DEBUG
 #define SHOW_RESULTS
 #define OUTPUT_TO_FILE // Output measurements into a CSV file
 

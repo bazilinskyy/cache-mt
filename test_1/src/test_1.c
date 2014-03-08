@@ -173,26 +173,26 @@ int pthread_main(int thread_num) {
 
 			//Info: http://www.centos.org/docs/5/html/Deployment_Guide-en-US/s1-proc-topfiles.html
 			interruptsBefore = search_in_file("/proc/interrupts", "LOC:", 1);
-#ifdef DETAILED_DEBUG
+	#ifdef DETAILED_DEBUG
 			printf("INT B: %llu :: ", interruptsBefore);
-#endif
+	#endif
 			//			pageFaultsMinorBefore = search_in_file("/proc/vmstat", "pgfault:", 1);
 			pageFaultsMinorBefore = get_page_fault(1);
-#ifdef DETAILED_DEBUG
+	#ifdef DETAILED_DEBUG
 			printf("PF Min B: %llu :: ", pageFaultsMinorBefore);
-#endif
+	#endif
 			//			pageFaultsMajorBefore = search_in_file("/proc/vmstat", "pgmajfault:", 1);
 			pageFaultsMajorBefore = get_page_fault(2);
-#ifdef DETAILED_DEBUG
+	#ifdef DETAILED_DEBUG
 			printf("PF Maj B: %llu :: ", pageFaultsMajorBefore);
-#endif
+	#endif
 			// Add status to the name of the file
 			char fileNameStatus[100];
 			snprintf(fileNameStatus, 100, "%s%s", fileName, "/status");
 			contextSwitchesBefore = search_in_file(fileNameStatus, "voluntary_ctxt_switches:", 1);
-#ifdef DETAILED_DEBUG
+	#ifdef DETAILED_DEBUG
 			printf("CS B: %lul\n", pageFaultsMajorBefore);
-#endif
+	#endif
 #else
 			//TODO read for Mac OS
 #endif
@@ -201,35 +201,34 @@ int pthread_main(int thread_num) {
 			for (j = 0; j < n; j++) { // Write and read 1 byte n times
 				experiment(testAr, testCh, n);
 			}
+			get_time_ns(&stop); // Calculate finish time
 
-			// Calculate finish time
-			get_time_ns(&stop);
 			// Get readings on interrupts, pagefaults and context switched before running the experiment
 #ifndef __APPLE__
 //			printf("BEFORE READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
 			interruptsAfter = search_in_file("/proc/interrupts", "LOC:", 1);
 //			printf("AFTER READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
-#ifdef DETAILED_DEBUG
+	#ifdef DETAILED_DEBUG
 			printf("INT A: %llu :: ", interruptsAfter);
-#endif
+	#endif
 //			printf("\nBEFORE READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
 			pageFaultsMinorAfter = get_page_fault(1);
 //			printf("AFTER READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
-#ifdef DETAILED_DEBUG
+	#ifdef DETAILED_DEBUG
 			printf("PF Min A: %llu :: ", pageFaultsMinorAfter);
-#endif
+	#endif
 //			printf("\nBEFORE READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
 			pageFaultsMajorAfter = get_page_fault(2);
 //			printf("AFTER READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
-#ifdef DETAILED_DEBUG
+	#ifdef DETAILED_DEBUG
 			printf("PF Maj A: %llu :: ", pageFaultsMajorAfter);
-#endif
+	#endif
 //			printf("\nBEFORE READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
 			contextSwitchesAfter = search_in_file(fileNameStatus, "voluntary_ctxt_switches:", 1);
 //			printf("AFTER READING FILE: %llu\n", search_in_file("/proc/interrupts", "LOC:", 1));
-#ifdef DETAILED_DEBUG
+	#ifdef DETAILED_DEBUG
 			printf("CS A: %lul\n", pageFaultsMajorAfter);
-#endif
+	#endif
 #else
 			//TODO read for Mac OS
 #endif
@@ -241,7 +240,7 @@ int pthread_main(int thread_num) {
 			// Disregard experiment if comparison of it with MIN and MAX makes it invalid
 			//TODO verify with Stephen
 			unsigned long long minTime = n * 1; // Lower bound for the duration of the run
-			unsigned long long maxTime = n * 10000; // Upper bound for the duration of the run
+			unsigned long long maxTime = n * 100000; // Upper bound for the duration of the run
 			if (tempTime < minTime || tempTime > maxTime) { // Disregard this run if it does not meet timing requirements
 				continue;
 			} else if (pageFaultsMinorAfter - pageFaultsMinorBefore > ALLOWED_PAGEFAULTS_MINOR) { // Disregard this run if minor pagefaults were detected
@@ -269,7 +268,7 @@ int pthread_main(int thread_num) {
 #endif
 				continue;
 			} else { // Everything it fine, record this run as successful
-				currentTime[expI] = tempTime; // Record how much time this iteration took
+				currentTime[experimentsRunSuccessfully] = tempTime; // Record how much time this iteration took
 				experimentsRunSuccessfully++;
 			}
 		}
