@@ -34,8 +34,10 @@
 int main(void) {
 	// Testing different aspects of the system/testing environment
 
-	// Testing interrupt time
+	// Testing interrupt time. Not for Mac.
+#ifndef __APPLE__
 	test_interrupt_time();
+#endif
 
 // Testing rdrsc
 //	unsigned long long t[32], prev;
@@ -360,10 +362,10 @@ int set_highest_process_priority(void) {
 void test_interrupt_time(void) {
 	struct timespec start, stop;
 	int run = 10;
-	int numBytes = 4;
+	int numBytes = 40;
 
 	// Record time run times
-	unsigned long long *time = malloc(sizeof(unsigned long long) * run * 2); // Record times of experiments in the run.
+	unsigned long long *time = malloc(sizeof(unsigned long long) * run); // Record times of experiments in the run.
 	if (time == NULL) {
 		printf("Error with allocating space for the array\n");
 		exit(1);
@@ -374,30 +376,41 @@ void test_interrupt_time(void) {
 		unsigned long long interruptsBefore;
 		unsigned long long interruptsAfter;
 
-		// First record time when interrupts occur
-		do {
+		interruptsAfter = search_in_file("/proc/interrupts", "LOC:", 1);
+		interruptsBefore = interruptsAfter;
+
+		while (interruptsBefore==interruptsAfter)
 			interruptsBefore = search_in_file("/proc/interrupts", "LOC:", 1);
 
-			get_time_ns(&start); // Record time before causing the interrupt
+		get_time_ns(&start); // Record time before causing the interrupt
+		// First record time when interrupts occur
+		do {
+
 
 			// Write numBytes
-			int j = 0;
-			for (j = 0; j < numBytes; ++j) {
-				unsigned char ch = 'a';
-			}
+			//int j = 0;
+			//for (j = 0; j < numBytes; ++j) {
+			//	unsigned char ch = 'a';
+			//}
 
-			get_time_ns(&stop); // Record time after causing the interrupt
 
 			interruptsAfter = search_in_file("/proc/interrupts", "LOC:", 1);
-		} while (interruptsAfter - interruptsBefore == 0 || interruptsAfter - interruptsBefore > 1000);
+//		} while ((interruptsAfter - interruptsBefore == 0) || (interruptsAfter - interruptsBefore) > 1000);
+		} while (interruptsAfter - interruptsBefore == 0);
+
+		get_time_ns(&stop); // Record time after causing the interrupt
 
 		int numInterrupts = interruptsAfter - interruptsBefore; // How many interrupts occurred
 		unsigned long long timeWithInterupts = calculate_time_ns(start, stop); // Record time with interrupts
 
+		printf("With %llu Num %d\n", timeWithInterupts, numInterrupts);
+
+		exit(1);
+
 		do {
 			interruptsBefore = search_in_file("/proc/interrupts", "LOC:", 1);
 
-			get_time_ns(&start); // Record time before causing the interrupt
+			get_time_ns(&start); // Record time before, without interrupts
 
 			// Write numBytes
 			int j = 0;
@@ -405,16 +418,14 @@ void test_interrupt_time(void) {
 				unsigned char ch = 'a';
 			}
 
-			get_time_ns(&stop); // Record time after causing the interrupt
+			get_time_ns(&stop); // Record time after, without interrupts
 
 			interruptsAfter = search_in_file("/proc/interrupts", "LOC:", 1);
 		} while (interruptsAfter - interruptsBefore != 0);
-		printf("B %llu A %llu\n", interruptsBefore, interruptsAfter);
-
 
 		unsigned long long timeWithoutInterupts = calculate_time_ns(start, stop); // Record time without interrupts
 
-		printf("With %llu Without %llu Num %d\n", timeWithInterupts, timeWithoutInterupts, numInterrupts);
+		//printf("With %llu Without %llu Num %d\n", timeWithInterupts, timeWithoutInterupts, numInterrupts);
 
 		time[i] = (timeWithInterupts - timeWithoutInterupts) / numInterrupts; // Record time difference over a number of interrupts
 	}
