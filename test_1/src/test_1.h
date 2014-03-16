@@ -60,5 +60,6 @@ unsigned long long average_time(unsigned long long *time, int timesRun); // Calc
 int pin_thread_to_core(int coreId); // Pin pthread to core
 int set_highest_process_priority(void); // Set priority of the current to be the highest
 void test_interrupt_time (void); // Record how much time one interrupt takes on the testing system
+int warm_strings_with_files(void); // Create two copies of each string used for storing files to fill in memory with this data.
 
 #endif /* TEST_1_H_ */

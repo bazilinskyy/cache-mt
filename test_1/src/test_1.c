@@ -134,10 +134,16 @@ int pthread_main(int thread_num) {
 			exit(1);
 		}
 		unsigned char testCh = ' '; // 1 byte of data
-		//Warm up cache
 #ifdef WARM_CACHE
+		//Warm up cache
 		experiment(testAr, testCh, 0); // Call experiment function once to warm up cache
 #endif
+
+#ifdef WARM_STRINGS_WITH_FILES
+		// Create two copies of each string used for storing files to fill in memory with this data.
+		warm_strings_with_files();
+#endif
+
 		// Run each experiment for TIMES_RUN_EXPERIMENT times
 		int expI = 0;
 		unsigned long long *currentTime = malloc(sizeof(unsigned long long) * TIMES_RUN_EXPERIMENT); // Record times of experiments in the run.
@@ -153,8 +159,7 @@ int pthread_main(int thread_num) {
 		int experimentsRunSuccessfully = 0; // Record how many times the experiment was run successfully
 		for (expI = 0; expI < TIMES_RUN_EXPERIMENT; ++expI) {
 #ifdef DETAILED_DEBUG
-			printf("* Iteration: %d Bytes: %.0f Experiment: %d\n", i + 1,
-					pow(2.0, (double) i), expI + 1);
+			printf("* Iteration: %d Bytes: %.0f Experiment: %d\n", i + 1, pow(2.0, (double) i), expI + 1);
 #endif
 
 			// Values
@@ -169,17 +174,17 @@ int pthread_main(int thread_num) {
 
 #ifndef __APPLE__
 			// Strings for storing contents of the files
-			char *interruptsBeforeString = malloc(3000);
+			char *interruptsBeforeString = malloc(1500);
 			if (interruptsBeforeString == NULL) {
 				printf("Error with allocating space for the string interruptsBeforeString\n");
 				exit(1);
 			}
-			char *pageFaultsBeforeString = malloc(3000);
+			char *pageFaultsBeforeString = malloc(1500);
 			if (pageFaultsBeforeString == NULL) {
 				printf("Error with allocating space for the string pageFaultsBeforeString\n");
 				exit(1);
 			}
-			char *contextSwitchesBeforeString = malloc(3000);
+			char *contextSwitchesBeforeString = malloc(1500);
 			if (contextSwitchesBeforeString == NULL) {
 				printf("Error with allocating space for the string contextSwitchesBeforeString\n");
 				exit(1);
@@ -198,7 +203,7 @@ int pthread_main(int thread_num) {
 			// Get readings on interrupts, pagefaults and context switched before running the experiment
 			//Info: http://www.centos.org/docs/5/html/Deployment_Guide-en-US/s1-proc-topfiles.html
 
-			// Save files with inforamtion onn interrupts, page faults, and context switches into strings
+			// Save files with information on interrupts, page faults, and context switches into strings
 			interruptsBeforeString = file_to_string("/proc/interrupts");
 
 			// Add stat to the name of the file
@@ -410,4 +415,70 @@ void test_interrupt_time(void) {
 	printf("1 interrupt takes (average from %d runs): %llu\n", run, average_time(time, run));
 
 	free(time);
+}
+
+// Create two copies of each string used for storing files to fill in memory with this data.
+int warm_strings_with_files(void) {
+	// Strings for storing contents of the files
+	char *interruptsBeforeStringWarm1 = malloc(1500);
+	if (interruptsBeforeStringWarm1 == NULL) {
+		printf("Error with allocating space for the string interruptsBeforeString\n");
+		exit(1);
+	}
+	char *pageFaultsBeforeStringWarm1 = malloc(1500);
+	if (pageFaultsBeforeStringWarm1 == NULL) {
+		printf("Error with allocating space for the string pageFaultsBeforeString\n");
+		exit(1);
+	}
+	char *contextSwitchesBeforeStringWarm1 = malloc(1500);
+	if (contextSwitchesBeforeStringWarm1 == NULL) {
+		printf("Error with allocating space for the string contextSwitchesBeforeString\n");
+		exit(1);
+	}
+	char *interruptsBeforeStringWarm2 = malloc(1500);
+	if (interruptsBeforeStringWarm2 == NULL) {
+		printf("Error with allocating space for the string interruptsBeforeString\n");
+		exit(1);
+	}
+	char *pageFaultsBeforeStringWarm2 = malloc(1500);
+	if (pageFaultsBeforeStringWarm2 == NULL) {
+		printf("Error with allocating space for the string pageFaultsBeforeString\n");
+		exit(1);
+	}
+	char *contextSwitchesBeforeStringWarm2 = malloc(1500);
+	if (contextSwitchesBeforeStringWarm2 == NULL) {
+		printf("Error with allocating space for the string contextSwitchesBeforeString\n");
+		exit(1);
+	}
+
+	// Get process ID
+	int processIdTemp = getpid();
+
+	// Create path to the proc/PID file
+	char fileNameTemp[100];
+	char bufTemp[100];
+	char buf2Temp[100] = "/proc/";
+	snprintf(bufTemp, 100, "%d", processIdTemp);
+	snprintf(fileNameTemp, 100, "%s%s", buf2Temp, bufTemp);
+
+	// Get readings on interrupts, pagefaults and context switched before running the experiment
+	//Info: http://www.centos.org/docs/5/html/Deployment_Guide-en-US/s1-proc-topfiles.html
+
+	// Save files with information on interrupts, page faults, and context switches into strings
+	interruptsBeforeStringWarm1 = file_to_string("/proc/interrupts");
+	interruptsBeforeStringWarm2 = file_to_string("/proc/interrupts");
+
+	// Add stat to the name of the file
+	char fileNameStatTemp[100];
+	snprintf(fileNameStatTemp, 100, "%s%s", fileNameStatTemp, "/stat");
+	pageFaultsBeforeStringWarm1 = file_to_string(fileNameStatTemp);
+	pageFaultsBeforeStringWarm2 = file_to_string(fileNameStatTemp);
+
+	// Add status to the name of the file
+	char fileNameStatusTemp[100];
+	snprintf(fileNameStatTemp, 100, "%s%s", fileNameStatTemp, "/status");
+	contextSwitchesBeforeStringWarm1 = file_to_string(fileNameStatTemp);
+	contextSwitchesBeforeStringWarm2 = file_to_string(fileNameStatTemp);
+
+	return 1;
 }
