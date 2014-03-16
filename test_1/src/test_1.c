@@ -220,6 +220,19 @@ int pthread_main(int thread_num) {
 #endif
 			int j;
 			// Run experiment function
+
+#ifdef START_AFTER_TIMER_TICK
+			// TODO Check with Stephen
+			// Start after the timer ticks
+			struct timespec temp_time1, temp_time2;
+
+			get_time_ns(&temp_time1);
+			get_time_ns(&temp_time2);
+
+			while (temp_time2.tv_sec == temp_time1.tv_sec && temp_time1.tv_nsec == temp_time2.tv_nsec) {
+				get_time_ns(&temp_time2);
+			}
+#endif
 			get_time_ns(&start); // Calculate start time
 			for (j = 0; j < n; j++) { // Write and read 1 byte n times
 				experiment(testAr, testCh, n);
