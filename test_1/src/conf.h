@@ -46,7 +46,7 @@
 
 // Output
 #define DEBUG
-//#define DETAILED_DEBUG
+#define DETAILED_DEBUG
 #define SHOW_RESULTS
 #define OUTPUT_TO_FILE // Output measurements into a CSV file
 

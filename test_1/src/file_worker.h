@@ -34,7 +34,7 @@
 #include "conf.h"
 #include <math.h>
 #include <string.h>
-
+#include <stdlib.h>
 
 // Based on code from Stephen Brown
 struct proc_stats {
@@ -84,8 +84,11 @@ struct proc_stats {
 
 void write_to_csv(unsigned long long *time, int type); // Output time array into a CSV file
 unsigned long long search_in_file(char *f, char *str, int find_numeric); // Search for a string in the file fname
+unsigned long long search_in_string(char *string, char *search_for, int find_numeric); // Search for a substring search_for in string.
 unsigned long long find_num_in_str(char *str); // Find a numeric in a string
 unsigned long get_page_fault(int choice);
-int read_stat(int pid, struct proc_stats *s);
+unsigned long get_page_fault_from_string(char * string, int choice);
+int read_stat(char * filename, int pid, struct proc_stats *s);
+char * file_to_string(char *f); // Create a string with contents of the file f.
 
 #endif /* FILE_WORKER_H_ */
