@@ -55,11 +55,11 @@ ifeq ($(UNAME_S),Darwin)
 endif
 
 %.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS) $(LIBS)
+	$(CC) -c -g -o $@ $< $(CFLAGS) $(LIBS)
 
 # Changed from $(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 test_1: $(OBJ)
-	$(CC) -o $@ $^ $(LIBS)
+	$(CC) -g -o $@ $^ $(LIBS)
 
 .PHONY: clean
 

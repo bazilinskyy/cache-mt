@@ -225,7 +225,6 @@ unsigned long long search_in_string(char *string, char *search_for, int find_num
 		if (find_numeric) {
 			char temp[30];
 			memcpy(temp, &string[tmp - string], 30);
-			printf ("TEMP: %s\n", temp);
 			unsigned long long number = find_num_in_str(temp);
 			return number;
 		} else {
