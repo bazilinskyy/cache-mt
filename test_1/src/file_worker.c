@@ -159,13 +159,18 @@ unsigned long get_page_fault_from_string(char * string, int choice) {
 }
 
 // Output time array into a CSV file. Type: 1 - clean, 2 - dirty
-void write_to_csv(unsigned long long *time, int type) {
+void write_to_csv(unsigned long long *time, int type, int testId) {
 	// Open filestream
 	FILE *f;
+	char fileName[100];
 	if (type == 1) {
-		f = fopen(CSV_FILE_CLEAN, "wb+");
+		// Create file name for a new csv file
+		snprintf(fileName, 100, "%s_%d.csv", CSV_FILE_CLEAN, testId);
+		f = fopen(fileName, "wb+");
 	} else {
-		f = fopen(CSV_FILE_DIRTY, "wb+");
+		// Create file name for a new csv file
+		snprintf(fileName, 100, "%s_%d.csv", CSV_FILE_DIRTY, testId);
+		f = fopen(fileName, "wb+");
 	}
 
 	if (f == NULL) //if file does not exist, create it
@@ -280,5 +285,6 @@ char * file_to_string(char *f) {
 unsigned long long find_num_in_str(char *str) {
 	unsigned long long num = -1;
 	sscanf(str, "%*[^0-9]%llu", &num);
+	//printf("%s\n", str);
 	return num;
 }

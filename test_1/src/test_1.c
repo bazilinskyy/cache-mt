@@ -34,6 +34,31 @@
 int main(void) {
 	// Testing different aspects of the system/testing environment
 
+	// Test clock_gettime
+	struct timespec start1, start2, start3;
+	get_time_ns(&start1);
+	get_time_ns(&start2);
+	get_time_ns(&start3);
+
+	while (calculate_time_ns(start1, start2) == 0ull) {
+		get_time_ns(&start2);
+	}
+	get_time_ns(&start3);
+	while (calculate_time_ns(start2, start3) == 0ull) {
+		get_time_ns(&start3);
+	}
+
+	printf("TIME. Time: %ld %ld %ld.", BILLION * start1.tv_sec + start1.tv_nsec,
+	BILLION * start2.tv_sec + start2.tv_nsec,
+	BILLION * start3.tv_sec + start3.tv_nsec);
+	printf(" Diff: %llu %llu\n", calculate_time_ns(start1, start2), calculate_time_ns(start2, start3));
+
+	// Test clock_getres
+	struct timespec startres1;
+	get_time_res(&startres1);
+	printf("RESOLUTION. time: %ld\n",
+	BILLION * startres1.tv_sec + startres1.tv_nsec);
+
 	// Testing interrupt time. Not for Mac.
 #ifndef __APPLE__
 	//test_interrupt_time();
@@ -77,44 +102,9 @@ int main(void) {
 
 // Function run in the thread
 void *pthread_main(void *params) {
-	unsigned long long *time = malloc(sizeof(unsigned long long) * MAX_POWER); // Record time for clean runs.
-	if (time == NULL) {
-		printf("Error with allocating space for the array\n");
-		exit(1);
-	}
-	unsigned long long *timeDirty = malloc(sizeof(unsigned long long) * MAX_POWER); // Record time for dirty runs.
-	if (timeDirty == NULL) {
-		printf("Error with allocating space for the array\n");
-		exit(1);
-	}
 	struct timespec start, stop;
 	int i = 0;
 	long n;
-
-	// Test clock_gettime
-	struct timespec start1, start2, start3;
-	get_time_ns(&start1);
-	get_time_ns(&start2);
-	get_time_ns(&start3);
-
-	while (calculate_time_ns(start1, start2) == 0ull) {
-		get_time_ns(&start2);
-	}
-	get_time_ns(&start3);
-	while (calculate_time_ns(start2, start3) == 0ull) {
-		get_time_ns(&start3);
-	}
-
-	printf("TIME. Time: %ld %ld %ld.", BILLION * start1.tv_sec + start1.tv_nsec,
-	BILLION * start2.tv_sec + start2.tv_nsec,
-	BILLION * start3.tv_sec + start3.tv_nsec);
-	printf(" Diff: %llu %llu\n", calculate_time_ns(start1, start2), calculate_time_ns(start2, start3));
-
-	// Test clock_getres
-	struct timespec startres1;
-	get_time_res(&startres1);
-	printf("RESOLUTION. time: %ld\n",
-	BILLION * startres1.tv_sec + startres1.tv_nsec);
 
 	// Sort out thread affinity
 #if PROCESS_AFFINITY == PIN_TO_ONE_CPU
@@ -125,225 +115,260 @@ void *pthread_main(void *params) {
 //		printf("My current process id/pid is %d\n", getpid());
 //	}
 
-	// Run experiments
-	for (n = 1.0; n < pow(2.0, (double) MAX_POWER); n *= 2.0) {
-		long *testAr = malloc(sizeof(long) * n * 2);
-		if (testAr == NULL) { // Array for manipulating data
+	int testId = 0;
+	for (testId = 0; testId < TIMES_RUN_TEST; ++testId) { // Run tests
+
+		unsigned long long *time = malloc(sizeof(unsigned long long) * MAX_POWER); // Record time for clean runs.
+		if (time == NULL) {
 			printf("Error with allocating space for the array\n");
 			exit(1);
 		}
-		long testLong = 0; // 1 byte of data
+		unsigned long long *timeDirty = malloc(sizeof(unsigned long long) * MAX_POWER); // Record time for dirty runs.
+		if (timeDirty == NULL) {
+			printf("Error with allocating space for the array\n");
+			exit(1);
+		}
+
+		// Run experiments
+		for (n = 1.0; n < pow(2.0, (double) MAX_POWER); n *= 2.0) {
+			unsigned long long *currentTime = malloc(sizeof(unsigned long long) * TIMES_RUN_EXPERIMENT); // Record times of experiments in the run.
+			if (time == NULL) {
+				printf("Error with allocating space for the array\n");
+				exit(1);
+			}
+			unsigned long long *currentTimeDirty = malloc(sizeof(unsigned long long) * TIMES_RUN_EXPERIMENT); // Record times of experiments in the run.
+			if (time == NULL) {
+				printf("Error with allocating space for the array\n");
+				exit(1);
+			}
+
+			long *testAr = malloc(sizeof(long) * n * 2);
+			if (testAr == NULL) { // Array for manipulating data
+				printf("Error with allocating space for the array\n");
+				exit(1);
+			}
+			long testLong = 0; // 4 bytes of data
+
+
 #ifdef WARM_CACHE
-		//Warm up cache
-		experiment(testAr, testLong, 0); // Call experiment function once to warm up cache
+			//Warm up cache
+			experiment(testAr, testLong, 0); // Call experiment function once to warm up cache
 #endif
 
 #ifdef WARM_STRINGS_WITH_FILES
-		// Create two copies of each string used for storing files to fill in memory with this data.
-		warm_strings_with_files();
+			// Create two copies of each string used for storing files to fill in memory with this data.
+			warm_strings_with_files();
 #endif
 
-		// Run each experiment for TIMES_RUN_EXPERIMENT times
-		int expI = 0;
-		unsigned long long *currentTime = malloc(sizeof(unsigned long long) * TIMES_RUN_EXPERIMENT); // Record times of experiments in the run.
-		if (time == NULL) {
-			printf("Error with allocating space for the array\n");
-			exit(1);
-		}
-		unsigned long long *currentTimeDirty = malloc(sizeof(unsigned long long) * TIMES_RUN_EXPERIMENT); // Record times of experiments in the run.
-		if (time == NULL) {
-			printf("Error with allocating space for the array\n");
-			exit(1);
-		}
-		int experimentsRunSuccessfully = 0; // Record how many times the experiment was run successfully
-		for (expI = 0; expI < TIMES_RUN_EXPERIMENT; ++expI) {
+			// Run each experiment for TIMES_RUN_EXPERIMENT times
+			int expI = 0;
+
+			int experimentsRunSuccessfully = 0; // Record how many times the experiment was run successfully
+			for (expI = 0; expI < TIMES_RUN_EXPERIMENT; ++expI) { // Run experiments in the test
 #ifdef DETAILED_DEBUG
-			printf("* Iteration: %d Bytes: %.0f Experiment: %d\n", i + 1, pow(2.0, (double) i), expI + 1);
+				printf("* Iteration: %d Bytes: %.0f Experiment: %d\n", i + 1, pow(2.0, (double) i), expI + 1);
 #endif
 
-			// Values
-			unsigned long long interruptsBefore = 0;
-			unsigned long long interruptsAfter = 0;
-			unsigned long long pageFaultsMinorBefore = 0;
-			unsigned long long pageFaultsMinorAfter = 0;
-			unsigned long long pageFaultsMajorBefore = 0;
-			unsigned long long pageFaultsMajorAfter = 0;
-			unsigned long long contextSwitchesBefore = 0;
-			unsigned long long contextSwitchesAfter = 0;
+				// Values
+				unsigned long long interruptsBefore = 0;
+				unsigned long long interruptsAfter = 0;
+				unsigned long long pageFaultsMinorBefore = 0;
+				unsigned long long pageFaultsMinorAfter = 0;
+				unsigned long long pageFaultsMajorBefore = 0;
+				unsigned long long pageFaultsMajorAfter = 0;
+				unsigned long long contextSwitchesBefore = 0;
+				unsigned long long contextSwitchesAfter = 0;
 
 #ifndef __APPLE__
-			// Strings for storing contents of the files
-			char *interruptsBeforeString = malloc(BIG_BUFFER_SIZE);
-			if (interruptsBeforeString == NULL) {
-				printf("Error with allocating space for the string interruptsBeforeString\n");
-				exit(1);
-			}
-			char *pageFaultsBeforeString = malloc(BIG_BUFFER_SIZE);
-			if (pageFaultsBeforeString == NULL) {
-				printf("Error with allocating space for the string pageFaultsBeforeString\n");
-				exit(1);
-			}
-			char *contextSwitchesBeforeString = malloc(BIG_BUFFER_SIZE);
-			if (contextSwitchesBeforeString == NULL) {
-				printf("Error with allocating space for the string contextSwitchesBeforeString\n");
-				exit(1);
-			}
+				// Strings for storing contents of the files
+				char *interruptsBeforeString = malloc(BIG_BUFFER_SIZE);
+				if (interruptsBeforeString == NULL) {
+					printf("Error with allocating space for the string interruptsBeforeString\n");
+					exit(1);
+				}
+				char *pageFaultsBeforeString = malloc(BIG_BUFFER_SIZE);
+				if (pageFaultsBeforeString == NULL) {
+					printf("Error with allocating space for the string pageFaultsBeforeString\n");
+					exit(1);
+				}
+				char *contextSwitchesBeforeString = malloc(BIG_BUFFER_SIZE);
+				if (contextSwitchesBeforeString == NULL) {
+					printf("Error with allocating space for the string contextSwitchesBeforeString\n");
+					exit(1);
+				}
 
-			// Get process ID
-			int processId = getpid();
+				// Get process ID
+				int processId = getpid();
 
-			// Create path to the proc/PID file
-			char fileName[100];
-			char buf[100];
-			char buf2[100] = "/proc/";
-			snprintf(buf, 100, "%d", processId);
-			snprintf(fileName, 100, "%s%s", buf2, buf);
+				// Create path to the proc/PID file
+				char fileName[100];
+				char buf[100];
+				char buf2[100] = "/proc/";
+				snprintf(buf, 100, "%d", processId);
+				snprintf(fileName, 100, "%s%s", buf2, buf);
 
-			// Get readings on interrupts, pagefaults and context switched before running the experiment
-			//Info: http://www.centos.org/docs/5/html/Deployment_Guide-en-US/s1-proc-topfiles.html
+				// Get readings on interrupts, pagefaults and context switched before running the experiment
+				//Info: http://www.centos.org/docs/5/html/Deployment_Guide-en-US/s1-proc-topfiles.html
 
-			// Save files with information on interrupts, page faults, and context switches into strings
-			interruptsBeforeString = file_to_string("/proc/interrupts");
+				// Save files with information on interrupts, page faults, and context switches into strings
+				interruptsBeforeString = file_to_string("/proc/interrupts");
 
-			// Add stat to the name of the file
-			char fileNameStat[100];
-			snprintf(fileNameStat, 100, "%s%s", fileName, "/stat");
-			pageFaultsBeforeString = file_to_string(fileNameStat);
+				// Add stat to the name of the file
+				char fileNameStat[100];
+				snprintf(fileNameStat, 100, "%s%s", fileName, "/stat");
+				pageFaultsBeforeString = file_to_string(fileNameStat);
 
-			// Add status to the name of the file
-			char fileNameStatus[100];
-			snprintf(fileNameStatus, 100, "%s%s", fileName, "/status");
-			contextSwitchesBeforeString = file_to_string(fileNameStatus);
+				// Add status to the name of the file
+				char fileNameStatus[100];
+				snprintf(fileNameStatus, 100, "%s%s", fileName, "/status");
+				contextSwitchesBeforeString = file_to_string(fileNameStatus);
 #else
-			//TODO read for Mac OS
+				//TODO read for Mac OS
 #endif
-			int j;
-			// Run experiment function
+				int j;
+				// Run experiment function
 
 #ifdef START_AFTER_TIMER_TICK
-			// Start after the timer ticks
-			struct timespec temp_time1, start;
+				// Start after the timer ticks
+				struct timespec temp_time1, start;
 
-			get_time_ns(&temp_time1);
-			get_time_ns(&start);
-
-			while (start.tv_sec == temp_time1.tv_sec && temp_time1.tv_nsec == start.tv_nsec) {
+				get_time_ns(&temp_time1);
 				get_time_ns(&start);
-			}
+
+				while (start.tv_sec == temp_time1.tv_sec && temp_time1.tv_nsec == start.tv_nsec) {
+					get_time_ns(&start);
+				}
 #else
-			struct timespec start,
-			get_time_ns(&start); // Calculate start time
+#ifdef START_AFTER_TIME_INTERRUPT
+				// Start after the time interrupt
+				unsigned long long interrupts1 = search_in_file("/proc/interrupts", "LOC:", 1);
+				unsigned long long interrupts2 = search_in_file("/proc/interrupts", "LOC:", 1);
+
+				while (interrupts1 == interrupts2) {
+					interrupts2 = search_in_file("/proc/interrupts", "LOC:", 1);
+					printf("%llu %llu\n", interrupts1, interrupts2);
+				}
+#endif
+				// Calculate the start time
+				struct timespec start;
+				get_time_ns(&start);
 #endif
 
-			for (j = 0; j < n; j++) { // Write and read 1 byte n times
-				experiment(testAr, testLong, n);
-			}
-			get_time_ns(&stop); // Calculate finish time
+				for (j = 0; j < n; j++) { // Write and read 1 byte n times
+					experiment(testAr, testLong, n);
+				}
+				get_time_ns(&stop); // Calculate finish time
 
-			// Get readings on interrupts, pagefaults and context switched before running the experiment
+				// Get readings on interrupts, pagefaults and context switched before running the experiment
 #ifndef __APPLE__
-			interruptsAfter = search_in_file("/proc/interrupts", "LOC:", 1);
-			pageFaultsMinorAfter = get_page_fault(1);
-			pageFaultsMajorAfter = get_page_fault(2);
-			contextSwitchesAfter = search_in_file(fileNameStatus, "voluntary_ctxt_switches:", 1);
+				interruptsAfter = search_in_file("/proc/interrupts", "LOC:", 1);
+				pageFaultsMinorAfter = get_page_fault(1);
+				pageFaultsMajorAfter = get_page_fault(2);
+				contextSwitchesAfter = search_in_file(fileNameStatus, "voluntary_ctxt_switches:", 1);
 
-			// Retrieve information from saved into strings files.
-			interruptsBefore = search_in_string(interruptsBeforeString, "LOC:", 1);
-			pageFaultsMinorBefore = get_page_fault_from_string(pageFaultsBeforeString, 1);
-			pageFaultsMajorBefore = get_page_fault_from_string(pageFaultsBeforeString, 2);
-			contextSwitchesBefore = search_in_string(contextSwitchesBeforeString, "voluntary_ctxt_switches:", 1);
+				// Retrieve information from saved into strings files.
+				interruptsBefore = search_in_string(interruptsBeforeString, "LOC:", 1);
+				pageFaultsMinorBefore = get_page_fault_from_string(pageFaultsBeforeString, 1);
+				pageFaultsMajorBefore = get_page_fault_from_string(pageFaultsBeforeString, 2);
+				contextSwitchesBefore = search_in_string(contextSwitchesBeforeString, "voluntary_ctxt_switches:", 1);
 
-			// Free memory
-//			free(contextSwitchesBeforeString);
-//			free(pageFaultsBeforeString);
-//			free(interruptsBeforeString);
+				// Free memory
+//				free(interruptsBeforeString);
+//				free(pageFaultsBeforeString);
+//				free(contextSwitchesBeforeString);
 
 #ifdef DETAILED_DEBUG
-			printf("INT B: %llu :: ", interruptsBefore);
-			printf("PF Min B: %llu :: ", pageFaultsMinorBefore);
-			printf("PF Maj B: %llu :: ", pageFaultsMajorBefore);
-			printf("CS B: %llu\n", contextSwitchesBefore);
-			printf("INT A: %llu :: ", interruptsAfter);
-			printf("PF Min A: %llu :: ", pageFaultsMinorAfter);
-			printf("PF Maj A: %llu :: ", pageFaultsMajorAfter);
-			printf("CS A: %llu\n", contextSwitchesAfter);
+				printf("INT B: %llu :: ", interruptsBefore);
+				printf("PF Min B: %llu :: ", pageFaultsMinorBefore);
+				printf("PF Maj B: %llu :: ", pageFaultsMajorBefore);
+				printf("CS B: %llu\n", contextSwitchesBefore);
+				printf("INT A: %llu :: ", interruptsAfter);
+				printf("PF Min A: %llu :: ", pageFaultsMinorAfter);
+				printf("PF Maj A: %llu :: ", pageFaultsMajorAfter);
+				printf("CS A: %llu\n", contextSwitchesAfter);
 #endif
 
 #else
-			//TODO read for Mac OS
+				//TODO read for Mac OS
 #endif
-			// Record difference
-			unsigned long long tempTime = calculate_time_ns(start, stop); // Calculate how much time this run took
-			// Record dirty time
-			currentTimeDirty[expI] = tempTime; // Record how much time this iteration took
+				// Record difference
+				unsigned long long tempTime = calculate_time_ns(start, stop); // Calculate how much time this run took
+				// Record dirty time
+				currentTimeDirty[expI] = tempTime; // Record how much time this iteration took
 
-			// Disregard experiment if comparison of it with MIN and MAX makes it invalid
-			//TODO verify with Stephen
-			unsigned long long minTime = n * 1; // Lower bound for the duration of the run
-			unsigned long long maxTime = n * 100000; // Upper bound for the duration of the run
-			if (tempTime < minTime || tempTime > maxTime) { // Disregard this run if it does not meet timing requirements
-				continue;
-			} else if (pageFaultsMinorAfter - pageFaultsMinorBefore > ALLOWED_PAGEFAULTS_MINOR) { // Disregard this run if minor pagefaults were detected
+				// Disregard experiment if comparison of it with MIN and MAX makes it invalid
+				//TODO verify with Stephen
+				unsigned long long minTime = n * 1; // Lower bound for the duration of the run
+				unsigned long long maxTime = n * 100000; // Upper bound for the duration of the run
+				if (tempTime < minTime || tempTime > maxTime) { // Disregard this run if it does not meet timing requirements
+					continue;
+				} else if (pageFaultsMinorAfter - pageFaultsMinorBefore > ALLOWED_PAGEFAULTS_MINOR) { // Disregard this run if minor pagefaults were detected
 #ifdef DEBUG
-				printf("PFMIN. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expI, pageFaultsMinorBefore, pageFaultsMinorAfter,
-				ALLOWED_PAGEFAULTS_MINOR);
+					printf("PFMIN. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expI, pageFaultsMinorBefore, pageFaultsMinorAfter,
+					ALLOWED_PAGEFAULTS_MINOR);
 #endif
-				continue;
-			} else if (pageFaultsMajorAfter - pageFaultsMajorBefore > ALLOWED_PAGEFAULTS_MAJOR) { // Disregard this run if major pagefaults were detected
+					continue;
+				} else if (pageFaultsMajorAfter - pageFaultsMajorBefore > ALLOWED_PAGEFAULTS_MAJOR) { // Disregard this run if major pagefaults were detected
 #ifdef DEBUG
-				printf("PFMAJ. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expI, pageFaultsMajorBefore, pageFaultsMajorAfter,
-				ALLOWED_PAGEFAULTS_MAJOR);
+					printf("PFMAJ. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expI, pageFaultsMajorBefore, pageFaultsMajorAfter,
+					ALLOWED_PAGEFAULTS_MAJOR);
 #endif
-				continue;
-			} else if (contextSwitchesAfter - contextSwitchesBefore > ALLOWED_CONTEXT_SWITCHES) { // Disregard this run if voluntary context switches were detected
+					continue;
+				} else if (contextSwitchesAfter - contextSwitchesBefore > ALLOWED_CONTEXT_SWITCHES) { // Disregard this run if voluntary context switches were detected
 #ifdef DEBUG
-				printf("CS. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expI, contextSwitchesBefore, contextSwitchesAfter,
-				ALLOWED_CONTEXT_SWITCHES);
+					printf("CS. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expI, contextSwitchesBefore, contextSwitchesAfter,
+					ALLOWED_CONTEXT_SWITCHES);
 #endif
-				continue;
-			} else if (interruptsAfter - interruptsBefore > ALLOWED_INTERRUPTS) { // Disregard this run if interrupts were detected
+					continue;
+				} else if (interruptsAfter - interruptsBefore > ALLOWED_INTERRUPTS) { // Disregard this run if interrupts were detected
 #ifdef DEBUG
-				printf("INT. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expI, interruptsBefore, interruptsAfter,
-				ALLOWED_INTERRUPTS);
+					printf("INT. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expI, interruptsBefore, interruptsAfter,
+					ALLOWED_INTERRUPTS);
 #endif
-				continue;
-			} else { // Everything it fine, record this run as successful
-				currentTime[experimentsRunSuccessfully] = tempTime; // Record how much time this iteration took
-				experimentsRunSuccessfully++;
+					continue;
+				} else { // Everything it fine, record this run as successful
+					currentTime[experimentsRunSuccessfully] = tempTime; // Record how much time this iteration took
+					experimentsRunSuccessfully++;
+				}
 			}
-		}
-		// Calculate average time of running the experiment
-		time[(int) i] = average_time(currentTime, experimentsRunSuccessfully); // 0 denotes a failed experiment (number of successful runs = 0)
-		timeDirty[(int) i] = average_time(currentTimeDirty, TIMES_RUN_EXPERIMENT); // 0 denotes a failed experiment (number of successful runs = 0)
-		i++; // Iterate for easier access to array
+			// Calculate average time of running the experiment
+			time[(int) i] = average_time(currentTime, experimentsRunSuccessfully); // 0 denotes a failed experiment (number of successful runs = 0)
+			timeDirty[(int) i] = average_time(currentTimeDirty, TIMES_RUN_EXPERIMENT); // 0 denotes a failed experiment (number of successful runs = 0)
+			i++; // Iterate for easier access to array
 
-		// Free memory
-		free(currentTime);
-		free(currentTimeDirty);
-		free(testAr); // free memory allocated for the array
-	}
-	// Output results
+			// Free memory
+			free(currentTime);
+			free(currentTimeDirty);
+			free(testAr);
+
+		} // End of the experiment loop.
+
+		// Output results
 #ifdef SHOW_RESULTS
-	printf("\nRESULTS Clean - %d:\n", MAX_POWER);
-	for (i = 0; i < MAX_POWER; ++i) {
-		printf("%d. %.0f - %llu\n", i + 1, pow(2.0, (double) i), time[i]);
-	}
+		printf("\n%d. RESULTS Clean - %d:\n", testId, MAX_POWER);
+		for (i = 0; i < MAX_POWER; ++i) {
+			printf("%d. %.0f - %llu\n", i + 1, pow(2.0, (double) i), time[i]);
+		}
 
-	printf("\nRESULTS Dirty - %d:\n", MAX_POWER);
-	for (i = 0; i < MAX_POWER; ++i) {
-		printf("%d. %.0f - %llu\n", i + 1, pow(2.0, (double) i), timeDirty[i]);
-	}
+		printf("\n%d. RESULTS Dirty - %d:\n", testId, MAX_POWER);
+		for (i = 0; i < MAX_POWER; ++i) {
+			printf("%d. %.0f - %llu\n", i + 1, pow(2.0, (double) i), timeDirty[i]);
+		}
 #endif
 
 #ifdef OUTPUT_TO_FILE
-	// Write to file
-	write_to_csv(time, 1);
-	write_to_csv(timeDirty, 2);
+		// Write to file
+		write_to_csv(time, 1, testId);
+		write_to_csv(timeDirty, 2, testId);
 #endif
 
-	// Free memory and exit
-	free(timeDirty);
-	free(time);
+		// Free memory and exit
+		free(timeDirty);
+		free(time);
+
+	} // End of the test loop.
+
+	return 1;
 }
 
 // Experiment itself, aslo used for warming up cache
