@@ -262,6 +262,7 @@ void *pthread_main(void *params) {
 				// Get readings on interrupts, pagefaults and context switched before running the experiment
 #ifndef __APPLE__
 				interruptsAfter = search_in_file("/proc/interrupts", "LOC:", 1);
+				//printf("INT SUM %llu\n", get_interrupts_sum());
 				pageFaultsMinorAfter = get_page_fault(1);
 				pageFaultsMajorAfter = get_page_fault(2);
 				contextSwitchesAfter = search_in_file(fileNameStatus, "voluntary_ctxt_switches:", 1);

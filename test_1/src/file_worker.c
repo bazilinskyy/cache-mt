@@ -104,7 +104,6 @@ unsigned long get_page_fault(int choice) {
 	struct proc_stats statsData;
 	int self = getpid(); // Process ID
 
-
 	char buf[256];
 	sprintf(buf,"/proc/%d/stat", self);
 
@@ -242,8 +241,8 @@ unsigned long long search_in_string(char *string, char *search_for, int find_num
 	return (0);
 }
 
-static char result[8][8*1024]; // For storing contents of the file.
-static int cycle=0; // Counter of how many files have been stored in result.
+static char result[8][8 * 1024]; // For storing contents of the file.
+static int cycle = 0; // Counter of how many files have been stored in result.
 
 char * file_to_string(char *f) {
 	FILE *fp;
@@ -251,8 +250,8 @@ char * file_to_string(char *f) {
 	struct stat info;
 
 	cycle++;
-	if (cycle==8)
-		cycle=0;
+	if (cycle == 8)
+		cycle = 0;
 
 	// Open file.
 	if ((fp = fopen(f, "r")) == NULL) {
@@ -268,9 +267,9 @@ char * file_to_string(char *f) {
 	}
 
 	// Check if ther eis a memory leak. This code may not work on machines with more than 4 cores.
-	if (strlen(result[cycle])>8*1024) {
-	   printf("Memory error - strlen(result)==%lu, file size==%d\n", strlen(result[cycle]), 8*1024);
-	   exit(1);
+	if (strlen(result[cycle]) > 8 * 1024) {
+		printf("Memory error - strlen(result)==%lu, file size==%d\n", strlen(result[cycle]), 8 * 1024);
+		exit(1);
 	}
 
 	//Close the file if still open.
@@ -287,4 +286,53 @@ unsigned long long find_num_in_str(char *str) {
 	sscanf(str, "%*[^0-9]%llu", &num);
 	//printf("%s\n", str);
 	return num;
+}
+
+// Get all interrupts from the file f
+struct proc_interrupts get_interrupts(int cpu) {
+	char *interruptsString = malloc(BIG_BUFFER_SIZE);
+	if (interruptsString == NULL) {
+		printf("Error with allocating space for the string interruptsBeforeString\n");
+		exit(1);
+	}
+
+	interruptsString = file_to_string("/proc/interrupts"); // Read a file with interrupts into a string
+
+	struct proc_interrupts result = get_interrupts_from_string(interruptsString, cpu);
+
+	free(interruptsString);
+	return result;
+}
+
+// Get all interrupts from the file f
+// TODO support for multiple CPUs
+struct proc_interrupts get_interrupts_from_string(char *str, int cpu) {
+	struct proc_interrupts result;
+
+	result.i_LOC = search_in_string(str, "LOC:", 1);
+
+	return result;
+}
+
+unsigned long long get_interrupts_sum() {
+	unsigned long long sum;
+	int n = 0;
+	FILE *fp;
+
+	// Open file
+	if ((fp = fopen("/proc/interrupts", "r")) == NULL) {
+		return (unsigned long long) (-1);
+	}
+
+	while (fscanf(fp, "%d", &n) > 0) // parse %d
+	{
+		sum += n;
+		printf("%d ", n);
+	}
+
+	//Close the file if still open.
+	if (fp) {
+		fclose(fp);
+	}
+	return sum;
 }

@@ -82,6 +82,37 @@ struct proc_stats {
     unsigned long long delayacct_blkio_ticks;	// %llu
 };
 
+// Structure for interrupts
+struct proc_interrupts {
+    unsigned long long i_0;
+    unsigned long long i_1;
+    unsigned long long i_6;
+    unsigned long long i_7;
+    unsigned long long i_9;
+    unsigned long long i_12;
+    unsigned long long i_14;
+    unsigned long long i_15;
+    unsigned long long i_18;
+    unsigned long long i_19;
+    unsigned long long i_20;
+    unsigned long long i_21;
+    unsigned long long i_22;
+    unsigned long long i_40;
+    unsigned long long i_41;
+    unsigned long long i_42;
+    unsigned long long i_43;
+    unsigned long long i_44;
+    unsigned long long i_NMI;
+    unsigned long long i_LOC;
+    unsigned long long i_SPU;
+    unsigned long long i_RES;
+    unsigned long long i_CAL;
+    unsigned long long i_TLB;
+    unsigned long long i_TRM;
+    unsigned long long i_ERR;
+    unsigned long long i_MIS;
+};
+
 void write_to_csv(unsigned long long *time, int type, int testId); // Output time array into a CSV file
 unsigned long long search_in_file(char *f, char *str, int find_numeric); // Search for a string in the file fname
 unsigned long long search_in_string(char *string, char *search_for, int find_numeric); // Search for a substring search_for in string.
@@ -90,5 +121,7 @@ unsigned long get_page_fault(int choice);
 unsigned long get_page_fault_from_string(char * string, int choice);
 int read_stat(char * filename, int pid, struct proc_stats *s);
 char * file_to_string(char *f); // Create a string with contents of the file f.
+struct proc_interrupts get_interrupts(int cpu);
+struct proc_interrupts get_interrupts_from_string(char *str, int cpu);
 
 #endif /* FILE_WORKER_H_ */

@@ -46,7 +46,6 @@
 #include "conf.h"
 #include "file_worker.h"
 
-
 // Process ID
 #ifndef __APPLE__
 	#include <sys/types.h>
