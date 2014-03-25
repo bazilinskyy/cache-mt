@@ -53,7 +53,7 @@
 //#define OUTPUT_TO_FILE // Output measurements into a CSV file
 
 #define BILLION  1000000000L
-#define CHAR_TO_ADD 'a'
+#define LONG_TO_ADD 1l
 #define BIG_BUFFER_SIZE (8*1024) // For storying files as strings
 #ifdef __APPLE__
 	#define CSV_FILE_CLEAN "test_1_i7_clean.csv"

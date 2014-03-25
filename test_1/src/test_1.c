@@ -127,16 +127,15 @@ void *pthread_main(void *params) {
 
 	// Run experiments
 	for (n = 1.0; n < pow(2.0, (double) MAX_POWER); n *= 2.0) {
-//		unsigned char testAr[(int) n];
-		unsigned char *testAr = malloc(sizeof(unsigned char) * n * 2);
+		long *testAr = malloc(sizeof(long) * n * 2);
 		if (testAr == NULL) { // Array for manipulating data
 			printf("Error with allocating space for the array\n");
 			exit(1);
 		}
-		unsigned char testCh = ' '; // 1 byte of data
+		long testLong = 0; // 1 byte of data
 #ifdef WARM_CACHE
 		//Warm up cache
-		experiment(testAr, testCh, 0); // Call experiment function once to warm up cache
+		experiment(testAr, testLong, 0); // Call experiment function once to warm up cache
 #endif
 
 #ifdef WARM_STRINGS_WITH_FILES
@@ -237,7 +236,7 @@ void *pthread_main(void *params) {
 #endif
 
 			for (j = 0; j < n; j++) { // Write and read 1 byte n times
-				experiment(testAr, testCh, n);
+				experiment(testAr, testLong, n);
 			}
 			get_time_ns(&stop); // Calculate finish time
 
@@ -348,9 +347,9 @@ void *pthread_main(void *params) {
 }
 
 // Experiment itself, aslo used for warming up cache
-void experiment(unsigned char *testAr, unsigned char testCh, int n) {
-	testAr[(int) n] = CHAR_TO_ADD; // Write 1 byte
-	testCh = testAr[(int) n]; // Read 1 byte
+void experiment(long *testAr, long testLong, int n) {
+	testAr[(int) n] = LONG_TO_ADD; // Write 1 byte
+	testLong = testAr[(int) n]; // Read 1 byte
 }
 
 // Calculate average time of running the experiment
