@@ -158,7 +158,7 @@ unsigned long get_page_fault_from_string(char * string, int choice) {
 }
 
 // Output time array into a CSV file. Type: 1 - clean, 2 - dirty
-void write_to_csv(unsigned long long *time, int type, int testId) {
+void write_to_csv(unsigned long long *time, int type, int testId, int experimentsRun) {
 	// Open filestream
 	FILE *f;
 	char fileName[100];
@@ -182,8 +182,10 @@ void write_to_csv(unsigned long long *time, int type, int testId) {
 	fprintf(f, "N,Time");
 	// Write timing information
 	int i = 0;
-	for (i = 0; i < MAX_POWER; ++i) {
-		fprintf(f, "\n%.0f,%llu", pow(2.0, (double) i), time[i]);
+	long n = 1;
+	for (i = 1; i <= experimentsRun; ++i) {
+		fprintf(f, "\n%d,%llu", n, time[i - 1]);
+		n = calculate_n(n);
 	}
 
 	// Close filestream
@@ -315,7 +317,7 @@ struct proc_interrupts get_interrupts_from_string(char *str, int cpu) {
 }
 
 unsigned long long get_interrupts_sum() {
-	unsigned long long sum;
+	unsigned long long sum = 0;
 	int n = 0;
 	FILE *fp;
 

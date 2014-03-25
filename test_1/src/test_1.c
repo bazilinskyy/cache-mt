@@ -118,19 +118,22 @@ void *pthread_main(void *params) {
 	int testId = 0;
 	for (testId = 0; testId < TIMES_RUN_TEST; ++testId) { // Run tests
 
-		unsigned long long *time = malloc(sizeof(unsigned long long) * MAX_POWER); // Record time for clean runs.
+		unsigned long long *time = malloc(sizeof(unsigned long long) * MAX_POWER * 10); // Record time for clean runs.
 		if (time == NULL) {
 			printf("Error with allocating space for the array\n");
 			exit(1);
 		}
-		unsigned long long *timeDirty = malloc(sizeof(unsigned long long) * MAX_POWER); // Record time for dirty runs.
+		unsigned long long *timeDirty = malloc(sizeof(unsigned long long) * MAX_POWER * 10); // Record time for dirty runs.
 		if (timeDirty == NULL) {
 			printf("Error with allocating space for the array\n");
 			exit(1);
 		}
 
 		// Run experiments
-		for (n = 1.0; n < pow(2.0, (double) MAX_POWER); n *= 2.0) {
+		int experimentsRun = 0;
+		for (n = 1.0; n < pow(2.0, (double) MAX_POWER);) {
+			experimentsRun++;
+
 			unsigned long long *currentTime = malloc(sizeof(unsigned long long) * TIMES_RUN_EXPERIMENT); // Record times of experiments in the run.
 			if (time == NULL) {
 				printf("Error with allocating space for the array\n");
@@ -149,7 +152,6 @@ void *pthread_main(void *params) {
 			}
 			long testLong = 0; // 4 bytes of data
 
-
 #ifdef WARM_CACHE
 			//Warm up cache
 			experiment(testAr, testLong, 0); // Call experiment function once to warm up cache
@@ -166,7 +168,7 @@ void *pthread_main(void *params) {
 			int experimentsRunSuccessfully = 0; // Record how many times the experiment was run successfully
 			for (expI = 0; expI < TIMES_RUN_EXPERIMENT; ++expI) { // Run experiments in the test
 #ifdef DETAILED_DEBUG
-				printf("* Iteration: %d Bytes: %.0f Experiment: %d\n", i + 1, pow(2.0, (double) i), expI + 1);
+					printf("* Iteration: %d Bytes: %.0f Experiment: %d\n", i + 1, pow(2.0, (double) i), expI + 1);
 #endif
 
 				// Values
@@ -342,25 +344,32 @@ void *pthread_main(void *params) {
 			free(currentTimeDirty);
 			free(testAr);
 
+			// Determine next value for n based on the current value
+			n = calculate_n(n);
+
 		} // End of the experiment loop.
 
 		// Output results
 #ifdef SHOW_RESULTS
-		printf("\n%d. RESULTS Clean - %d:\n", testId, MAX_POWER);
-		for (i = 0; i < MAX_POWER; ++i) {
-			printf("%d. %.0f - %llu\n", i + 1, pow(2.0, (double) i), time[i]);
+		printf("\n%d. RESULTS Clean - %d:\n", testId, experimentsRun);
+		long n = 1;
+		for (i = 1; i <= experimentsRun; ++i) {
+			printf("%d. %d - %llu\n", i, n, time[i-1]);
+			n = calculate_n(n);
 		}
 
-		printf("\n%d. RESULTS Dirty - %d:\n", testId, MAX_POWER);
-		for (i = 0; i < MAX_POWER; ++i) {
-			printf("%d. %.0f - %llu\n", i + 1, pow(2.0, (double) i), timeDirty[i]);
+		n = 1;
+		printf("\n%d. RESULTS Dirty - %d:\n", testId, experimentsRun);
+		for (i = 1; i <= experimentsRun; ++i) {
+			printf("%d. %d - %llu\n", i, n, timeDirty[i-1]);
+			n = calculate_n(n);
 		}
 #endif
 
 #ifdef OUTPUT_TO_FILE
 		// Write to file
-		write_to_csv(time, 1, testId);
-		write_to_csv(timeDirty, 2, testId);
+		write_to_csv(time, 1, testId, experimentsRun);
+		write_to_csv(timeDirty, 2, testId, experimentsRun);
 #endif
 
 		// Free memory and exit
@@ -525,4 +534,22 @@ int warm_strings_with_files(void) {
 	contextSwitchesBeforeStringWarm2 = file_to_string(fileNameStatTemp);
 
 	return 1;
+}
+
+// Calculate how many bytes are to be written during the experiment
+long calculate_n(long n) {
+	if (n < 1000) {
+		n *= 2.0;
+	} else if (n > 1000 && n < 10000) {
+		n += 1000;
+	} else if (n > 10000 && n < 100000) {
+		n += 10000;
+	} else if (n > 100000 && n < 1000000) {
+		n += 100000;
+	} else if (n > 1000000 && n < 10000000) {
+		n += 1000000;
+	} else {
+		n *= 2.0;
+	}
+	return n;
 }
