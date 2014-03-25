@@ -28,6 +28,8 @@
  ============================================================================================
  */
 
+#include <sys/stat.h>
+
 #include "file_worker.h"
 
 // Based on code from Stephen Brown
@@ -235,28 +237,43 @@ unsigned long long search_in_string(char *string, char *search_for, int find_num
 	return (0);
 }
 
+static char result[8][8*1024]; // For storing contents of the file.
+static int cycle=0; // Counter of how many files have been stored in result.
+
 char * file_to_string(char *f) {
 	FILE *fp;
 	char temp[512];
+	struct stat info;
+
+	cycle++;
+	if (cycle==8)
+		cycle=0;
 
 	// Open file.
 	if ((fp = fopen(f, "r")) == NULL) {
 		return (char *) (-1);
 	}
 
-	// String to store the contents of the file.
-	char *result = malloc(1500); // TODO size of file
+	// Initialise the result
+	result[cycle][0] = 0;
 
 	// Search for str and extract numeric.
 	while (fgets(temp, 512, fp) != NULL) {
-		strcat(result, temp);
+		strcat(result[cycle], temp);
+	}
+
+	// Check if ther eis a memory leak. This code may not work on machines with more than 4 cores.
+	if (strlen(result[cycle])>8*1024) {
+	   printf("Memory error - strlen(result)==%lu, file size==%d\n", strlen(result[cycle]), 8*1024);
+	   exit(1);
 	}
 
 	//Close the file if still open.
 	if (fp) {
 		fclose(fp);
 	}
-	return result;
+
+	return &result[cycle][0];
 }
 
 // Find a numeric in a string

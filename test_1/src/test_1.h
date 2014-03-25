@@ -54,7 +54,7 @@
 #endif
 
 int main(void);
-int pthread_main(int thread_num); // Main run in the pthread
+void *pthread_main(void *params); // Main run in the pthread
 void experiment (unsigned char *testAr, unsigned char testCh, int n);
 unsigned long long average_time(unsigned long long *time, int timesRun); // Calculate average time of running experiment
 int pin_thread_to_core(int coreId); // Pin pthread to core

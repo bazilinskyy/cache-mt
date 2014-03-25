@@ -62,7 +62,7 @@ int main(void) {
 	int rc;
 
 	// Run in pthread
-	rc = pthread_create(&thread1, NULL, pthread_main, (void *)1);
+	rc = pthread_create(&thread1, NULL, pthread_main, (void *)NULL);
 	if (rc) {
 		printf("ERROR; return code from pthread_create() is %d\n", rc);
 		exit(-1);
@@ -76,7 +76,7 @@ int main(void) {
 }
 
 // Function run in the thread
-int pthread_main(int thread_num) {
+void *pthread_main(void *params) {
 	unsigned long long *time = malloc(sizeof(unsigned long long) * MAX_POWER); // Record time for clean runs.
 	if (time == NULL) {
 		printf("Error with allocating space for the array\n");
@@ -174,17 +174,17 @@ int pthread_main(int thread_num) {
 
 #ifndef __APPLE__
 			// Strings for storing contents of the files
-			char *interruptsBeforeString = malloc(1500);
+			char *interruptsBeforeString = malloc(BIG_BUFFER_SIZE);
 			if (interruptsBeforeString == NULL) {
 				printf("Error with allocating space for the string interruptsBeforeString\n");
 				exit(1);
 			}
-			char *pageFaultsBeforeString = malloc(1500);
+			char *pageFaultsBeforeString = malloc(BIG_BUFFER_SIZE);
 			if (pageFaultsBeforeString == NULL) {
 				printf("Error with allocating space for the string pageFaultsBeforeString\n");
 				exit(1);
 			}
-			char *contextSwitchesBeforeString = malloc(1500);
+			char *contextSwitchesBeforeString = malloc(BIG_BUFFER_SIZE);
 			if (contextSwitchesBeforeString == NULL) {
 				printf("Error with allocating space for the string contextSwitchesBeforeString\n");
 				exit(1);
@@ -253,6 +253,11 @@ int pthread_main(int thread_num) {
 			pageFaultsMinorBefore = get_page_fault_from_string(pageFaultsBeforeString, 1);
 			pageFaultsMajorBefore = get_page_fault_from_string(pageFaultsBeforeString, 2);
 			contextSwitchesBefore = search_in_string(contextSwitchesBeforeString, "voluntary_ctxt_switches:", 1);
+
+			// Free memory
+//			free(contextSwitchesBeforeString);
+//			free(pageFaultsBeforeString);
+//			free(interruptsBeforeString);
 
 #ifdef DETAILED_DEBUG
 			printf("INT B: %llu :: ", interruptsBefore);
@@ -340,7 +345,6 @@ int pthread_main(int thread_num) {
 	// Free memory and exit
 	free(timeDirty);
 	free(time);
-	return 1;
 }
 
 // Experiment itself, aslo used for warming up cache
@@ -435,32 +439,32 @@ void test_interrupt_time(void) {
 // Create two copies of each string used for storing files to fill in memory with this data.
 int warm_strings_with_files(void) {
 	// Strings for storing contents of the files
-	char *interruptsBeforeStringWarm1 = malloc(1500);
+	char *interruptsBeforeStringWarm1 = malloc(BIG_BUFFER_SIZE);
 	if (interruptsBeforeStringWarm1 == NULL) {
 		printf("Error with allocating space for the string interruptsBeforeString\n");
 		exit(1);
 	}
-	char *pageFaultsBeforeStringWarm1 = malloc(1500);
+	char *pageFaultsBeforeStringWarm1 = malloc(BIG_BUFFER_SIZE);
 	if (pageFaultsBeforeStringWarm1 == NULL) {
 		printf("Error with allocating space for the string pageFaultsBeforeString\n");
 		exit(1);
 	}
-	char *contextSwitchesBeforeStringWarm1 = malloc(1500);
+	char *contextSwitchesBeforeStringWarm1 = malloc(BIG_BUFFER_SIZE);
 	if (contextSwitchesBeforeStringWarm1 == NULL) {
 		printf("Error with allocating space for the string contextSwitchesBeforeString\n");
 		exit(1);
 	}
-	char *interruptsBeforeStringWarm2 = malloc(1500);
+	char *interruptsBeforeStringWarm2 = malloc(BIG_BUFFER_SIZE);
 	if (interruptsBeforeStringWarm2 == NULL) {
 		printf("Error with allocating space for the string interruptsBeforeString\n");
 		exit(1);
 	}
-	char *pageFaultsBeforeStringWarm2 = malloc(1500);
+	char *pageFaultsBeforeStringWarm2 = malloc(BIG_BUFFER_SIZE);
 	if (pageFaultsBeforeStringWarm2 == NULL) {
 		printf("Error with allocating space for the string pageFaultsBeforeString\n");
 		exit(1);
 	}
-	char *contextSwitchesBeforeStringWarm2 = malloc(1500);
+	char *contextSwitchesBeforeStringWarm2 = malloc(BIG_BUFFER_SIZE);
 	if (contextSwitchesBeforeStringWarm2 == NULL) {
 		printf("Error with allocating space for the string contextSwitchesBeforeString\n");
 		exit(1);

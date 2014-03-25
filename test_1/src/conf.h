@@ -50,10 +50,11 @@
 #define DEBUG
 //#define DETAILED_DEBUG
 #define SHOW_RESULTS
-#define OUTPUT_TO_FILE // Output measurements into a CSV file
+//#define OUTPUT_TO_FILE // Output measurements into a CSV file
 
 #define BILLION  1000000000L
 #define CHAR_TO_ADD 'a'
+#define BIG_BUFFER_SIZE (8*1024) // For storying files as strings
 #ifdef __APPLE__
 	#define CSV_FILE_CLEAN "test_1_i7_clean.csv"
 	#define CSV_FILE_DIRTY "test_1_i7_dirty.csv"
