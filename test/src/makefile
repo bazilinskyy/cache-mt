@@ -32,7 +32,7 @@ IFLAGS =-I
 WFLAG1 = -Wall
 WFLAG2 = -Werror
 WFLAG3 = -Wextra
-#WFLAGS = $(WFLAG1) $(WFLAG2) $(WFLAG3)
+WFLAGS = $(WFLAG1) $(WFLAG2) $(WFLAG3)
 #WFLAGS = $(WFLAG1)
 #OFLAGS = -g -O3
 #SFLAG1 = -std=c99
