@@ -1,6 +1,6 @@
 /*
  ============================================================================================
- Name        : experiments.c
+ Name        : test_env.h
  Author      : Pavlo Bazilinskyy
  Version     : 0.1
  Copyright   : Copyright (c) 2014, Pavlo Bazilinskyy <pavlo.bazilinskyy@gmail.com>
@@ -24,26 +24,24 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
 
- Description : The experiments.
+ Description : The header for the testing environment.
  Target		 : MacBook Air with i7 and Xeon 5130
  ============================================================================================
  */
 
-#include "experiments.h"
+#ifndef TEST_ENV_H_
+#define TEST_ENV_H_
 
-// Test 1 (measuring cache latency)
-void experiment_1(int n) {
-	long *testAr = malloc(sizeof(long) * n * 2);
-	if (testAr == NULL) { // Array for manipulating data
-		printf("Error with allocating space for the array\n");
-		exit(1);
-	}
-	long testLong = 0; // 4 bytes of data
+#include <stdio.h>
+#include <stdlib.h>
 
-	int i;
-	for (i = 0; i < n; i++) { // Write and read 1 byte n times
-		testAr[(int) n] = LONG_TO_ADD; // Write 1 byte
-		testLong += testAr[(int) n]; // Read 1 byte
-	}
-	free(testAr);
-}
+// Custom includes
+#include "hr_timer.h"
+#include "conf.h"
+#include "file_worker.h"
+
+void test_interrupt_time (void); // Record how much time one interrupt takes on the testing system
+int warm_strings_with_files(void); // Create two copies of each string used for storing files to fill in memory with this data.
+long calculate_n(long n);
+
+#endif /* TEST_ENV_H_ */

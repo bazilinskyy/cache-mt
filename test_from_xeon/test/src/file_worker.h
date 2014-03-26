@@ -36,7 +36,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include "test_env.h"
-#include <errno.h>
 
 // Based on code from Stephen Brown
 struct proc_stats {

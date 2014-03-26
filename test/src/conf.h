@@ -42,7 +42,7 @@
 //#define START_AFTER_TIME_INTERRUPT
 #define PROCESS_AFFINITY PIN_TO_ONE_CPU
 #define PIN_TO_CPU 0
-#define TIMES_RUN_TEST 1
+#define TIMES_RUN_TEST 3
 #define TIMES_RUN_EXPERIMENT 10
 // Every time reads a file it generates 1
 #define ALLOWED_INTERRUPTS 5

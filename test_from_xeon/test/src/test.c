@@ -48,16 +48,12 @@ int main(int argc, char *argv[]) {
 
 	// Test clock_gettime
 	//test_clock_gettime();
-
 	// Test clock_getres
 	//test_clock_getres();
-
 	// Testing interrupt time. Not for Mac.
 	//test_interrupt_time();
-
 	// Testing rdrsc
-	test_rdtsc();
-
+	//test_rdrsc();
 	/* Set process priority to the highest possible value */
 #ifdef SET_HIGHEST_PRIORITY
 	set_highest_process_priority();
@@ -149,9 +145,21 @@ void *pthread_main(void *params) {
 
 #ifndef __APPLE__
 				// Strings for storing contents of the files
-				char *interruptsBeforeString;
-				char *pageFaultsBeforeString;
-				char *contextSwitchesBeforeString;
+				char *interruptsBeforeString = malloc(BIG_BUFFER_SIZE);
+				if (interruptsBeforeString == NULL) {
+					printf("Error with allocating space for the string interruptsBeforeString\n");
+					exit(1);
+				}
+				char *pageFaultsBeforeString = malloc(BIG_BUFFER_SIZE);
+				if (pageFaultsBeforeString == NULL) {
+					printf("Error with allocating space for the string pageFaultsBeforeString\n");
+					exit(1);
+				}
+				char *contextSwitchesBeforeString = malloc(BIG_BUFFER_SIZE);
+				if (contextSwitchesBeforeString == NULL) {
+					printf("Error with allocating space for the string contextSwitchesBeforeString\n");
+					exit(1);
+				}
 
 				// Get process ID
 				int processId = getpid();
@@ -223,7 +231,7 @@ void *pthread_main(void *params) {
 				// Get readings on interrupts, pagefaults and context switched before running the experiment
 #ifndef __APPLE__
 				interruptsAfter = search_in_file("/proc/interrupts", "LOC:", 1);
-				//printf("INT SUM %d\n", get_interrupts_sum());
+				//printf("INT SUM %llu\n", get_interrupts_sum());
 				pageFaultsMinorAfter = get_page_fault(1);
 				pageFaultsMajorAfter = get_page_fault(2);
 				contextSwitchesAfter = search_in_file(fileNameStatus, "voluntary_ctxt_switches:", 1);
@@ -233,6 +241,11 @@ void *pthread_main(void *params) {
 				pageFaultsMinorBefore = get_page_fault_from_string(pageFaultsBeforeString, 1);
 				pageFaultsMajorBefore = get_page_fault_from_string(pageFaultsBeforeString, 2);
 				contextSwitchesBefore = search_in_string(contextSwitchesBeforeString, "voluntary_ctxt_switches:", 1);
+
+				// Free memory
+//				free(interruptsBeforeString);
+//				free(pageFaultsBeforeString);
+//				free(contextSwitchesBeforeString);
 
 #ifdef DETAILED_DEBUG
 				printf("INT B: %llu :: ", interruptsBefore);
@@ -307,14 +320,14 @@ void *pthread_main(void *params) {
 		printf("\n%d. RESULTS Clean - %d:\n", testId, experimentsRun);
 		long n = 1;
 		for (i = 1; i <= experimentsRun; ++i) {
-			printf("%d. %lu - %llu\n", i, n * sizeof(long), time[i - 1]);
+			printf("%d. %lu - %llu\n", i, n, time[i - 1]);
 			n = calculate_n(n);
 		}
 
 		n = 1;
 		printf("\n%d. RESULTS Dirty - %d:\n", testId, experimentsRun);
 		for (i = 1; i <= experimentsRun; ++i) {
-			printf("%d. %lu - %llu\n", i, n * sizeof(long), timeDirty[i - 1]); // Assuming that we write longs.
+			printf("%d. %lu - %llu\n", i, n, timeDirty[i - 1]);
 			n = calculate_n(n);
 		}
 #endif

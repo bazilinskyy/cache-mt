@@ -43,7 +43,7 @@ void experiment_1(int n) {
 	int i;
 	for (i = 0; i < n; i++) { // Write and read 1 byte n times
 		testAr[(int) n] = LONG_TO_ADD; // Write 1 byte
-		testLong += testAr[(int) n]; // Read 1 byte
+		testLong = testAr[(int) n]; // Read 1 byte
 	}
 	free(testAr);
 }

@@ -40,7 +40,7 @@ int get_time_ns(struct timespec *timeStruct) {
 	return 1;
 }
 
-//  Get timer resolution
+// Get time in nanoseconds
 int get_time_res(struct timespec *timeStruct) {
 #ifndef __APPLE__
 	if( clock_getres( CLOCK_MONOTONIC, timeStruct) == -1 ) {
@@ -53,7 +53,6 @@ int get_time_res(struct timespec *timeStruct) {
 #endif
 }
 
-// Calculate a difference in nanoseconds between start and end.
 unsigned long long calculate_time_ns(struct timespec start, struct timespec end) {
 //	unsigned long long accum = ( timeStructFinish.tv_sec - timeStructStart.tv_sec ) + (double)( timeStructFinish.tv_nsec - timeStructStart.tv_nsec ) / (double)BILLION;
 	struct timespec temp;
@@ -68,7 +67,6 @@ unsigned long long calculate_time_ns(struct timespec start, struct timespec end)
 	return BILLION * temp.tv_sec + temp.tv_nsec;
 }
 
-// Use RDTSC to measure time at nanosecond accuracy (if it is not disabled)
 unsigned long long rdtsc(void) {
 	unsigned long a, b;
 	unsigned long long temp;
@@ -122,18 +120,14 @@ void test_clock_getres(void) {
 
 // Test rdtsc
 void test_rdtsc(void) {
-	printf("TEST OF RDTSC\n");
-
 	unsigned long long t[32], prev;
 	int i;
 	for (i = 0; i < 32; i++)
 		t[i] = rdtsc();
-
 	prev = t[0];
 	for (i = 1; i < 32; i++) {
 		printf("%llu [%llu]\n", t[i], t[i] - prev);
 		prev = t[i];
 	}
-
 	printf("Total=%llu\n", t[32 - 1] - t[0]);
 }

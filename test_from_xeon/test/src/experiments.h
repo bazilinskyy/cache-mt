@@ -24,26 +24,20 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
 
- Description : The experiments.
+ Description : The header for the experiments.
  Target		 : MacBook Air with i7 and Xeon 5130
  ============================================================================================
  */
 
-#include "experiments.h"
+#ifndef EXPERIMENTS_H_
+#define EXPERIMENTS_H_
 
-// Test 1 (measuring cache latency)
-void experiment_1(int n) {
-	long *testAr = malloc(sizeof(long) * n * 2);
-	if (testAr == NULL) { // Array for manipulating data
-		printf("Error with allocating space for the array\n");
-		exit(1);
-	}
-	long testLong = 0; // 4 bytes of data
+#include "conf.h"
 
-	int i;
-	for (i = 0; i < n; i++) { // Write and read 1 byte n times
-		testAr[(int) n] = LONG_TO_ADD; // Write 1 byte
-		testLong += testAr[(int) n]; // Read 1 byte
-	}
-	free(testAr);
-}
+#include <stdio.h>
+#include <stdlib.h>
+
+void experiment_1(int n);
+
+
+#endif /* EXPERIMENTS_H_ */

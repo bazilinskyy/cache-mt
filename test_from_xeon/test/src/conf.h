@@ -1,6 +1,6 @@
 /*
  ============================================================================================
- Name        : experiments.c
+ Name        : conf.h
  Author      : Pavlo Bazilinskyy
  Version     : 0.1
  Copyright   : Copyright (c) 2014, Pavlo Bazilinskyy <pavlo.bazilinskyy@gmail.com>
@@ -24,26 +24,46 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  THE SOFTWARE.
 
- Description : The experiments.
- Target		 : MacBook Air with i7 and Xeon 5130
+ Description : The project configuration.
  ============================================================================================
  */
 
-#include "experiments.h"
+#ifndef CONF_H_
+#define CONF_H_
 
-// Test 1 (measuring cache latency)
-void experiment_1(int n) {
-	long *testAr = malloc(sizeof(long) * n * 2);
-	if (testAr == NULL) { // Array for manipulating data
-		printf("Error with allocating space for the array\n");
-		exit(1);
-	}
-	long testLong = 0; // 4 bytes of data
+// Configure test
+#define MORE_EXPERIMENTS // Run a large number of experiments (refer to test_env.c)
+// Configure experiment (each test consists of a number of experiments == TIMES_RUN_EXPERIMENT)
+#define MAX_POWER 24
+#define SET_HIGHEST_PRIORITY
+#define WARM_CACHE
+#define WARM_STRINGS_WITH_FILES
+#define START_AFTER_TIMER_TICK
+//#define START_AFTER_TIME_INTERRUPT
+#define PROCESS_AFFINITY PIN_TO_ONE_CPU
+#define PIN_TO_CPU 0
+#define TIMES_RUN_TEST 1
+#define TIMES_RUN_EXPERIMENT 10
+// Every time reads a file it generates 1
+#define ALLOWED_INTERRUPTS 5
+#define ALLOWED_CONTEXT_SWITCHES 0
+#define ALLOWED_PAGEFAULTS_MINOR 6
+#define ALLOWED_PAGEFAULTS_MAJOR 0
 
-	int i;
-	for (i = 0; i < n; i++) { // Write and read 1 byte n times
-		testAr[(int) n] = LONG_TO_ADD; // Write 1 byte
-		testLong += testAr[(int) n]; // Read 1 byte
-	}
-	free(testAr);
-}
+// Output
+#define DEBUG
+//#define DETAILED_DEBUG
+#define SHOW_RESULTS
+#define OUTPUT_TO_FILE // Output measurements into CSV files.
+
+#define BILLION  1000000000L
+#define LONG_TO_ADD 1l
+#define BIG_BUFFER_SIZE (8*1024) // For storying files as strings
+#ifdef __APPLE__
+#define CSV_FILE_CLEAN "results/test_1_i7_clean"
+#define CSV_FILE_DIRTY "results/test_1_i7_dirty"
+#else
+#define CSV_FILE_CLEAN "results/test_1_xeon_clean"
+#define CSV_FILE_DIRTY "results/test_1_xeon_dirty"
+#endif
+#endif /* CONF_H_ */

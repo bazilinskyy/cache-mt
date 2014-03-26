@@ -135,8 +135,6 @@ unsigned long get_page_fault_from_string(char * string, int choice) {
 	{
 		fputs(string, fp);
 		fclose(fp);
-	} else {
-		printf("Error opening a temp file.\n");
 	}
 
 	struct proc_stats statsData;
@@ -186,7 +184,7 @@ void write_to_csv(unsigned long long *time, int type, int testId, int experiment
 	int i = 0;
 	long n = 1;
 	for (i = 1; i <= experimentsRun; ++i) {
-		fprintf(f, "\n%lu,%llu", n * sizeof(long), time[i - 1]);
+		fprintf(f, "\n%lu,%llu", n, time[i - 1]);
 		n = calculate_n(n);
 	}
 
@@ -203,7 +201,6 @@ unsigned long long search_in_file(char *f, char *str, int find_numeric) {
 
 	// Open file.
 	if ((fp = fopen(f, "r")) == NULL) {
-		printf("Error: unable to open %s: %s\n", f, strerror(errno));
 		return (-1);
 	}
 
@@ -221,7 +218,9 @@ unsigned long long search_in_file(char *f, char *str, int find_numeric) {
 	}
 
 	//Close the file if still open.
-	fclose(fp);
+	if (fp) {
+		fclose(fp);
+	}
 	return (0);
 }
 
@@ -271,12 +270,13 @@ char * file_to_string(char *f) {
 	// Check if ther eis a memory leak. This code may not work on machines with more than 4 cores.
 	if (strlen(result[cycle]) > 8 * 1024) {
 		printf("Memory error - strlen(result)==%lu, file size==%d\n", strlen(result[cycle]), 8 * 1024);
-		fclose(fp);
 		exit(1);
 	}
 
 	//Close the file if still open.
-	fclose(fp);
+	if (fp) {
+		fclose(fp);
+	}
 
 	return &result[cycle][0];
 }
@@ -291,12 +291,17 @@ unsigned long long find_num_in_str(char *str) {
 
 // Get all interrupts from the file f
 struct proc_interrupts get_interrupts(int cpu) {
-	char *interruptsString;
+	char *interruptsString = malloc(BIG_BUFFER_SIZE);
+	if (interruptsString == NULL) {
+		printf("Error with allocating space for the string interruptsBeforeString\n");
+		exit(1);
+	}
 
 	interruptsString = file_to_string("/proc/interrupts"); // Read a file with interrupts into a string
 
 	struct proc_interrupts result = get_interrupts_from_string(interruptsString, cpu);
 
+	free(interruptsString);
 	return result;
 }
 
@@ -314,24 +319,21 @@ unsigned long long get_interrupts_sum() {
 	unsigned long long sum = 0;
 	int n = 0;
 	FILE *fp;
-	char temp[512];
 
 	// Open file
 	if ((fp = fopen("/proc/interrupts", "r")) == NULL) {
-		printf("Error: unable to open /proc/interrupts: %s\n", strerror(errno));
 		return (unsigned long long) (-1);
 	}
 
-	while (fgets(temp, 512, fp) != NULL) {
-
-		if (sscanf(&temp[5], "%d", &n) > 0) // parse %d
-		{
-			sum += n;
-			//printf("%d ", n);
-		}
+	while (fscanf(fp, "%d", &n) > 0) // parse %d
+	{
+		sum += n;
+		printf("%d ", n);
 	}
 
 	//Close the file if still open.
-	fclose(fp);
+	if (fp) {
+		fclose(fp);
+	}
 	return sum;
 }
