@@ -83,36 +83,12 @@ void test_interrupt_time(void) {
 // Create two copies of each string used for storing files to fill in memory with this data.
 int warm_strings_with_files(void) {
 	// Strings for storing contents of the files
-	char *interruptsBeforeStringWarm1 = malloc(BIG_BUFFER_SIZE);
-	if (interruptsBeforeStringWarm1 == NULL) {
-		printf("Error with allocating space for the string interruptsBeforeString\n");
-		exit(1);
-	}
-	char *pageFaultsBeforeStringWarm1 = malloc(BIG_BUFFER_SIZE);
-	if (pageFaultsBeforeStringWarm1 == NULL) {
-		printf("Error with allocating space for the string pageFaultsBeforeString\n");
-		exit(1);
-	}
-	char *contextSwitchesBeforeStringWarm1 = malloc(BIG_BUFFER_SIZE);
-	if (contextSwitchesBeforeStringWarm1 == NULL) {
-		printf("Error with allocating space for the string contextSwitchesBeforeString\n");
-		exit(1);
-	}
-	char *interruptsBeforeStringWarm2 = malloc(BIG_BUFFER_SIZE);
-	if (interruptsBeforeStringWarm2 == NULL) {
-		printf("Error with allocating space for the string interruptsBeforeString\n");
-		exit(1);
-	}
-	char *pageFaultsBeforeStringWarm2 = malloc(BIG_BUFFER_SIZE);
-	if (pageFaultsBeforeStringWarm2 == NULL) {
-		printf("Error with allocating space for the string pageFaultsBeforeString\n");
-		exit(1);
-	}
-	char *contextSwitchesBeforeStringWarm2 = malloc(BIG_BUFFER_SIZE);
-	if (contextSwitchesBeforeStringWarm2 == NULL) {
-		printf("Error with allocating space for the string contextSwitchesBeforeString\n");
-		exit(1);
-	}
+	char *interruptsBeforeStringWarm1;
+	char *pageFaultsBeforeStringWarm1;
+	char *contextSwitchesBeforeStringWarm1;
+	char *interruptsBeforeStringWarm2;
+	char *pageFaultsBeforeStringWarm2;
+	char *contextSwitchesBeforeStringWarm2;
 
 	// Get process ID
 	int processIdTemp = getpid();
