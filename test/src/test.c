@@ -274,25 +274,25 @@ void *pthread_main(void *params) {
 					continue;
 				} else if (pageFaultsMinorAfter - pageFaultsMinorBefore > ALLOWED_PAGEFAULTS_MINOR) { // Disregard this run if minor pagefaults were detected
 #ifdef DEBUG
-					printf("PFMIN. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expId, pageFaultsMinorBefore, pageFaultsMinorAfter,
+					printf("PFMIN. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId, pageFaultsMinorAfter - pageFaultsMinorBefore,
 					ALLOWED_PAGEFAULTS_MINOR);
 #endif
 					continue;
 				} else if (pageFaultsMajorAfter - pageFaultsMajorBefore > ALLOWED_PAGEFAULTS_MAJOR) { // Disregard this run if major pagefaults were detected
 #ifdef DEBUG
-					printf("PFMAJ. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expId, pageFaultsMajorBefore, pageFaultsMajorAfter,
+					printf("PFMAJ. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId, pageFaultsMajorAfter - pageFaultsMajorBefore,
 					ALLOWED_PAGEFAULTS_MAJOR);
 #endif
 					continue;
 				} else if (contextSwitchesAfter - contextSwitchesBefore > ALLOWED_CONTEXT_SWITCHES) { // Disregard this run if voluntary context switches were detected
 #ifdef DEBUG
-					printf("CS. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expId, contextSwitchesBefore, contextSwitchesAfter,
+					printf("CS. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId, contextSwitchesAfter - contextSwitchesBefore,
 					ALLOWED_CONTEXT_SWITCHES);
 #endif
 					continue;
 				} else if (interruptsAfter - interruptsBefore > ALLOWED_INTERRUPTS) { // Disregard this run if interrupts were detected
 #ifdef DEBUG
-					printf("INT. EXP: %ld. RUN: %d B: %llu A: %llu. LIMIT: %d\n", n, expId, interruptsBefore, interruptsAfter,
+					printf("INT. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId, interruptsAfter - interruptsBefore,
 					ALLOWED_INTERRUPTS);
 #endif
 					continue;
