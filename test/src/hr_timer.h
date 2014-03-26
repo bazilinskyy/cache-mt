@@ -1,6 +1,6 @@
 /*
  ============================================================================================
- Name        : test_1.h
+ Name        : hr_timer.h
  Author      : Pavlo Bazilinskyy
  Version     : 0.1
  Copyright   : Copyright (c) 2014, Pavlo Bazilinskyy <pavlo.bazilinskyy@gmail.com>
@@ -24,42 +24,41 @@
  	 	 	   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  	 	 	   THE SOFTWARE.
 
- Description : Configuration of the experiment
+ Description : Header for the cross-platform high-resolution timer for performance measurements
  ============================================================================================
  */
-#ifndef TEST_1_H_
-#define TEST_1_H_
+#ifndef HR_TIMER_H_
+#define HR_TIMER_H_
 
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-// Pthread
+#include <math.h>
+#include <time.h>
 #include <pthread.h>
-#include <sched.h>
-#include <errno.h>
-// Custom includes
-#include "hr_timer.h"
-#include "conf.h"
-#include "file_worker.h"
-
-// Process ID
-#ifndef __APPLE__
-	#include <sys/types.h>
-	#include <unistd.h>
+#ifdef __APPLE__
+	#include "clock_gettime_mac.h"
+#elif __linux // For future use
+    // linux
+#elif __unix // all unices not caught above
+    // Unix
+#elif __posix
+    // POSIX
 #endif
+#include "conf.h"
 
-int main(void);
-void *pthread_main(void *params); // Main run in the pthread
-void experiment(long *testAr, long testLong, int n);
+// Get time in nanoseconds
+int get_time_ns(struct timespec *timeStruct);
+// Get time resolution
+int get_time_res(struct timespec *timeStruct);
+// From http://stackoverflow.com/questions/13950290/clock-gettime-nanoseconds-calculation
+unsigned long long calculate_time_ns(struct timespec start, struct timespec end);
+unsigned long long rdtsc(void); //  Get time with rdtsc, if it is enabled in the kernel
 unsigned long long average_time(unsigned long long *time, int timesRun); // Calculate average time of running experiment
-int pin_thread_to_core(int coreId); // Pin pthread to core
-int set_highest_process_priority(void); // Set priority of the current to be the highest
-void test_interrupt_time (void); // Record how much time one interrupt takes on the testing system
-int warm_strings_with_files(void); // Create two copies of each string used for storing files to fill in memory with this data.
-long calculate_n(long n);
 
-#endif /* TEST_1_H_ */
+// Functions used for testing
+void test_clock_gettime(void);
+void test_clock_getres(void);
+void test_rdtsc(void);
+
+#endif /* HR_TIMER_H_ */

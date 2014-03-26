@@ -184,7 +184,7 @@ void write_to_csv(unsigned long long *time, int type, int testId, int experiment
 	int i = 0;
 	long n = 1;
 	for (i = 1; i <= experimentsRun; ++i) {
-		fprintf(f, "\n%d,%llu", n, time[i - 1]);
+		fprintf(f, "\n%lu,%llu", n, time[i - 1]);
 		n = calculate_n(n);
 	}
 
@@ -249,7 +249,6 @@ static int cycle = 0; // Counter of how many files have been stored in result.
 char * file_to_string(char *f) {
 	FILE *fp;
 	char temp[512];
-	struct stat info;
 
 	cycle++;
 	if (cycle == 8)

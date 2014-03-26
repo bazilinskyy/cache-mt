@@ -1,6 +1,6 @@
 /*
  ============================================================================================
- Name        : hr_timer.c
+ Name        : test.h
  Author      : Pavlo Bazilinskyy
  Version     : 0.1
  Copyright   : Copyright (c) 2014, Pavlo Bazilinskyy <pavlo.bazilinskyy@gmail.com>
@@ -24,57 +24,39 @@
  	 	 	   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  	 	 	   THE SOFTWARE.
 
- Description : Cross-platform high-resolution timer for performance measurements
+ Description : The header for the main file test.c
  ============================================================================================
  */
+#ifndef TEST_1_H_
+#define TEST_1_H_
 
+#define _GNU_SOURCE
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+// Pthread
+#include <pthread.h>
+#include <sched.h>
+#include <errno.h>
+// Custom includes
 #include "hr_timer.h"
+#include "conf.h"
+#include "file_worker.h"
+#include "experiments.h" // The actual experiments.
+#include "test_env.h" // The testing environment.
 
-// Get time in nanoseconds
-int get_time_ns(struct timespec *timeStruct) {
-	 //TODO more hr function discussed by Brian, assembly code
-	 if( clock_gettime( CLOCK_MONOTONIC, timeStruct) == -1 ) {
-	      perror( "clock gettime" );
-	      return 0;
-	 }
-	 return 1;
-}
-
-// Get time in nanoseconds
-int get_time_res(struct timespec *timeStruct) {
+// Process ID
 #ifndef __APPLE__
-	 if( clock_getres( CLOCK_MONOTONIC, timeStruct) == -1 ) {
-	      perror( "clock getres" );
-	      return 0;
-	 }
-	 return 1;
-#else // Does not work on Mac OS
-	 return 0;
+	#include <sys/types.h>
+	#include <unistd.h>
 #endif
-}
 
-unsigned long long calculate_time_ns(struct timespec start, struct timespec end) {
-//	unsigned long long accum = ( timeStructFinish.tv_sec - timeStructStart.tv_sec ) + (double)( timeStructFinish.tv_nsec - timeStructStart.tv_nsec ) / (double)BILLION;
-	struct timespec temp;
-	if ((end.tv_nsec - start.tv_nsec) < 0)
-	{
-			temp.tv_sec = end.tv_sec - start.tv_sec - 1;
-			temp.tv_nsec = BILLION + end.tv_nsec - start.tv_nsec;
-	}
-	else
-	{
-			temp.tv_sec = end.tv_sec - start.tv_sec;
-			temp.tv_nsec = end.tv_nsec - start.tv_nsec;
-	}
+int main(int argc, char *argv[]);
+void *pthread_main(void *params); // Main run in the pthread
+int pin_thread_to_core(int coreId); // Pin pthread to core
+int set_highest_process_priority(void); // Set priority of the current to be the highest
 
-	return BILLION*temp.tv_sec + temp.tv_nsec;
-}
-
-unsigned long long rdtsc(void) {
-   unsigned long a,b;
-   unsigned long long temp;
-   __asm__ __volatile__("rdtsc" : "=a" (a), "=d" (b):: "memory", "%ebx", "%ecx");
-   temp = b;
-   temp = (temp<<32) | a;
-   return temp;
-}
+#endif /* TEST_1_H_ */

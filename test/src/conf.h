@@ -1,6 +1,6 @@
 /*
  ============================================================================================
- Name        : hr_timer.h
+ Name        : conf.h
  Author      : Pavlo Bazilinskyy
  Version     : 0.1
  Copyright   : Copyright (c) 2014, Pavlo Bazilinskyy <pavlo.bazilinskyy@gmail.com>
@@ -24,35 +24,44 @@
  	 	 	   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  	 	 	   THE SOFTWARE.
 
- Description : Header for the cross-platform high-resolution timer for performance measurements
+ Description : The project configuration.
  ============================================================================================
  */
-#ifndef HR_TIMER_H_
-#define HR_TIMER_H_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <math.h>
-#include <time.h>
-#include <pthread.h>
+#ifndef CONF_H_
+#define CONF_H_
+
+// Configure experiment
+#define MAX_POWER 24
+#define SET_HIGHEST_PRIORITY
+#define WARM_CACHE
+#define WARM_STRINGS_WITH_FILES
+#define START_AFTER_TIMER_TICK
+//#define START_AFTER_TIME_INTERRUPT
+#define PROCESS_AFFINITY PIN_TO_ONE_CPU
+#define PIN_TO_CPU 0
+#define TIMES_RUN_TEST 1
+#define TIMES_RUN_EXPERIMENT 10
+// Every time reads a file it generates 1
+#define ALLOWED_INTERRUPTS 5
+#define ALLOWED_CONTEXT_SWITCHES 0
+#define ALLOWED_PAGEFAULTS_MINOR 6
+#define ALLOWED_PAGEFAULTS_MAJOR 0
+
+// Output
+#define DEBUG
+//#define DETAILED_DEBUG
+#define SHOW_RESULTS
+#define OUTPUT_TO_FILE // Output measurements into a CSV file
+
+#define BILLION  1000000000L
+#define LONG_TO_ADD 1l
+#define BIG_BUFFER_SIZE (8*1024) // For storying files as strings
 #ifdef __APPLE__
-	#include "clock_gettime_mac.h"
-#elif __linux // For future use
-    // linux
-#elif __unix // all unices not caught above
-    // Unix
-#elif __posix
-    // POSIX
+	#define CSV_FILE_CLEAN "results/test_1_i7_clean"
+	#define CSV_FILE_DIRTY "results/test_1_i7_dirty"
+#else
+	#define CSV_FILE_CLEAN "results/test_1_xeon_clean"
+	#define CSV_FILE_DIRTY "results/test_1_xeon_dirty"
 #endif
-#include "conf.h"
-
-// Get time in nanoseconds
-int get_time_ns(struct timespec *timeStruct);
-// Get time resolution
-int get_time_res(struct timespec *timeStruct);
-// From http://stackoverflow.com/questions/13950290/clock-gettime-nanoseconds-calculation
-unsigned long long calculate_time_ns(struct timespec start, struct timespec end);
-unsigned long long rdtsc(void); //  Get time with rdtsc, if it is enabled in the kernel
-
-#endif /* HR_TIMER_H_ */
+#endif /* CONF_H_ */

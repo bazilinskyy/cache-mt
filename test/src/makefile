@@ -42,8 +42,8 @@ DFLAGS = # -Doptions
 UFLAGS = # Set on make command line only
 CFLAGS = $(SFLAGS) $(DFLAGS) $(IFLAGS) $(OFLAGS) $(WFLAGS) $(UFLAGS)
 LIBS =-lm
-DEPS =test_1.h hr_timer.h file_worker.h conf.h
-OBJ  =test_1.o hr_timer.o file_worker.o
+DEPS =test.h hr_timer.h file_worker.h conf.h experiments.h test_env.h
+OBJ  =test.o hr_timer.o file_worker.o experiments.o test_env.o
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
@@ -58,7 +58,7 @@ endif
 	$(CC) -c -g -o $@ $< $(CFLAGS) $(LIBS)
 
 # Changed from $(CC) -o $@ $^ $(CFLAGS) $(LIBS)
-test_1: $(OBJ)
+test: $(OBJ)
 	$(CC) -g -o $@ $^ $(LIBS)
 
 .PHONY: clean
