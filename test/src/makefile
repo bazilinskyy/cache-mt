@@ -32,8 +32,8 @@ IFLAGS =-I
 WFLAG1 = -Wall
 WFLAG2 = -Werror
 WFLAG3 = -Wextra
-WFLAGS = $(WFLAG1) $(WFLAG2) $(WFLAG3)
-#WFLAGS = $(WFLAG1)
+#WFLAGS = $(WFLAG1) $(WFLAG2) $(WFLAG3)
+WFLAGS = $(WFLAG1)
 #OFLAGS = -g -O3
 #SFLAG1 = -std=c99
 #SFLAG2 = -m64
@@ -41,13 +41,13 @@ SFLAGS = $(SFLAG1) $(SFLAG2)
 DFLAGS = # -Doptions
 UFLAGS = # Set on make command line only
 CFLAGS = $(SFLAGS) $(DFLAGS) $(IFLAGS) $(OFLAGS) $(WFLAGS) $(UFLAGS)
-LIBS =-lm
+LIBS =
 DEPS =test.h hr_timer.h file_worker.h conf.h experiments.h test_env.h
 OBJ  =test.o hr_timer.o file_worker.o experiments.o test_env.o
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
-	LIBS += -lrt -lpthread
+	LIBS += -lrt -lpthread -lm
 endif
 ifeq ($(UNAME_S),Darwin)
 	DEPS += clock_gettime_mac.h
@@ -59,7 +59,7 @@ endif
 
 # Changed from $(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 test: $(OBJ)
-	$(CC) -g -o $@ $^ $(LIBS)
+	$(CC) -o $@ $^ $(LIBS)
 
 .PHONY: clean
 

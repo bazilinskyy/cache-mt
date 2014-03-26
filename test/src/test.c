@@ -4,29 +4,29 @@
  Author      : Pavlo Bazilinskyy
  Version     : 0.1
  Copyright   : Copyright (c) 2014, Pavlo Bazilinskyy <pavlo.bazilinskyy@gmail.com>
-			   School of Computer Science, National University of Ireland, Maynooth
+ School of Computer Science, National University of Ireland, Maynooth
 
-			   Permission is hereby granted, free of charge, to any person obtaining a copy
-			   of this software and associated documentation files (the "Software"), to deal
-			   in the Software without restriction, including without limitation the rights
-			   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-			   copies of the Software, and to permit persons to whom the Software is
-			   furnished to do so, subject to the following conditions:
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
 
-		       The above copyright notice and this permission notice shall be included in
-			   all copies or substantial portions of the Software.
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
 
-			   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-			   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-			   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-			   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-			   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-			   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-			   THE SOFTWARE.
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
 
-Description  : The main file for preparing the testing environment and executing
-			   experiments.
-Target		 : MacBook Air with i7 and Xeon 5130
+ Description  : The main file for preparing the testing environment and executing
+ experiments.
+ Target		 : MacBook Air with i7 and Xeon 5130
  ============================================================================================
  */
 
@@ -48,13 +48,10 @@ int main(int argc, char *argv[]) {
 
 	// Test clock_gettime
 	//test_clock_gettime();
-
 	// Test clock_getres
 	//test_clock_getres();
-
 	// Testing interrupt time. Not for Mac.
 	//test_interrupt_time();
-
 	// Testing rdrsc
 	test_rdtsc();
 
@@ -87,40 +84,47 @@ void *pthread_main(void *params) {
 	int i = 0;
 	long n;
 
+	int threadId = (int) params; // Get the thread ID
+
 	// Set up thread affinity.
 #if PROCESS_AFFINITY == PIN_TO_ONE_CPU
 	pin_thread_to_core(PIN_TO_CPU); // Pin this pthread to the PIN_TO_CPU
 #endif
 
+	unsigned long long *time = malloc(sizeof(unsigned long long) * MAX_POWER * 10); // Record time for clean runs.
+	if (time == NULL) {
+		printf("Error with allocating space for the array\n");
+		exit(1);
+	}
+	unsigned long long *timeDirty = malloc(sizeof(unsigned long long) * MAX_POWER * 10); // Record time for dirty runs.
+	if (timeDirty == NULL) {
+		printf("Error with allocating space for the array\n");
+		exit(1);
+	}
+
+	unsigned long long *currentTime = malloc(sizeof(unsigned long long) * TIMES_RUN_EXPERIMENT); // Record times of experiments in the run.
+	if (time == NULL) {
+		printf("Error with allocating space for the array\n");
+		exit(1);
+	}
+	unsigned long long *currentTimeDirty = malloc(sizeof(unsigned long long) * TIMES_RUN_EXPERIMENT); // Record times of experiments in the run.
+	if (time == NULL) {
+		printf("Error with allocating space for the array\n");
+		exit(1);
+	}
+
 	int testId = 0; // ID of the test. Used for output.
 	for (testId = 0; testId < TIMES_RUN_TEST; ++testId) { // Run tests
 
-		unsigned long long *time = malloc(sizeof(unsigned long long) * MAX_POWER * 10); // Record time for clean runs.
-		if (time == NULL) {
-			printf("Error with allocating space for the array\n");
-			exit(1);
-		}
-		unsigned long long *timeDirty = malloc(sizeof(unsigned long long) * MAX_POWER * 10); // Record time for dirty runs.
-		if (timeDirty == NULL) {
-			printf("Error with allocating space for the array\n");
-			exit(1);
-		}
+		// Reset arrays
+		memcpy(time, &(typeof(time)){ 0 }, sizeof time);
+		memcpy(timeDirty, &(typeof(timeDirty)){ 0 }, sizeof timeDirty);
+		printf ("%llu time[1]", time[1]);
 
 		// Run experiments
 		int experimentsRun = 0;
 		for (n = 1.0; n < pow(2.0, (double) MAX_POWER);) {
 			experimentsRun++;
-
-			unsigned long long *currentTime = malloc(sizeof(unsigned long long) * TIMES_RUN_EXPERIMENT); // Record times of experiments in the run.
-			if (time == NULL) {
-				printf("Error with allocating space for the array\n");
-				exit(1);
-			}
-			unsigned long long *currentTimeDirty = malloc(sizeof(unsigned long long) * TIMES_RUN_EXPERIMENT); // Record times of experiments in the run.
-			if (time == NULL) {
-				printf("Error with allocating space for the array\n");
-				exit(1);
-			}
 
 #ifdef WARM_CACHE //Warm up cache
 			experiment_1(0); // Call experiment function once to warm up cache
@@ -290,12 +294,13 @@ void *pthread_main(void *params) {
 			}
 			// Calculate average time of running the experiment
 			time[(int) i] = average_time(currentTime, experimentsRunSuccessfully); // 0 denotes a failed experiment (number of successful runs = 0)
+			//printf("time: %llu aver: %llu\n ", time[(int) i], average_time(currentTime, experimentsRunSuccessfully));
+
+			// TODO bug with time showing as 0 starting from the 2nd test on Mac.
+//			if (testId == 1)
+//				printf("%llu\n ", time[(int) i]);
 			timeDirty[(int) i] = average_time(currentTimeDirty, TIMES_RUN_EXPERIMENT); // 0 denotes a failed experiment (number of successful runs = 0)
 			i++; // Iterate for easier access to array
-
-			// Free memory
-			free(currentTime);
-			free(currentTimeDirty);
 
 			// Determine next value for n based on the current value
 			n = calculate_n(n);
@@ -306,6 +311,9 @@ void *pthread_main(void *params) {
 #ifdef SHOW_RESULTS
 		printf("\n%d. RESULTS Clean - %d:\n", testId, experimentsRun);
 		long n = 1;
+//		 See bug above: bug with time showing as 0 starting from the 2nd test on Mac.
+//		if (testId == 1)
+//			printf("%llu\n ", time[1]);
 		for (i = 1; i <= experimentsRun; ++i) {
 			printf("%d. %lu - %llu\n", i, n * sizeof(long), time[i - 1]);
 			n = calculate_n(n);
@@ -325,11 +333,14 @@ void *pthread_main(void *params) {
 		write_to_csv(timeDirty, 2, testId, experimentsRun);
 #endif
 
-		// Free memory and exit
-		free(timeDirty);
-		free(time);
-
 	} // End of the test loop.
+
+	// Free memory and exit
+	free(timeDirty);
+	free(time);
+	free(currentTime);
+	free(currentTimeDirty);
+
 	return (void *) 1;
 }
 
@@ -347,6 +358,7 @@ int pin_thread_to_core(int coreId) {
 	pthread_t current_thread = pthread_self();
 	return pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
 #else
+	// TODO set affinity on Mac.
 	return -1;
 #endif
 }
