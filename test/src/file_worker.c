@@ -36,11 +36,11 @@
 int read_stat(char * filename, int pid, struct proc_stats *s) {
 #ifndef __APPLE__
 	const char *format = "%d %s %c %d %d %d %d %d %lu %lu %lu %lu %lu %lu %lu %ld %ld %ld %ld %ld %ld %lu %lu %ld %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %d %d %lu %lu %llu";
-	FILE *proc;
+	FILE *fp;
 
-	proc = fopen(filename,"r");
-	if (proc) {
-		if (42==fscanf(proc, format,
+	fp = fopen(filename,"r");
+	if (fp) {
+		if (42==fscanf(fp, format,
 						&s->pid,
 						s->comm,
 						&s->state,
@@ -84,10 +84,14 @@ int read_stat(char * filename, int pid, struct proc_stats *s) {
 						&s->policy,
 						&s->delayacct_blkio_ticks
 				)) {
-			fclose(proc);
+			if (fp) {
+				fclose(fp);
+			}
 			return 1;
 		} else {
-			fclose(proc);
+			if (fp) {
+				fclose(fp);
+			}
 			return 0;
 		}
 	} else {
@@ -134,7 +138,9 @@ unsigned long get_page_fault_from_string(char * string, int choice) {
 	if (fp != NULL)
 	{
 		fputs(string, fp);
-		fclose(fp);
+		if (fp) {
+			fclose(fp);
+		}
 	} else {
 		printf("Error opening a temp file.\n");
 	}
@@ -162,36 +168,38 @@ unsigned long get_page_fault_from_string(char * string, int choice) {
 // Output time array into a CSV file. Type: 1 - clean, 2 - dirty
 void write_to_csv(unsigned long long *time, int type, int testId, int experimentsRun) {
 	// Open filestream
-	FILE *f;
+	FILE *fp;
 	char fileName[100];
 	if (type == 1) {
 		// Create file name for a new csv file
 		snprintf(fileName, 100, "%s_%d.csv", CSV_FILE_CLEAN, testId);
-		f = fopen(fileName, "wb+");
+		fp = fopen(fileName, "wb+");
 	} else {
 		// Create file name for a new csv file
 		snprintf(fileName, 100, "%s_%d.csv", CSV_FILE_DIRTY, testId);
-		f = fopen(fileName, "wb+");
+		fp = fopen(fileName, "wb+");
 	}
 
-	if (f == NULL) //if file does not exist, create it
+	if (fp == NULL) //if file does not exist, create it
 	{
 		printf("Error creating file.\n");
 	}
 
 	// Write to file
 	// Write headers
-	fprintf(f, "N,Time");
+	fprintf(fp, "N,Time");
 	// Write timing information
 	int i = 0;
 	long n = 1;
 	for (i = 1; i <= experimentsRun; ++i) {
-		fprintf(f, "\n%lu,%llu", n * sizeof(long), time[i - 1]);
+		fprintf(fp, "\n%lu,%llu", n * sizeof(long), time[i - 1]);
 		n = calculate_n(n);
 	}
 
 	// Close filestream
-	fclose(f);
+	if (fp) {
+		fclose(fp);
+	}
 #ifdef DEBUG
 	printf("Finished writing to file %d.\n", type);
 #endif
@@ -212,6 +220,9 @@ unsigned long long search_in_file(char *f, char *str, int find_numeric) {
 		if ((strstr(temp, str)) != NULL) {
 			if (find_numeric) {
 				unsigned long long number = find_num_in_str(temp);
+				if (fp) {
+					fclose(fp);
+				}
 				return number;
 			} else {
 				printf("A match found\n.");
@@ -221,7 +232,9 @@ unsigned long long search_in_file(char *f, char *str, int find_numeric) {
 	}
 
 	//Close the file if still open.
-	fclose(fp);
+	if (fp) {
+		fclose(fp);
+	}
 	return (0);
 }
 
@@ -271,12 +284,16 @@ char * file_to_string(char *f) {
 	// Check if ther eis a memory leak. This code may not work on machines with more than 4 cores.
 	if (strlen(result[cycle]) > 8 * 1024) {
 		printf("Memory error - strlen(result)==%lu, file size==%d\n", strlen(result[cycle]), 8 * 1024);
-		fclose(fp);
+		if (fp) {
+			fclose(fp);
+		}
 		exit(1);
 	}
 
 	//Close the file if still open.
-	fclose(fp);
+	if (fp) {
+		fclose(fp);
+	}
 
 	return &result[cycle][0];
 }
@@ -325,13 +342,15 @@ unsigned long long get_interrupts_sum() {
 	while (fgets(temp, 512, fp) != NULL) {
 
 		if (sscanf(&temp[5], "%d", &n) > 0) // parse %d
-		{
+				{
 			sum += n;
 			//printf("%d ", n);
 		}
 	}
 
 	//Close the file if still open.
-	fclose(fp);
+	if (fp) {
+		fclose(fp);
+	}
 	return sum;
 }
