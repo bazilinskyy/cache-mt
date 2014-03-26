@@ -327,14 +327,15 @@ struct proc_interrupts get_interrupts_from_string(char *str, int cpu) {
 	return result;
 }
 
-unsigned long long get_interrupts_sum() {
+// Get a sum of all interrupts in the system
+unsigned long long get_interrupts_sum(char *f) {
 	unsigned long long sum = 0;
 	int n = 0;
 	FILE *fp;
 	char temp[512];
 
 	// Open file
-	if ((fp = fopen("/proc/interrupts", "r")) == NULL) {
+	if ((fp = fopen(f, "r")) == NULL) {
 		printf("Error: unable to open /proc/interrupts: %s\n", strerror(errno));
 		return (unsigned long long) (-1);
 	}
@@ -353,4 +354,20 @@ unsigned long long get_interrupts_sum() {
 		fclose(fp);
 	}
 	return sum;
+}
+
+// Get a sum of all interrupts in the system, from a previously saved string
+unsigned long long get_interrupts_sum_in_string(char *str) {
+	// Save the string str into the temp file
+	FILE *fp = fopen("temp", "wb+");
+	if (fp != NULL) {
+		fputs(str, fp);
+		if (fp) {
+			fclose(fp);
+		}
+	} else {
+		printf("Error opening a temp file.\n");
+	}
+
+	return get_interrupts_sum("temp"); // Pretend the temp file is the interrupts file.
 }

@@ -114,12 +114,12 @@ void *pthread_main(void *params) {
 	}
 
 	int testId = 0; // ID of the test. Used for output.
-	for (testId = 0; testId < TIMES_RUN_TEST; ++testId) { // Run tests
+	for (testId = 0; testId < TIMES_RUN_TEST; ++testId) { // Run tests=
 
 		// Reset arrays
 		memcpy(time, &(typeof(time)){ 0 }, sizeof time);
 		memcpy(timeDirty, &(typeof(timeDirty)){ 0 }, sizeof timeDirty);
-		printf ("%llu time[1]", time[1]);
+		printf ("%llu time[1]\n", time[1]);
 
 		// Run experiments
 		int experimentsRun = 0;
@@ -138,7 +138,7 @@ void *pthread_main(void *params) {
 			int experimentsRunSuccessfully = 0; // Record how many times the experiment was run successfully
 			for (expId = 0; expId < TIMES_RUN_EXPERIMENT; ++expId) { // Run experiments in the test
 #ifdef DETAILED_DEBUG
-					printf("* Iteration: %d Bytes: %.0f Experiment: %d\n", i + 1, pow(2.0, (double) i), expId + 1);
+					printf("* Test: %d Experiment: %d\n", testId + 1, expId + 1);
 #endif
 
 				// Values for gethering data about the environment
@@ -226,14 +226,15 @@ void *pthread_main(void *params) {
 
 				// Get readings on interrupts, pagefaults and context switched before running the experiment
 #ifndef __APPLE__
-				interruptsAfter = search_in_file("/proc/interrupts", "LOC:", 1);
-				//printf("INT SUM %d\n", get_interrupts_sum());
+//				interruptsAfter = search_in_file("/proc/interrupts", "LOC:", 1);
+				interruptsAfter = get_interrupts_sum("/proc/interrupts");
 				pageFaultsMinorAfter = get_page_fault(1);
 				pageFaultsMajorAfter = get_page_fault(2);
 				contextSwitchesAfter = search_in_file(fileNameStatus, "voluntary_ctxt_switches:", 1);
 
 				// Retrieve information from saved into strings files.
-				interruptsBefore = search_in_string(interruptsBeforeString, "LOC:", 1);
+//				interruptsBefore = search_in_string(interruptsBeforeString, "LOC:", 1);
+				interruptsBefore = get_interrupts_sum_in_string(interruptsBeforeString);
 				pageFaultsMinorBefore = get_page_fault_from_string(pageFaultsBeforeString, 1);
 				pageFaultsMajorBefore = get_page_fault_from_string(pageFaultsBeforeString, 2);
 				contextSwitchesBefore = search_in_string(contextSwitchesBeforeString, "voluntary_ctxt_switches:", 1);
@@ -265,25 +266,25 @@ void *pthread_main(void *params) {
 					continue;
 				} else if (pageFaultsMinorAfter - pageFaultsMinorBefore > ALLOWED_PAGEFAULTS_MINOR) { // Disregard this run if minor pagefaults were detected
 #ifdef DEBUG
-					printf("PFMIN. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId, pageFaultsMinorAfter - pageFaultsMinorBefore,
+					printf("PFMIN. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, pageFaultsMinorAfter - pageFaultsMinorBefore,
 					ALLOWED_PAGEFAULTS_MINOR);
 #endif
 					continue;
 				} else if (pageFaultsMajorAfter - pageFaultsMajorBefore > ALLOWED_PAGEFAULTS_MAJOR) { // Disregard this run if major pagefaults were detected
 #ifdef DEBUG
-					printf("PFMAJ. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId, pageFaultsMajorAfter - pageFaultsMajorBefore,
+					printf("PFMAJ. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, pageFaultsMajorAfter - pageFaultsMajorBefore,
 					ALLOWED_PAGEFAULTS_MAJOR);
 #endif
 					continue;
 				} else if (contextSwitchesAfter - contextSwitchesBefore > ALLOWED_CONTEXT_SWITCHES) { // Disregard this run if voluntary context switches were detected
 #ifdef DEBUG
-					printf("CS. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId, contextSwitchesAfter - contextSwitchesBefore,
+					printf("CS. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, contextSwitchesAfter - contextSwitchesBefore,
 					ALLOWED_CONTEXT_SWITCHES);
 #endif
 					continue;
 				} else if (interruptsAfter - interruptsBefore > ALLOWED_INTERRUPTS) { // Disregard this run if interrupts were detected
 #ifdef DEBUG
-					printf("INT. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId, interruptsAfter - interruptsBefore,
+					printf("INT. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, interruptsAfter - interruptsBefore,
 					ALLOWED_INTERRUPTS);
 #endif
 					continue;

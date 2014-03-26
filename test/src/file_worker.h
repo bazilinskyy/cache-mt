@@ -125,5 +125,7 @@ int read_stat(char * filename, int pid, struct proc_stats *s);
 char * file_to_string(char *f); // Create a string with contents of the file f.
 struct proc_interrupts get_interrupts(int cpu);
 struct proc_interrupts get_interrupts_from_string(char *str, int cpu);
+unsigned long long get_interrupts_sum(char *f);
+unsigned long long get_interrupts_sum_in_string(char *str);
 
 #endif /* FILE_WORKER_H_ */
