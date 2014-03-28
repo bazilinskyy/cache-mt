@@ -31,10 +31,16 @@
 #ifndef CONF_H_
 #define CONF_H_
 
+// Defining strings for using with preprocessor
+#define RDTSC 1 // 1 for RDTSC for TIMING
+#define CLOCK_GETTIME 2 // 2 for CLOCK_GETTIME for TIMING
+#define TIMER_TICK 1 // 1 for TIMER_TICK for START_AFTER (used together with CLOCK_GETTIME)
+#define TIME_INTERRUPT 2 // 2 for TIME_INTERRUPT for START_AFTER
+
 // Configure test
 #define MORE_EXPERIMENTS // Run a large number of experiments (refer to test_env.c)
-#define TIMING 2 // 1 for RDTSC or 2 for clock_gettime
-#define START_AFTER 1 // 1 for TIMER_TICK or 2 for TIME_INTERRUPT. Used with clock_gettime
+#define TIMING CLOCK_GETTIME // 1 for RDTSC or 2 for clock_gettime
+#define START_AFTER TIMER_TICK // 1 for TIMER_TICK or 2 for TIME_INTERRUPT. Used with clock_gettime
 // Configure experiment (each test consists of a number of experiments == TIMES_RUN_EXPERIMENT)
 #define MAX_POWER 24
 #define SET_HIGHEST_PRIORITY

@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 	// Testing interrupt time. Not for Mac.
 	//test_interrupt_time();
 	// Testing rdrsc
-	test_rdtsc();
+	//test_rdtsc();
 
 	/* Set process priority to the highest possible value */
 #ifdef SET_HIGHEST_PRIORITY
@@ -117,8 +117,8 @@ void *pthread_main(void *params) {
 	for (testId = 0; testId < TIMES_RUN_TEST; ++testId) { // Run tests=
 
 		// Reset arrays
-		memcpy(time, &(typeof(time)){ 0 }, sizeof time);
-		memcpy(timeDirty, &(typeof(timeDirty)){ 0 }, sizeof timeDirty);
+		memcpy(&time[0], &(typeof(time)){ 0 }, sizeof time);
+		memcpy(&timeDirty[0], &(typeof(timeDirty)){ 0 }, sizeof timeDirty);
 		printf ("%llu time[1]\n", time[1]);
 
 
@@ -190,7 +190,7 @@ void *pthread_main(void *params) {
 #endif
 				/* Prepare for running the experiment. */
 
-#if TIMING == 1 // Use RDTSC to measure time
+#if TIMING == RDTSC // Use RDTSC to measure time
 				// Prepare rdtsc
 				int tsc_val = 0;
 				unsigned long long r1, r2, r3, r4;
@@ -234,9 +234,9 @@ void *pthread_main(void *params) {
 
 				// ******** FINISH EXPERIMENT ********
 
-#elif TIMING==2 // Use clock_gettime
+#elif TIMING == CLOCK_GETTIME // Use clock_gettime
 
-#if START_AFTER==1
+#if START_AFTER == TIMER_TICK
 				// Start after the timer ticks.
 				struct timespec temp_time1, start;
 
@@ -246,7 +246,7 @@ void *pthread_main(void *params) {
 				while (start.tv_sec == temp_time1.tv_sec && temp_time1.tv_nsec == start.tv_nsec) {
 					get_time_ns(&start);
 				}
-#elif START_AFTER==2
+#elif START_AFTER == TIME_INTERRUPT
 				// Start after the time interrupt
 				unsigned long long interrupts1 = search_in_file("/proc/interrupts", "LOC:", 1);
 				unsigned long long interrupts2 = search_in_file("/proc/interrupts", "LOC:", 1);
@@ -304,9 +304,9 @@ void *pthread_main(void *params) {
 #endif
 				// Record the time difference.
 				// Use RDTSC
-#if TIMING == 1
+#if TIMING == RDTSC
 				unsigned long long tempTime = timeAfter - timeBefore; // Calculate how much time this run took
-#elif TIMING == 2
+#elif TIMING == CLOCK_GETTIME
 				unsigned long long tempTime = calculate_time_ns(start, stop); // Calculate how much time this run took
 #endif
 				// Record dirty time.

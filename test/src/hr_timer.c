@@ -68,6 +68,19 @@ unsigned long long calculate_time_ns(struct timespec start, struct timespec end)
 	return BILLION * temp.tv_sec + temp.tv_nsec;
 }
 
+// Calculate average time of running the experiment
+unsigned long long average_time(unsigned long long *time, int timesRun) {
+	if (timesRun == 0) // avoid division
+		return 0;
+	// Loop through times of all runs of the experiment
+	int i;
+	unsigned long long avTime = 0;
+	for (i = 0; i < timesRun; ++i) {
+		avTime += time[i];
+	}
+	return avTime / timesRun;
+}
+
 /*
  * Use RDTSC to measure time at nanosecond accuracy (if it is not disabled)
  * CPUID == 1 - use CPUID; CPUID == 1 - do not use CPUID
@@ -84,7 +97,7 @@ unsigned long long rdtsc_old(int CPUID) {
 	return temp;
 }
 
-
+#if TIMING == RDTSC
 const char *tsc_names[] =
 {
 	[0] = "[not set]",
@@ -116,19 +129,7 @@ void sigsegv_cb(int sig) {
 		perror("prctl");
 
 }
-
-// Calculate average time of running the experiment
-unsigned long long average_time(unsigned long long *time, int timesRun) {
-	if (timesRun == 0) // avoid division
-		return 0;
-	// Loop through times of all runs of the experiment
-	int i;
-	unsigned long long avTime = 0;
-	for (i = 0; i < timesRun; ++i) {
-		avTime += time[i];
-	}
-	return avTime / timesRun;
-}
+#endif
 
 // Test clock_gettime
 void test_clock_gettime(void) {
@@ -167,7 +168,7 @@ void test_rdtsc(void) {
 	unsigned long long t[32], prev;
 	int i;
 	for (i = 0; i < 32; i++)
-		t[i] = rdtsc(1);
+		t[i] = rdtsc_old(1);
 
 	prev = t[0];
 	for (i = 1; i < 32; i++) {
@@ -181,7 +182,7 @@ void test_rdtsc(void) {
 	printf("\nTEST OF RDTSC without CPUID\n");
 
 	for (i = 0; i < 32; i++)
-		t[i] = rdtsc(0);
+		t[i] = rdtsc_old(0);
 
 	prev = t[0];
 	for (i = 1; i < 32; i++) {
