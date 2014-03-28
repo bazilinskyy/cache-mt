@@ -121,6 +121,7 @@ void *pthread_main(void *params) {
 		memcpy(timeDirty, &(typeof(timeDirty)){ 0 }, sizeof timeDirty);
 		printf ("%llu time[1]\n", time[1]);
 
+
 		// Run experiments
 		int experimentsRun = 0;
 		for (n = 1.0; n < pow(2.0, (double) MAX_POWER);) {
@@ -137,6 +138,8 @@ void *pthread_main(void *params) {
 			int expId = 0; // The ID of the experiment
 			int experimentsRunSuccessfully = 0; // Record how many times the experiment was run successfully
 			for (expId = 0; expId < TIMES_RUN_EXPERIMENT; ++expId) { // Run experiments in the test
+
+
 #ifdef DETAILED_DEBUG
 					printf("* Test: %d Experiment: %d\n", testId + 1, expId + 1);
 #endif
@@ -187,7 +190,53 @@ void *pthread_main(void *params) {
 #endif
 				/* Prepare for running the experiment. */
 
-#ifdef START_AFTER_TIMER_TICK
+#if TIMING == 1 // Use RDTSC to measure time
+				// Prepare rdtsc
+				int tsc_val = 0;
+				unsigned long long r1, r2, r3, r4;
+
+				signal(SIGSEGV, sigsegv_cb);
+
+				if ( prctl(PR_GET_TSC, &tsc_val) == -1)
+					perror("prctl");
+
+				if ( prctl(PR_SET_TSC, PR_TSC_SIGSEGV) == -1)
+					perror("prctl");
+
+				sleep(1); // make sure there is no I/O pending from this process
+				r1 = (unsigned long long)rdtsc();
+				r2 = (unsigned long long)rdtsc();
+				r3 = (unsigned long long)rdtsc();
+				r4 = (unsigned long long)rdtsc();
+				usleep(10); // this (might) ensure that we have a full time quantum to execute in - as we get re-scheduled after the sleep
+				// the next few instructions seem to get pre-loaded into i-cache so no loop here to do that
+				r1 = (unsigned long long)rdtsc();
+				r2 = (unsigned long long)rdtsc();
+				r3 = (unsigned long long)rdtsc();
+				r4 = (unsigned long long)rdtsc();
+
+				// Use RDTSC to measure time
+				unsigned long long timeBefore, timeAfter;
+
+
+				// ******** RUN EXPERIMENT ***********
+				int j;
+				for (j = 0; j < 2; j++) {
+					usleep(10);
+					timeBefore = rdtsc();
+					if (experiment_id == 1) {
+						experiment_1(n);
+					}
+					timeAfter = rdtsc();
+				}
+				// Decide which experiment to run
+
+
+				// ******** FINISH EXPERIMENT ********
+
+#elif TIMING==2 // Use clock_gettime
+
+#if START_AFTER==1
 				// Start after the timer ticks.
 				struct timespec temp_time1, start;
 
@@ -197,8 +246,7 @@ void *pthread_main(void *params) {
 				while (start.tv_sec == temp_time1.tv_sec && temp_time1.tv_nsec == start.tv_nsec) {
 					get_time_ns(&start);
 				}
-#else
-#ifdef START_AFTER_TIME_INTERRUPT
+#elif START_AFTER==2
 				// Start after the time interrupt
 				unsigned long long interrupts1 = search_in_file("/proc/interrupts", "LOC:", 1);
 				unsigned long long interrupts2 = search_in_file("/proc/interrupts", "LOC:", 1);
@@ -207,12 +255,10 @@ void *pthread_main(void *params) {
 					interrupts2 = search_in_file("/proc/interrupts", "LOC:", 1);
 					printf("%llu %llu\n", interrupts1, interrupts2);
 				}
-#endif
 				// Calculate the start time
 				struct timespec start;
 				get_time_ns(&start);
 #endif
-
 				// ******** RUN EXPERIMENT ***********
 
 				// Decide which experiment to run
@@ -223,6 +269,9 @@ void *pthread_main(void *params) {
 				// ******** FINISH EXPERIMENT ********
 				struct timespec stop;
 				get_time_ns(&stop); // Calculate finish time
+#endif
+
+
 
 				// Get readings on interrupts, pagefaults and context switched before running the experiment
 #ifndef __APPLE__
@@ -254,7 +303,12 @@ void *pthread_main(void *params) {
 				//TODO read for Mac OS
 #endif
 				// Record the time difference.
+				// Use RDTSC
+#if TIMING == 1
+				unsigned long long tempTime = timeAfter - timeBefore; // Calculate how much time this run took
+#elif TIMING == 2
 				unsigned long long tempTime = calculate_time_ns(start, stop); // Calculate how much time this run took
+#endif
 				// Record dirty time.
 				currentTimeDirty[expId] = tempTime; // Record how much time this iteration took
 

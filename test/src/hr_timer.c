@@ -68,14 +68,53 @@ unsigned long long calculate_time_ns(struct timespec start, struct timespec end)
 	return BILLION * temp.tv_sec + temp.tv_nsec;
 }
 
-// Use RDTSC to measure time at nanosecond accuracy (if it is not disabled)
-unsigned long long rdtsc(void) {
+/*
+ * Use RDTSC to measure time at nanosecond accuracy (if it is not disabled)
+ * CPUID == 1 - use CPUID; CPUID == 1 - do not use CPUID
+*/
+unsigned long long rdtsc_old(int CPUID) {
 	unsigned long a, b;
 	unsigned long long temp;
-	__asm__ __volatile__("rdtsc" : "=a" (a), "=d" (b):: "memory", "%ebx", "%ecx");
+	if (CPUID)
+		__asm__ __volatile__("CPUID\nrdtsc" : "=a" (a), "=d" (b):: "memory", "%ebx", "%ecx");
+	else
+		__asm__ __volatile__("rdtsc" : "=a" (a), "=d" (b):: "memory", "%ebx", "%ecx");
 	temp = b;
 	temp = (temp << 32) | a;
 	return temp;
+}
+
+
+const char *tsc_names[] =
+{
+	[0] = "[not set]",
+	[PR_TSC_ENABLE] = "PR_TSC_ENABLE",
+	[PR_TSC_SIGSEGV] = "PR_TSC_SIGSEGV",
+};
+
+uint64_t rdtsc() {
+uint32_t lo, hi;
+/* We cannot use "=A", since this would use %rax on x86_64 */
+__asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
+return (uint64_t)hi << 32 | lo;
+}
+
+void sigsegv_cb(int sig) {
+	int tsc_val = 0;
+
+	printf("[ SIG_SEGV ]\n");
+	printf("prctl(PR_GET_TSC, &tsc_val); ");
+	fflush(stdout);
+
+	if ( prctl(PR_GET_TSC, &tsc_val) == -1)
+		perror("prctl");
+
+	printf("tsc_val == %s\n", tsc_names[tsc_val]);
+	printf("prctl(PR_SET_TSC, PR_TSC_ENABLE)\n");
+	fflush(stdout);
+	if ( prctl(PR_SET_TSC, PR_TSC_ENABLE) == -1)
+		perror("prctl");
+
 }
 
 // Calculate average time of running the experiment
@@ -122,12 +161,27 @@ void test_clock_getres(void) {
 
 // Test rdtsc
 void test_rdtsc(void) {
-	printf("TEST OF RDTSC\n");
+	// With CPUID
+	printf("TEST OF RDTSC with CPUID\n");
 
 	unsigned long long t[32], prev;
 	int i;
 	for (i = 0; i < 32; i++)
-		t[i] = rdtsc();
+		t[i] = rdtsc(1);
+
+	prev = t[0];
+	for (i = 1; i < 32; i++) {
+		printf("%llu [%llu]\n", t[i], t[i] - prev);
+		prev = t[i];
+	}
+
+	printf("Total=%llu\n", t[32 - 1] - t[0]);
+
+	// Without CPUID
+	printf("\nTEST OF RDTSC without CPUID\n");
+
+	for (i = 0; i < 32; i++)
+		t[i] = rdtsc(0);
 
 	prev = t[0];
 	for (i = 1; i < 32; i++) {
