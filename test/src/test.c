@@ -254,8 +254,10 @@ void *pthread_main(void *params) {
 #ifndef __APPLE__
 //				interruptsAfter = search_in_file("/proc/interrupts", "LOC:", 1);
 				interruptsAfter = get_interrupts_sum("/proc/interrupts");
-				pageFaultsMinorAfter = get_page_fault(1);
-				pageFaultsMajorAfter = get_page_fault(2);
+				// Get file once to avoid getting one extra minor page fault
+				struct proc_stats stat_file = get_page_fault_file();
+				pageFaultsMinorAfter = get_page_fault(stat_file, 1);
+				pageFaultsMajorAfter = get_page_fault(stat_file, 2);
 				contextSwitchesAfter = search_in_file(fileNameStatus, "voluntary_ctxt_switches:", 1);
 
 				// Retrieve information from saved into strings files.

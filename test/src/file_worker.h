@@ -119,7 +119,7 @@ void write_to_csv(unsigned long long *time, int type, int testId, int experiment
 unsigned long long search_in_file(char *f, char *str, int find_numeric); // Search for a string in the file fname
 unsigned long long search_in_string(char *string, char *search_for, int find_numeric); // Search for a substring search_for in string.
 unsigned long long find_num_in_str(char *str); // Find a numeric in a string
-unsigned long get_page_fault(int choice);
+unsigned long get_page_fault(struct proc_stats statsData, int choice);
 unsigned long get_page_fault_from_string(char * string, int choice);
 int read_stat(char * filename, int pid, struct proc_stats *s);
 char * file_to_string(char *f); // Create a string with contents of the file f.
@@ -127,5 +127,6 @@ struct proc_interrupts get_interrupts(int cpu);
 struct proc_interrupts get_interrupts_from_string(char *str, int cpu);
 unsigned long long get_interrupts_sum(char *f);
 unsigned long long get_interrupts_sum_in_string(char *str);
+struct proc_stats get_page_fault_file();
 
 #endif /* FILE_WORKER_H_ */

@@ -102,9 +102,7 @@ int read_stat(char * filename, int pid, struct proc_stats *s) {
 #endif
 }
 
-// 1 - minor, 2 - major
-unsigned long get_page_fault(int choice) {
-#ifndef __APPLE__
+struct proc_stats get_page_fault_file() {
 	struct proc_stats statsData;
 	int self = getpid(); // Process ID
 
@@ -114,6 +112,12 @@ unsigned long get_page_fault(int choice) {
 	// Read data from the stats file
 	read_stat(buf, self, &statsData);
 
+	return statsData;
+}
+
+// 1 - minor, 2 - major
+unsigned long get_page_fault(struct proc_stats statsData, int choice) {
+#ifndef __APPLE__
 	if (choice == 1) {
 		return statsData.minflt;
 //		return statsData->cminflt);

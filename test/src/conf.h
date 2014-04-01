@@ -53,7 +53,7 @@
 // Every time reads a file it generates 1
 #define ALLOWED_INTERRUPTS 5
 #define ALLOWED_CONTEXT_SWITCHES 0
-#define ALLOWED_PAGEFAULTS_MINOR 6
+#define ALLOWED_PAGEFAULTS_MINOR 7
 #define ALLOWED_PAGEFAULTS_MAJOR 0
 
 // Output
