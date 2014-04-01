@@ -105,7 +105,7 @@ int main(int argc, char **argv) {
 	// use 2 loops to preload the i-cache and makes sure there will be no page faults on the rs array
 	// if you don't, the first read takes 9 extra clock cycles on a Q6600 CPU
 	for (j = 0; j < 2; j++) {
-		usleep(10);
+		//usleep(10);
 		for (i = 0; i < LOOPS; i++) {
 			get_time(&rs[i]);
 		}

@@ -174,6 +174,7 @@ void *pthread_main(void *params) {
 				//Info: http://www.centos.org/docs/5/html/Deployment_Guide-en-US/s1-proc-topfiles.html
 
 				// Save files with information on interrupts, page faults, and context switches into strings
+
 				interruptsBeforeString = file_to_string("/proc/interrupts");
 
 				// Add stat to the name of the file
@@ -191,30 +192,6 @@ void *pthread_main(void *params) {
 				/* Prepare for running the experiment. */
 
 #if TIMING == RDTSC // Use RDTSC to measure time
-				// Prepare rdtsc
-				int tsc_val = 0;
-				unsigned long long r1, r2, r3, r4;
-
-				signal(SIGSEGV, sigsegv_cb);
-
-				if ( prctl(PR_GET_TSC, &tsc_val) == -1)
-					perror("prctl");
-
-				if ( prctl(PR_SET_TSC, PR_TSC_SIGSEGV) == -1)
-					perror("prctl");
-
-				sleep(1); // make sure there is no I/O pending from this process
-				r1 = (unsigned long long)rdtsc();
-				r2 = (unsigned long long)rdtsc();
-				r3 = (unsigned long long)rdtsc();
-				r4 = (unsigned long long)rdtsc();
-				usleep(10); // this (might) ensure that we have a full time quantum to execute in - as we get re-scheduled after the sleep
-				// the next few instructions seem to get pre-loaded into i-cache so no loop here to do that
-				r1 = (unsigned long long)rdtsc();
-				r2 = (unsigned long long)rdtsc();
-				r3 = (unsigned long long)rdtsc();
-				r4 = (unsigned long long)rdtsc();
-
 				// Use RDTSC to measure time
 				unsigned long long timeBefore, timeAfter;
 
@@ -420,7 +397,9 @@ int pin_thread_to_core(int coreId) {
 
 // Set priority of the current to be the highest
 // From: http://stackoverflow.com/questions/29621/change-own-process-priority-in-c
+// man http://linux.die.net/man/3/setpriority
+// TODO set to FIFO real time process
 int set_highest_process_priority(void) {
-	setpriority(PRIO_PROCESS, 0, -20); // TODO set to FIFO real time process
+	setpriority(PRIO_PROCESS, 0, -20);
 	return 1;
 }

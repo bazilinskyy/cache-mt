@@ -35,7 +35,7 @@ const char *tsc_names[] =
 uint64_t rdtsc() {
 uint32_t lo, hi;
 /* We cannot use "=A", since this would use %rax on x86_64 */
-__asm__ __volatile__ ("rdtsc" : "=a" (lo), "=d" (hi));
+__asm__ __volatile__ ("rdtscp" : "=a" (lo), "=d" (hi));
 return (uint64_t)hi << 32 | lo;
 }
 
@@ -115,8 +115,8 @@ int main(int argc, char **argv)
         // use 2 loops to preload the i-cache and makes sure there will be no page faults on the rs array
         // if you don't, the first read takes 9 extra clock cycles on a Q6600 CPU
         for (j=0; j<2; j++) {
-           usleep(10);
-           for (i=0; i<LOOPS; i++)
+           //usleep(10);
+           for (i=0; i<LOOPS; i++) P
              rs[i] = rdtsc();
         }
  
