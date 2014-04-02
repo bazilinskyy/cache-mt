@@ -54,7 +54,6 @@ int main(int argc, char *argv[]) {
 	//test_interrupt_time();
 	// Testing rdrsc
 	//test_rdtsc();
-
 	/* Set process priority to the highest possible value */
 #ifdef SET_HIGHEST_PRIORITY
 	set_highest_process_priority();
@@ -102,11 +101,25 @@ void *pthread_main(void *params) {
 		exit(1);
 	}
 
+	// Record information about interrupts page faults and context switches for all iterations of all experiments
+	unsigned long long **interrupts = makeMatrixUnsignedLonglong(MAX_POWER * 10, TIMES_RUN_EXPERIMENT);
+	unsigned long long **pageFaultsMinor = makeMatrixUnsignedLonglong(MAX_POWER * 10, TIMES_RUN_EXPERIMENT);
+	unsigned long long **pageFaultsMajor = makeMatrixUnsignedLonglong(MAX_POWER * 10, TIMES_RUN_EXPERIMENT);
+	unsigned long long **contextSwitches = makeMatrixUnsignedLonglong(MAX_POWER * 10, TIMES_RUN_EXPERIMENT);
+
+	// Initialise with zeros
+	initaliseMatrixUnsignedLonglongWithZeros(interrupts, MAX_POWER * 10, TIMES_RUN_EXPERIMENT);
+	initaliseMatrixUnsignedLonglongWithZeros(pageFaultsMinor, MAX_POWER * 10, TIMES_RUN_EXPERIMENT);
+	initaliseMatrixUnsignedLonglongWithZeros(pageFaultsMajor, MAX_POWER * 10, TIMES_RUN_EXPERIMENT);
+	initaliseMatrixUnsignedLonglongWithZeros(contextSwitches, MAX_POWER * 10, TIMES_RUN_EXPERIMENT);
+
+	// Record information about time of execution of the experiment
 	unsigned long long *currentTime = malloc(sizeof(unsigned long long) * TIMES_RUN_EXPERIMENT); // Record times of experiments in the run.
 	if (time == NULL) {
 		printf("Error with allocating space for the array\n");
 		exit(1);
 	}
+	// Record information about dirty (not exluding runs with interrupts, page faults, and context switches) time of execution of the experiment
 	unsigned long long *currentTimeDirty = malloc(sizeof(unsigned long long) * TIMES_RUN_EXPERIMENT); // Record times of experiments in the run.
 	if (time == NULL) {
 		printf("Error with allocating space for the array\n");
@@ -117,15 +130,18 @@ void *pthread_main(void *params) {
 	for (testId = 0; testId < TIMES_RUN_TEST; ++testId) { // Run tests=
 
 		// Reset arrays
-		memcpy(&time[0], &(typeof(time)){ 0 }, sizeof time);
-		memcpy(&timeDirty[0], &(typeof(timeDirty)){ 0 }, sizeof timeDirty);
-		printf ("%llu time[1]\n", time[1]);
-
+		memcpy(&time[0], &(typeof(time) ) { 0 }, sizeof time);
+		memcpy(&timeDirty[0], &(typeof(timeDirty) ) { 0 }, sizeof timeDirty);
+		//printf("%llu time[1]\n", time[1]);
 
 		// Run experiments
 		int experimentsRun = 0;
 		for (n = 1.0; n < pow(2.0, (double) MAX_POWER);) {
 			experimentsRun++;
+
+#ifdef DEBUG
+			printf("Test: %d\n", n);
+#endif
 
 #ifdef WARM_CACHE //Warm up cache
 			experiment_1(0); // Call experiment function once to warm up cache
@@ -139,9 +155,8 @@ void *pthread_main(void *params) {
 			int experimentsRunSuccessfully = 0; // Record how many times the experiment was run successfully
 			for (expId = 0; expId < TIMES_RUN_EXPERIMENT; ++expId) { // Run experiments in the test
 
-
 #ifdef DETAILED_DEBUG
-					printf("* Test: %d Experiment: %d\n", testId + 1, expId + 1);
+				printf("* Test: %d Experiment: %d\n", n, expId + 1);
 #endif
 
 				// Values for gethering data about the environment
@@ -195,7 +210,6 @@ void *pthread_main(void *params) {
 				// Use RDTSC to measure time
 				unsigned long long timeBefore, timeAfter;
 
-
 				// ******** RUN EXPERIMENT ***********
 				int j;
 				for (j = 0; j < 2; j++) {
@@ -207,7 +221,6 @@ void *pthread_main(void *params) {
 					timeAfter = rdtsc();
 				}
 				// Decide which experiment to run
-
 
 				// ******** FINISH EXPERIMENT ********
 
@@ -245,10 +258,8 @@ void *pthread_main(void *params) {
 
 				// ******** FINISH EXPERIMENT ********
 				struct timespec stop;
-				get_time_ns(&stop); // Calculate finish time
+				get_time_ns(&stop);// Calculate finish time
 #endif
-
-
 
 				// Get readings on interrupts, pagefaults and context switched before running the experiment
 #ifndef __APPLE__
@@ -286,39 +297,46 @@ void *pthread_main(void *params) {
 #if TIMING == RDTSC
 				unsigned long long tempTime = timeAfter - timeBefore; // Calculate how much time this run took
 #elif TIMING == CLOCK_GETTIME
-				unsigned long long tempTime = calculate_time_ns(start, stop); // Calculate how much time this run took
+						unsigned long long tempTime = calculate_time_ns(start, stop); // Calculate how much time this run took
 #endif
 				// Record dirty time.
 				currentTimeDirty[expId] = tempTime; // Record how much time this iteration took
 
+				// Record information about interrupts, page faults, context switches
+				interrupts[experimentsRun - 1][expId] = interruptsAfter - interruptsBefore;
+				pageFaultsMinor[experimentsRun - 1][expId] = pageFaultsMinorAfter - pageFaultsMinorBefore;
+				pageFaultsMajor[experimentsRun - 1][expId] = pageFaultsMajorAfter - pageFaultsMajorBefore;
+				contextSwitches[experimentsRun - 1][expId] = contextSwitchesAfter - contextSwitchesBefore;
+
+				printf("%d.%d %llu %llu %llu %llu\n", experimentsRun - 1, expId, interrupts[experimentsRun - 1][expId], pageFaultsMinor[experimentsRun - 1][expId], pageFaultsMajor[experimentsRun - 1][expId], contextSwitches[experimentsRun - 1][expId]);
+
 				// Disregard experiment if comparison of it with MIN and MAX makes it invalid
-				//TODO verify with Stephen
 				unsigned long long minTime = n * 1; // Lower bound for the duration of the run
 				unsigned long long maxTime = n * 100000; // Upper bound for the duration of the run
 				if (tempTime < minTime || tempTime > maxTime) { // Disregard this run if it does not meet timing requirements
 					continue;
 				} else if (pageFaultsMinorAfter - pageFaultsMinorBefore > ALLOWED_PAGEFAULTS_MINOR) { // Disregard this run if minor pagefaults were detected
-#ifdef DEBUG
-					printf("PFMIN. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, pageFaultsMinorAfter - pageFaultsMinorBefore,
-					ALLOWED_PAGEFAULTS_MINOR);
+#ifdef DETAILED_DEBUG
+				printf("PFMIN. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, pageFaultsMinorAfter - pageFaultsMinorBefore,
+						ALLOWED_PAGEFAULTS_MINOR);
 #endif
 					continue;
 				} else if (pageFaultsMajorAfter - pageFaultsMajorBefore > ALLOWED_PAGEFAULTS_MAJOR) { // Disregard this run if major pagefaults were detected
-#ifdef DEBUG
-					printf("PFMAJ. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, pageFaultsMajorAfter - pageFaultsMajorBefore,
-					ALLOWED_PAGEFAULTS_MAJOR);
+#ifdef DETAILED_DEBUG
+				printf("PFMAJ. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, pageFaultsMajorAfter - pageFaultsMajorBefore,
+						ALLOWED_PAGEFAULTS_MAJOR);
 #endif
 					continue;
 				} else if (contextSwitchesAfter - contextSwitchesBefore > ALLOWED_CONTEXT_SWITCHES) { // Disregard this run if voluntary context switches were detected
-#ifdef DEBUG
-					printf("CS. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, contextSwitchesAfter - contextSwitchesBefore,
-					ALLOWED_CONTEXT_SWITCHES);
+#ifdef DETAILED_DEBUG
+				printf("CS. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, contextSwitchesAfter - contextSwitchesBefore,
+						ALLOWED_CONTEXT_SWITCHES);
 #endif
 					continue;
 				} else if (interruptsAfter - interruptsBefore > ALLOWED_INTERRUPTS) { // Disregard this run if interrupts were detected
-#ifdef DEBUG
-					printf("INT. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, interruptsAfter - interruptsBefore,
-					ALLOWED_INTERRUPTS);
+#ifdef DETAILED_DEBUG
+				printf("INT. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, interruptsAfter - interruptsBefore,
+						ALLOWED_INTERRUPTS);
 #endif
 					continue;
 				} else { // Everything it fine, record this run as successful
@@ -363,8 +381,8 @@ void *pthread_main(void *params) {
 
 #ifdef OUTPUT_TO_FILE
 		// Write to file
-		write_to_csv(time, 1, testId, experimentsRun);
-		write_to_csv(timeDirty, 2, testId, experimentsRun);
+		write_to_csv(time, 1, testId, experimentsRun, interrupts, pageFaultsMinor, pageFaultsMajor, contextSwitches);
+		write_to_csv(timeDirty, 2, testId, experimentsRun, interrupts, pageFaultsMinor, pageFaultsMajor, contextSwitches);
 #endif
 
 	} // End of the test loop.
@@ -374,6 +392,22 @@ void *pthread_main(void *params) {
 	free(time);
 	free(currentTime);
 	free(currentTimeDirty);
+	for (i = 0; i < MAX_POWER * 10; i++) {
+		free((void *) interrupts[i]);
+	}
+	free(interrupts);
+	for (i = 0; i < MAX_POWER * 10; i++) {
+		free((void *) pageFaultsMinor[i]);
+	}
+	free(pageFaultsMinor);
+	for (i = 0; i < MAX_POWER * 10; i++) {
+		free((void *) pageFaultsMajor[i]);
+	}
+	free(pageFaultsMajor);
+	for (i = 0; i < MAX_POWER * 10; i++) {
+		free((void *) contextSwitches[i]);
+	}
+	free(contextSwitches);
 
 	return (void *) 1;
 }
@@ -404,4 +438,24 @@ int pin_thread_to_core(int coreId) {
 int set_highest_process_priority(void) {
 	setpriority(PRIO_PROCESS, 0, -20);
 	return 1;
+}
+
+// Initialise a matrix of unsigned long longs
+unsigned long long ** makeMatrixUnsignedLonglong(int x, int y) {
+	unsigned long long** theArray;
+	theArray = (unsigned long long**) malloc(x * sizeof(unsigned long long*));
+	int i = 0;
+	for (i = 0; i < x; i++)
+		theArray[i] = (unsigned long long*) malloc(y * sizeof(unsigned long long));
+	return theArray;
+}
+
+// Initialise a matrix of unsigned long longs
+void initaliseMatrixUnsignedLonglongWithZeros(unsigned long long ** matrix, int x, int y) {
+	int i, j;
+	for (i = 0; i < x; ++i) {
+		for (j = 0; j < y; ++j) {
+			matrix[i][j] = 0;
+		}
+	}
 }

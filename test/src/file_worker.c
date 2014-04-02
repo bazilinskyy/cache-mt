@@ -107,7 +107,7 @@ struct proc_stats get_page_fault_file() {
 	int self = getpid(); // Process ID
 
 	char buf[256];
-	sprintf(buf,"/proc/%d/stat", self);
+	sprintf(buf, "/proc/%d/stat", self);
 
 	// Read data from the stats file
 	read_stat(buf, self, &statsData);
@@ -170,7 +170,8 @@ unsigned long get_page_fault_from_string(char * string, int choice) {
 }
 
 // Output time array into a CSV file. Type: 1 - clean, 2 - dirty
-void write_to_csv(unsigned long long *time, int type, int testId, int experimentsRun) {
+void write_to_csv(unsigned long long *time, int type, int testId, int experimentsRun, unsigned long long interrupts[][TIMES_RUN_EXPERIMENT], unsigned long long pageFaultsMinor[][TIMES_RUN_EXPERIMENT],
+		unsigned long long pageFaultsMajor[][TIMES_RUN_EXPERIMENT], unsigned long long contextSwitches[][TIMES_RUN_EXPERIMENT]) {
 	// Open filestream
 	FILE *fp;
 	char fileName[100];
@@ -192,11 +193,19 @@ void write_to_csv(unsigned long long *time, int type, int testId, int experiment
 	// Write to file
 	// Write headers
 	fprintf(fp, "N,Time");
+	int j = 0;
+	for (j = 0; j < TIMES_RUN_EXPERIMENT; ++j) {
+		fprintf(fp, ",%d.INT,%d.PFMIN,%d.PFMAJ,%d.CS", j+1, j+1, j+1, j+1);
+	}
 	// Write timing information
 	int i = 0;
 	long n = 1;
-	for (i = 1; i <= experimentsRun; ++i) {
+	for (i = 0; i < experimentsRun; ++i) {
 		fprintf(fp, "\n%lu,%llu", n * sizeof(long), time[i - 1]);
+		int j = 0;
+		for (j = 0; j < TIMES_RUN_EXPERIMENT; ++j) {
+			fprintf(fp, ",%llu,%llu,%llu,%llu", interrupts[i][j], pageFaultsMinor[i][j], pageFaultsMajor[i][j], contextSwitches[i][j]);
+		}
 		n = calculate_n(n);
 	}
 

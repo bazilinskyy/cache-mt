@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 
 unsigned long long get_page_fault(int choice);
+char * file_to_string(char *f);
 
 // Based on code from Stephen Brown
 struct proc_stats {
@@ -121,6 +123,18 @@ int main(int argc, const char ** argv) {
 	pageFaultsA = get_page_fault(1);
 
 	printf("2nd time /proc/iomem: Before: %llu After: %llu\n", pageFaultsB, pageFaultsA);
+
+	char * str1 = file_to_string("/proc/interrupts");
+	char * str2;
+
+
+	while (strcmp(str1, str2) != 0) {
+		pageFaultsB = get_page_fault(1);
+		str2 = file_to_string("/proc/interrupts");
+		pageFaultsA = get_page_fault(1);
+	}
+
+	printf("/proc/interrupts changed: Before: %llu After: %llu\n", pageFaultsB, pageFaultsA);
 }
 
 // Based on code from Stephen Brown
@@ -180,4 +194,45 @@ unsigned long long get_page_fault(int choice) {
 #else
 	return -1;
 #endif
+}
+
+static char result[8][8 * 1024]; // For storing contents of the file.
+static int cycle = 0; // Counter of how many files have been stored in result.
+
+char * file_to_string(char *f) {
+	FILE *fp;
+	char temp[512];
+
+	cycle++;
+	if (cycle == 8)
+		cycle = 0;
+
+	// Open file.
+	if ((fp = fopen(f, "r")) == NULL) {
+		return (char *) (-1);
+	}
+
+	// Initialise the result
+	result[cycle][0] = 0;
+
+	// Search for str and extract numeric.
+	while (fgets(temp, 512, fp) != NULL) {
+		strcat(result[cycle], temp);
+	}
+
+	// Check if ther eis a memory leak. This code may not work on machines with more than 4 cores.
+	if (strlen(result[cycle]) > 8 * 1024) {
+		printf("Memory error - strlen(result)==%lu, file size==%d\n", strlen(result[cycle]), 8 * 1024);
+		if (fp) {
+			fclose(fp);
+		}
+		exit(1);
+	}
+
+	//Close the file if still open.
+	if (fp) {
+		fclose(fp);
+	}
+
+	return &result[cycle][0];
 }

@@ -58,5 +58,7 @@ int main(int argc, char *argv[]);
 void *pthread_main(void *params); // Main run in the pthread
 int pin_thread_to_core(int coreId); // Pin pthread to core
 int set_highest_process_priority(void); // Set priority of the current to be the highest
+unsigned long long ** makeMatrixUnsignedLonglong(int x, int y);
+void initaliseMatrixUnsignedLonglongWithZeros(unsigned long long ** matrix, int x, int y);
 
 #endif /* TEST_1_H_ */
