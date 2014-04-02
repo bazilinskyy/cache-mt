@@ -34,7 +34,7 @@ WFLAG2 = -Werror
 WFLAG3 = -Wextra
 #WFLAGS = $(WFLAG1) $(WFLAG2) $(WFLAG3)
 WFLAGS = $(WFLAG1)
-#OFLAGS = -g -O3
+OFLAGS = -g -O3
 #SFLAG1 = -std=c99
 #SFLAG2 = -m64
 SFLAGS = $(SFLAG1) $(SFLAG2)

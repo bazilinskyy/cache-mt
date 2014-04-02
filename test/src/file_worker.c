@@ -195,7 +195,7 @@ void write_to_csv(unsigned long long *time, int type, int testId, int experiment
 	fprintf(fp, "N,Time");
 	int j = 0;
 	for (j = 0; j < TIMES_RUN_EXPERIMENT; ++j) {
-		fprintf(fp, ",%d.INT,%d.PFMIN,%d.PFMAJ,%d.CS", j+1, j+1, j+1, j+1);
+		fprintf(fp, ",%d.INT,%d.PFMIN,%d.PFMAJ", j+1, j+1, j+1);
 	}
 	// Write timing information
 	int i = 0;
@@ -204,7 +204,8 @@ void write_to_csv(unsigned long long *time, int type, int testId, int experiment
 		fprintf(fp, "\n%lu,%llu", n * sizeof(long), time[i - 1]);
 		int j = 0;
 		for (j = 0; j < TIMES_RUN_EXPERIMENT; ++j) {
-			fprintf(fp, ",%llu,%llu,%llu,%llu", interrupts[i][j], pageFaultsMinor[i][j], pageFaultsMajor[i][j], contextSwitches[i][j]);
+			//printf("%d.%d %llu %llu %llu %llu\n", interrupts[i][j], pageFaultsMinor[i][j], pageFaultsMajor[i][j], contextSwitches[i][j]);
+			fprintf(fp, ",%llu,%llu,%llu", interrupts[i][j], pageFaultsMinor[i][j], pageFaultsMajor[i][j]);
 		}
 		n = calculate_n(n);
 	}

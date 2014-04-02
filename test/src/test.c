@@ -102,16 +102,10 @@ void *pthread_main(void *params) {
 	}
 
 	// Record information about interrupts page faults and context switches for all iterations of all experiments
-	unsigned long long **interrupts = makeMatrixUnsignedLonglong(MAX_POWER * 10, TIMES_RUN_EXPERIMENT);
-	unsigned long long **pageFaultsMinor = makeMatrixUnsignedLonglong(MAX_POWER * 10, TIMES_RUN_EXPERIMENT);
-	unsigned long long **pageFaultsMajor = makeMatrixUnsignedLonglong(MAX_POWER * 10, TIMES_RUN_EXPERIMENT);
-	unsigned long long **contextSwitches = makeMatrixUnsignedLonglong(MAX_POWER * 10, TIMES_RUN_EXPERIMENT);
-
-	// Initialise with zeros
-	initaliseMatrixUnsignedLonglongWithZeros(interrupts, MAX_POWER * 10, TIMES_RUN_EXPERIMENT);
-	initaliseMatrixUnsignedLonglongWithZeros(pageFaultsMinor, MAX_POWER * 10, TIMES_RUN_EXPERIMENT);
-	initaliseMatrixUnsignedLonglongWithZeros(pageFaultsMajor, MAX_POWER * 10, TIMES_RUN_EXPERIMENT);
-	initaliseMatrixUnsignedLonglongWithZeros(contextSwitches, MAX_POWER * 10, TIMES_RUN_EXPERIMENT);
+	unsigned long long interrupts[MAX_POWER * 10][TIMES_RUN_EXPERIMENT];
+	unsigned long long pageFaultsMinor[MAX_POWER * 10][TIMES_RUN_EXPERIMENT];
+	unsigned long long pageFaultsMajor[MAX_POWER * 10][TIMES_RUN_EXPERIMENT];
+	unsigned long long contextSwitches[MAX_POWER * 10][TIMES_RUN_EXPERIMENT];
 
 	// Record information about time of execution of the experiment
 	unsigned long long *currentTime = malloc(sizeof(unsigned long long) * TIMES_RUN_EXPERIMENT); // Record times of experiments in the run.
@@ -140,7 +134,7 @@ void *pthread_main(void *params) {
 			experimentsRun++;
 
 #ifdef DEBUG
-			printf("Test: %d\n", n);
+			printf("Test: %d\n", (int) n);
 #endif
 
 #ifdef WARM_CACHE //Warm up cache
@@ -198,9 +192,10 @@ void *pthread_main(void *params) {
 				pageFaultsBeforeString = file_to_string(fileNameStat);
 
 				// Add status to the name of the file
-				char fileNameStatus[100];
-				snprintf(fileNameStatus, 100, "%s%s", fileName, "/status");
-				contextSwitchesBeforeString = file_to_string(fileNameStatus);
+//				char fileNameStatus[100];
+//				snprintf(fileNameStatus, 100, "%s%s", fileName, "/status");
+//				contextSwitchesBeforeString = file_to_string(fileNameStatus);
+				contextSwitchesBeforeString = "0";
 #else
 				//TODO read for Mac OS
 #endif
@@ -269,14 +264,16 @@ void *pthread_main(void *params) {
 				struct proc_stats stat_file = get_page_fault_file();
 				pageFaultsMinorAfter = get_page_fault(stat_file, 1);
 				pageFaultsMajorAfter = get_page_fault(stat_file, 2);
-				contextSwitchesAfter = search_in_file(fileNameStatus, "voluntary_ctxt_switches:", 1);
+//				contextSwitchesAfter = search_in_file(fileNameStatus, "voluntary_ctxt_switches:", 1);
+				contextSwitchesAfter = 0;
 
 				// Retrieve information from saved into strings files.
 //				interruptsBefore = search_in_string(interruptsBeforeString, "LOC:", 1);
 				interruptsBefore = get_interrupts_sum_in_string(interruptsBeforeString);
 				pageFaultsMinorBefore = get_page_fault_from_string(pageFaultsBeforeString, 1);
 				pageFaultsMajorBefore = get_page_fault_from_string(pageFaultsBeforeString, 2);
-				contextSwitchesBefore = search_in_string(contextSwitchesBeforeString, "voluntary_ctxt_switches:", 1);
+//				contextSwitchesBefore = search_in_string(contextSwitchesBeforeString, "voluntary_ctxt_switches:", 1);
+				contextSwitchesBefore = 0;
 
 #ifdef DETAILED_DEBUG
 				printf("INT B: %llu :: ", interruptsBefore);
@@ -308,7 +305,7 @@ void *pthread_main(void *params) {
 				pageFaultsMajor[experimentsRun - 1][expId] = pageFaultsMajorAfter - pageFaultsMajorBefore;
 				contextSwitches[experimentsRun - 1][expId] = contextSwitchesAfter - contextSwitchesBefore;
 
-				printf("%d.%d %llu %llu %llu %llu\n", experimentsRun - 1, expId, interrupts[experimentsRun - 1][expId], pageFaultsMinor[experimentsRun - 1][expId], pageFaultsMajor[experimentsRun - 1][expId], contextSwitches[experimentsRun - 1][expId]);
+				//printf("%d.%d %llu %llu %llu %llu\n", experimentsRun - 1, expId, interrupts[experimentsRun - 1][expId], pageFaultsMinor[experimentsRun - 1][expId], pageFaultsMajor[experimentsRun - 1][expId], contextSwitches[experimentsRun - 1][expId]);
 
 				// Disregard experiment if comparison of it with MIN and MAX makes it invalid
 				unsigned long long minTime = n * 1; // Lower bound for the duration of the run
@@ -392,22 +389,22 @@ void *pthread_main(void *params) {
 	free(time);
 	free(currentTime);
 	free(currentTimeDirty);
-	for (i = 0; i < MAX_POWER * 10; i++) {
-		free((void *) interrupts[i]);
-	}
-	free(interrupts);
-	for (i = 0; i < MAX_POWER * 10; i++) {
-		free((void *) pageFaultsMinor[i]);
-	}
-	free(pageFaultsMinor);
-	for (i = 0; i < MAX_POWER * 10; i++) {
-		free((void *) pageFaultsMajor[i]);
-	}
-	free(pageFaultsMajor);
-	for (i = 0; i < MAX_POWER * 10; i++) {
-		free((void *) contextSwitches[i]);
-	}
-	free(contextSwitches);
+//	for (i = 0; i < MAX_POWER * 10; i++) {
+//		free((void *) interrupts[i]);
+//	}
+//	free(interrupts);
+//	for (i = 0; i < MAX_POWER * 10; i++) {
+//		free((void *) pageFaultsMinor[i]);
+//	}
+//	free(pageFaultsMinor);
+//	for (i = 0; i < MAX_POWER * 10; i++) {
+//		free((void *) pageFaultsMajor[i]);
+//	}
+//	free(pageFaultsMajor);
+//	for (i = 0; i < MAX_POWER * 10; i++) {
+//		free((void *) contextSwitches[i]);
+//	}
+//	free(contextSwitches);
 
 	return (void *) 1;
 }
