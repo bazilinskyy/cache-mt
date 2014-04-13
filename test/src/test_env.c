@@ -82,14 +82,6 @@ void test_interrupt_time(void) {
 
 // Create two copies of each string used for storing files to fill in memory with this data.
 int warm_strings_with_files(void) {
-	// Strings for storing contents of the files
-	char *interruptsBeforeStringWarm1;
-	char *pageFaultsBeforeStringWarm1;
-	//char *contextSwitchesBeforeStringWarm1;
-	char *interruptsBeforeStringWarm2;
-	char *pageFaultsBeforeStringWarm2;
-	//char *contextSwitchesBeforeStringWarm2;
-
 	// Get process ID
 	int processIdTemp = getpid();
 
@@ -104,14 +96,14 @@ int warm_strings_with_files(void) {
 	//Info: http://www.centos.org/docs/5/html/Deployment_Guide-en-US/s1-proc-topfiles.html
 
 	// Save files with information on interrupts, page faults, and context switches into strings
-	interruptsBeforeStringWarm1 = file_to_string("/proc/interrupts");
-	interruptsBeforeStringWarm2 = file_to_string("/proc/interrupts");
+	char *interruptsBeforeStringWarm1 = file_to_string("/proc/interrupts");
+	char *pageFaultsBeforeStringWarm1 = file_to_string("/proc/interrupts");
 
 	// Add stat to the name of the file
 	char fileNameStatTemp[100];
 	snprintf(fileNameStatTemp, 100, "%s%s", fileNameStatTemp, "/stat");
-	pageFaultsBeforeStringWarm1 = file_to_string(fileNameStatTemp);
-	pageFaultsBeforeStringWarm2 = file_to_string(fileNameStatTemp);
+	char *interruptsBeforeStringWarm2 = file_to_string(fileNameStatTemp);
+	char *pageFaultsBeforeStringWarm2 = file_to_string(fileNameStatTemp);
 
 	// Add status to the name of the file
 //	snprintf(fileNameStatTemp, 100, "%s%s", fileNameStatTemp, "/status");

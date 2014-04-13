@@ -71,7 +71,6 @@ void run_tests() {
 	int i = 0;
 	long n;
 
-
 	// Set up thread affinity.
 #if PROCESS_AFFINITY == PIN_TO_ONE_CPU
 	pin_thread_to_core(PIN_TO_CPU); // Pin this pthread to the PIN_TO_CPU
@@ -137,7 +136,7 @@ void run_tests() {
 			for (expId = 0; expId < TIMES_RUN_EXPERIMENT; ++expId) { // Run experiments in the test
 
 #ifdef DETAILED_DEBUG
-				printf("* Test: %d Experiment: %d\n", n, expId + 1);
+				printf("* Test: %d Experiment: %d\n", (int) n, (int) expId + 1);
 #endif
 
 				// Values for gethering data about the environment
@@ -193,24 +192,21 @@ void run_tests() {
 				unsigned long long timeBefore, timeAfter;
 
 				// ******** RUN EXPERIMENT ***********
-				int j;
-				for (j = 0; j < 2; j++) {
-					timeBefore = rdtsc();
-					if (experiment_id == 1) {
-						experiment_1(n);
-					} else if (experiment_id == 2) {
-						experiment_2(n);
-					} else if (experiment_id == 3) {
-						experiment_2(n);
-					} else if (experiment_id == 4) {
-						experiment_2(n);
-					} else if (experiment_id == 5) {
-						experiment_2(n);
-					} else if (experiment_id == 6) {
-						experiment_2(n);
-					}
-					timeAfter = rdtsc();
+				timeBefore = rdtsc();
+				if (experiment_id == 1) {
+					experiment_1(n);
+				} else if (experiment_id == 2) {
+					experiment_2(n);
+				} else if (experiment_id == 3) {
+					experiment_2(n);
+				} else if (experiment_id == 4) {
+					experiment_2(n);
+				} else if (experiment_id == 5) {
+					experiment_2(n);
+				} else if (experiment_id == 6) {
+					experiment_2(n);
 				}
+				timeAfter = rdtsc();
 				// Decide which experiment to run
 
 				// ******** FINISH EXPERIMENT ********
@@ -310,26 +306,26 @@ void run_tests() {
 					continue;
 				} else if (pageFaultsMinorAfter - pageFaultsMinorBefore > ALLOWED_PAGEFAULTS_MINOR) { // Disregard this run if minor pagefaults were detected
 #ifdef DETAILED_DEBUG
-				printf("PFMIN. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, pageFaultsMinorAfter - pageFaultsMinorBefore,
-						ALLOWED_PAGEFAULTS_MINOR);
+					printf("PFMIN. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, pageFaultsMinorAfter - pageFaultsMinorBefore,
+					ALLOWED_PAGEFAULTS_MINOR);
 #endif
 					continue;
 				} else if (pageFaultsMajorAfter - pageFaultsMajorBefore > ALLOWED_PAGEFAULTS_MAJOR) { // Disregard this run if major pagefaults were detected
 #ifdef DETAILED_DEBUG
-				printf("PFMAJ. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, pageFaultsMajorAfter - pageFaultsMajorBefore,
-						ALLOWED_PAGEFAULTS_MAJOR);
+					printf("PFMAJ. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, pageFaultsMajorAfter - pageFaultsMajorBefore,
+					ALLOWED_PAGEFAULTS_MAJOR);
 #endif
 					continue;
 				} else if (contextSwitchesAfter - contextSwitchesBefore > ALLOWED_CONTEXT_SWITCHES) { // Disregard this run if voluntary context switches were detected
 #ifdef DETAILED_DEBUG
-				printf("CS. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, contextSwitchesAfter - contextSwitchesBefore,
-						ALLOWED_CONTEXT_SWITCHES);
+					printf("CS. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, contextSwitchesAfter - contextSwitchesBefore,
+					ALLOWED_CONTEXT_SWITCHES);
 #endif
 					continue;
 				} else if (interruptsAfter - interruptsBefore > ALLOWED_INTERRUPTS) { // Disregard this run if interrupts were detected
 #ifdef DETAILED_DEBUG
-				printf("INT. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, interruptsAfter - interruptsBefore,
-						ALLOWED_INTERRUPTS);
+					printf("INT. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, interruptsAfter - interruptsBefore,
+					ALLOWED_INTERRUPTS);
 #endif
 					continue;
 				} else { // Everything it fine, record this run as successful
