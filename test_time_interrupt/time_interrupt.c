@@ -14,7 +14,7 @@ uint64_t rdtsc();
 int main(int argc, const char ** argv) {
 	int k;
 	long sum;
-	for (k = 0; k < 10; ++k) {
+	for (k = 0; k < 100; ++k) {
 
 		unsigned long long time1, time2, timeInt1, timeInt2;
 		int n = 1;

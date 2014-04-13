@@ -59,31 +59,18 @@ int main(int argc, char *argv[]) {
 	set_highest_process_priority();
 #endif
 
-	// TODO fix pthreads on Mac OS
-#ifndef __APPLE__
-	pthread_t thread1;
-	int rc;
+	// Run tests
+	run_tests();
 
-	// Run in pthread
-	rc = pthread_create(&thread1, NULL, pthread_main, (void *)NULL);
-	if (rc) {
-		printf("ERROR; return code from pthread_create() is %d\n", rc);
-		exit(-1);
-	}
-	pthread_join(thread1, NULL);
-#else
-	pthread_main((void *) 1);
-#endif
 	// Everything is good, return Success code
 	return EXIT_SUCCESS;
 }
 
 // Function run in the thread
-void *pthread_main(void *params) {
+void run_tests() {
 	int i = 0;
 	long n;
 
-	int threadId = (int) params; // Get the thread ID
 
 	// Set up thread affinity.
 #if PROCESS_AFFINITY == PIN_TO_ONE_CPU
@@ -167,7 +154,7 @@ void *pthread_main(void *params) {
 				// Strings for storing contents of the files
 				char *interruptsBeforeString;
 				char *pageFaultsBeforeString;
-				char *contextSwitchesBeforeString;
+				// char *contextSwitchesBeforeString;
 
 				// Get process ID
 				int processId = getpid();
@@ -195,7 +182,7 @@ void *pthread_main(void *params) {
 //				char fileNameStatus[100];
 //				snprintf(fileNameStatus, 100, "%s%s", fileName, "/status");
 //				contextSwitchesBeforeString = file_to_string(fileNameStatus);
-				contextSwitchesBeforeString = "0";
+				//contextSwitchesBeforeString = "0";
 #else
 				//TODO read for Mac OS
 #endif
@@ -208,10 +195,19 @@ void *pthread_main(void *params) {
 				// ******** RUN EXPERIMENT ***********
 				int j;
 				for (j = 0; j < 2; j++) {
-					usleep(10);
 					timeBefore = rdtsc();
 					if (experiment_id == 1) {
 						experiment_1(n);
+					} else if (experiment_id == 2) {
+						experiment_2(n);
+					} else if (experiment_id == 3) {
+						experiment_2(n);
+					} else if (experiment_id == 4) {
+						experiment_2(n);
+					} else if (experiment_id == 5) {
+						experiment_2(n);
+					} else if (experiment_id == 6) {
+						experiment_2(n);
 					}
 					timeAfter = rdtsc();
 				}
@@ -405,27 +401,6 @@ void *pthread_main(void *params) {
 //		free((void *) contextSwitches[i]);
 //	}
 //	free(contextSwitches);
-
-	return (void *) 1;
-}
-
-// Pin thread to a particular core
-int pin_thread_to_core(int coreId) {
-#ifndef __APPLE__
-	int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
-	if (coreId < 0 || coreId >= num_cores)
-	return EINVAL;
-
-	cpu_set_t cpuset;
-	CPU_ZERO(&cpuset);
-	CPU_SET(coreId, &cpuset);
-
-	pthread_t current_thread = pthread_self();
-	return pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
-#else
-	// TODO set affinity on Mac.
-	return -1;
-#endif
 }
 
 // Set priority of the current to be the highest

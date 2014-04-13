@@ -85,10 +85,10 @@ int warm_strings_with_files(void) {
 	// Strings for storing contents of the files
 	char *interruptsBeforeStringWarm1;
 	char *pageFaultsBeforeStringWarm1;
-	char *contextSwitchesBeforeStringWarm1;
+	//char *contextSwitchesBeforeStringWarm1;
 	char *interruptsBeforeStringWarm2;
 	char *pageFaultsBeforeStringWarm2;
-	char *contextSwitchesBeforeStringWarm2;
+	//char *contextSwitchesBeforeStringWarm2;
 
 	// Get process ID
 	int processIdTemp = getpid();
@@ -114,9 +114,9 @@ int warm_strings_with_files(void) {
 	pageFaultsBeforeStringWarm2 = file_to_string(fileNameStatTemp);
 
 	// Add status to the name of the file
-	snprintf(fileNameStatTemp, 100, "%s%s", fileNameStatTemp, "/status");
-	contextSwitchesBeforeStringWarm1 = file_to_string(fileNameStatTemp);
-	contextSwitchesBeforeStringWarm2 = file_to_string(fileNameStatTemp);
+//	snprintf(fileNameStatTemp, 100, "%s%s", fileNameStatTemp, "/status");
+//	contextSwitchesBeforeStringWarm1 = file_to_string(fileNameStatTemp);
+//	contextSwitchesBeforeStringWarm2 = file_to_string(fileNameStatTemp);
 
 	return 1;
 }
