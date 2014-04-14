@@ -51,7 +51,7 @@
 #endif
 
 int main(int argc, char *argv[]);
-void run_tests(); // Set up environment and run experiments.
+void run_tests(int argc, char *argv[]); // Set up environment and run experiments.
 int set_highest_process_priority(void); // Set priority of the current to be the highest
 unsigned long long ** makeMatrixUnsignedLonglong(int x, int y);
 void initaliseMatrixUnsignedLonglongWithZeros(unsigned long long ** matrix, int x, int y);

@@ -42,11 +42,11 @@
 #define TIMING RDTSC // 1 for RDTSC or 2 for clock_gettime
 #define START_AFTER TIMER_TICK // 1 for TIMER_TICK or 2 for TIME_INTERRUPT. Used with clock_gettime
 // Configure experiment (each test consists of a number of experiments == TIMES_RUN_EXPERIMENT)
-#define MAX_POWER 24
+#define MAX_POWER 20
 #define SET_HIGHEST_PRIORITY
 #define WARM_CACHE
 #define WARM_STRINGS_WITH_FILES
-#define PROCESS_AFFINITY PIN_TO_ONE_CPU
+#define PROCESS_AFFINITY NA // PIN_TO_ONE_CPU
 #define PIN_TO_CPU 0
 #define TIMES_RUN_TEST 1
 #define TIMES_RUN_EXPERIMENT 10
@@ -66,10 +66,10 @@
 #define LONG_TO_ADD 1l
 #define BIG_BUFFER_SIZE (8*1024) // For storying files as strings
 #ifdef __APPLE__
-#define CSV_FILE_CLEAN "results/test_1_i7_clean"
-#define CSV_FILE_DIRTY "results/test_1_i7_dirty"
+#define CSV_FILE_CLEAN "results/i7_clean"
+#define CSV_FILE_DIRTY "results/i7_dirty"
 #else
-#define CSV_FILE_CLEAN "results/test_1_xeon_clean"
-#define CSV_FILE_DIRTY "results/test_1_xeon_dirty"
+#define CSV_FILE_CLEAN "results/xeon_clean"
+#define CSV_FILE_DIRTY "results/xeon_dirty"
 #endif
 #endif /* CONF_H_ */

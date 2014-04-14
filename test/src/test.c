@@ -60,14 +60,14 @@ int main(int argc, char *argv[]) {
 #endif
 
 	// Run tests
-	run_tests();
+	run_tests(argc, argv);
 
 	// Everything is good, return Success code
 	return EXIT_SUCCESS;
 }
 
 // Function run in the thread
-void run_tests() {
+void run_tests(int argc, char *argv[]) {
 	int i = 0;
 	long n;
 
@@ -370,8 +370,8 @@ void run_tests() {
 
 #ifdef OUTPUT_TO_FILE
 		// Write to file
-		write_to_csv(time, 1, testId, experimentsRun, interrupts, pageFaultsMinor, pageFaultsMajor, contextSwitches);
-		write_to_csv(timeDirty, 2, testId, experimentsRun, interrupts, pageFaultsMinor, pageFaultsMajor, contextSwitches);
+		write_to_csv(time, 1, experiment_id, testId, experimentsRun, interrupts, pageFaultsMinor, pageFaultsMajor, contextSwitches);
+		write_to_csv(timeDirty, 2, experiment_id, testId, experimentsRun, interrupts, pageFaultsMinor, pageFaultsMajor, contextSwitches);
 #endif
 
 	} // End of the test loop.

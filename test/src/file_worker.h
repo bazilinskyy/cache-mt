@@ -115,7 +115,7 @@ struct proc_interrupts {
     unsigned long long i_MIS;
 };
 
-void write_to_csv(unsigned long long *time, int type, int testId, int experimentsRun, unsigned long long interrupts[][TIMES_RUN_EXPERIMENT], unsigned long long pageFaultsMinor[][TIMES_RUN_EXPERIMENT],
+void write_to_csv(unsigned long long *time, int type, int testArg, int testId, int experimentsRun, unsigned long long interrupts[][TIMES_RUN_EXPERIMENT], unsigned long long pageFaultsMinor[][TIMES_RUN_EXPERIMENT],
 		unsigned long long pageFaultsMajor[][TIMES_RUN_EXPERIMENT], unsigned long long contextSwitches[][TIMES_RUN_EXPERIMENT]); // Output time array into a CSV file
 unsigned long long search_in_file(char *f, char *str, int find_numeric); // Search for a string in the file fname
 unsigned long long search_in_string(char *string, char *search_for, int find_numeric); // Search for a substring search_for in string.

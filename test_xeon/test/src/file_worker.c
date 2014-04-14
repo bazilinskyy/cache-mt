@@ -122,7 +122,7 @@ unsigned long get_page_fault(struct proc_stats statsData, int choice) {
 		return statsData.minflt;
 //		return statsData->cminflt);
 
-	} else if (choice == 2) {
+	} else {
 		return statsData.majflt;
 //	    return statsData->cmajflt;
 	}
@@ -159,7 +159,7 @@ unsigned long get_page_fault_from_string(char * string, int choice) {
 		return statsData.minflt;
 //		return statsData->cminflt);
 
-	} else if (choice == 2) {
+	} else {
 		return statsData.majflt;
 //	    return statsData->cmajflt;
 	}
@@ -271,7 +271,7 @@ unsigned long long search_in_string(char *string, char *search_for, int find_num
 	return (0);
 }
 
-static char result[8][8 * 1024]; // For storing contents of the file.
+static char result[8][8 * 5120]; // For storing contents of the file.
 static int cycle = 0; // Counter of how many files have been stored in result.
 
 char * file_to_string(char *f) {
@@ -296,7 +296,7 @@ char * file_to_string(char *f) {
 	}
 
 	// Check if ther eis a memory leak. This code may not work on machines with more than 4 cores.
-	if (strlen(result[cycle]) > 8 * 1024) {
+	if (strlen(result[cycle]) > 8 * 5120) {
 		printf("Memory error - strlen(result)==%lu, file size==%d\n", strlen(result[cycle]), 8 * 1024);
 		if (fp) {
 			fclose(fp);

@@ -54,12 +54,6 @@ void experiment_1(int n) {
 	free(testAr);
 }
 
-/*
- * EXPERIMENT 2
- *
- */
-void experiment_2(int n) {
-
 //TODO fix pthreads on Mac OS. OLD CODE for pthreads.
 //#ifndef __APPLE__
 //	pthread_t thread1;
@@ -76,6 +70,11 @@ void experiment_2(int n) {
 //	pthread_main((void *) 1);
 //#endif
 
+/*
+ * EXPERIMENT 2
+ *
+ */
+void experiment_2(int n) {
 	pthread_t thread1, thread2;
 	int rc;
 
@@ -91,19 +90,103 @@ void experiment_2(int n) {
 	argStruct->n = n;
 	argStruct->testAr = testAr;
 
+	pthread_mutex_init(&mut, NULL); // Initialise the mutex.
+
 	// Create pthreads
+	pthread_mutex_lock(&mut); // Lock mutex.
 	rc = pthread_create(&thread1, NULL, e2_pthread_main1, (void *) argStruct);
 	if (rc) {
 		printf("ERROR; return code from pthread_create() is %d\n", rc);
 		exit(-1);
 	}
+	pthread_mutex_unlock(&mut); // Lock mutex.
+
+	pthread_mutex_lock(&mut); // Lock mutex.
 	rc = pthread_create(&thread2, NULL, e2_pthread_main2, (void *) argStruct);
 	if (rc) {
 		printf("ERROR; return code from pthread_create() is %d\n", rc);
 		exit(-1);
 	}
+	pthread_mutex_unlock(&mut); // Lock mutex.
+
+	// Join threads
+	pthread_join(thread1, NULL);
+	pthread_join(thread2, NULL);
+
+	// Finish
+	free(testAr);
+	free(argStruct); // Free memory allocated for generic argument struct
+	pthread_mutex_destroy(&mut);
+}
+
+// Sender. This thread sends data
+void *e2_pthread_main1(void * argStruct) {
+	pin_thread_to_core(0); // Pin to the first core of the first CPU.
+
+	struct argStructType *args = (struct argStructType *) argStruct; 	// Unpack arguments
+
+
+	// Work with  shared data
+	int i = 0;
+	for (i = 0; i < args->n; ++i) {
+		args->testAr[i] = 3l;
+	}
+
+	return ((void *) 1);
+}
+
+void *e2_pthread_main2(void * argStruct) {
+	pin_thread_to_core(0); // Pin to the first core of the first CPU.
+
+	struct argStructType *args = (struct argStructType *) argStruct; 	// Unpack arguments
+
+	// Work with  shared data
+	int i = 0;
+	long temp; // For assignment of values from the therad
+	for (i = 0; i < args->n; ++i) {
+		temp = args->testAr[i];
+	}
+
+	return ((void *) 1);
+}
+
+/*
+ * EXPERIMENT 3
+ *
+ */
+void experiment_3(int n) {
+	pthread_t thread1, thread2;
+	int rc;
+
+	long *testAr = malloc(sizeof(long) * n);
+	if (testAr == NULL) { // Array for manipulating data
+		printf("Error with allocating space for the array\n");
+		exit(1);
+	}
+
+	// Wrap information that has to be passed to a pthread
+	struct argStructType * argStruct = malloc(sizeof(struct argStructType));
+	argStruct->experimentId = 2;
+	argStruct->n = n;
+	argStruct->testAr = testAr;
 
 	pthread_mutex_init(&mut, NULL); // Initialise the mutex.
+
+	// Create pthreads
+	pthread_mutex_lock(&mut); // Lock mutex.
+	rc = pthread_create(&thread1, NULL, e3_pthread_main1, (void *) argStruct);
+	if (rc) {
+		printf("ERROR; return code from pthread_create() is %d\n", rc);
+		exit(-1);
+	}
+	pthread_mutex_unlock(&mut); // Lock mutex.
+	pthread_mutex_lock(&mut); // Lock mutex.
+	rc = pthread_create(&thread2, NULL, e3_pthread_main2, (void *) argStruct);
+	if (rc) {
+		printf("ERROR; return code from pthread_create() is %d\n", rc);
+		exit(-1);
+	}
+	pthread_mutex_unlock(&mut); // Lock mutex.
 
 	// Join threads
 	pthread_join(thread1, NULL);
@@ -115,44 +198,34 @@ void experiment_2(int n) {
 }
 
 // Sender. This thread sends data
-void *e2_pthread_main1(void * argStruct) {
+void *e3_pthread_main1(void * argStruct) {
 	pin_thread_to_core(0); // Pin to the first core of the first CPU.
 
 	struct argStructType *args = (struct argStructType *) argStruct; 	// Unpack arguments
 
-	pthread_mutex_lock(&mut); // Lock mutex.
 	// Work with  shared data
 	int i = 0;
 	for (i = 0; i < args->n; ++i) {
 		args->testAr[i] = 3l;
 	}
-	pthread_mutex_unlock(&mut); // Unlock mutex.
 
 	return ((void *) 1);
 }
 
-void *e2_pthread_main2(void * argStruct) {
-	pin_thread_to_core(0); // Pin to the first core of the first CPU.
+// Received. This thread receives data.
+void *e3_pthread_main2(void * argStruct) {
+	pin_thread_to_core(1); // Pin to the first core of the first CPU. We assumed that there is at least one CPU with at least 2 cores.
 
 	struct argStructType *args = (struct argStructType *) argStruct; 	// Unpack arguments
 
-	pthread_mutex_lock(&mut); // Lock mutex.
 	// Work with  shared data
 	int i = 0;
 	long temp; // For assignment of values from the therad
 	for (i = 0; i < args->n; ++i) {
 		temp = args->testAr[i];
 	}
-	pthread_mutex_unlock(&mut); // Unlock mutex.
 
 	return ((void *) 1);
-}
-
-/*
- * EXPERIMENT 3
- *
- */
-void experiment_3(int n) {
 }
 
 /*
@@ -160,8 +233,80 @@ void experiment_3(int n) {
  *
  */
 void experiment_4(int n) {
+	pthread_t thread1, thread2;
+	int rc;
+
+	long *testAr = malloc(sizeof(long) * n);
+	if (testAr == NULL) { // Array for manipulating data
+		printf("Error with allocating space for the array\n");
+		exit(1);
+	}
+
+	// Wrap information that has to be passed to a pthread
+	struct argStructType * argStruct = malloc(sizeof(struct argStructType));
+	argStruct->experimentId = 2;
+	argStruct->n = n;
+	argStruct->testAr = testAr;
+
+	pthread_mutex_init(&mut, NULL); // Initialise the mutex.
+
+	// Create pthreads
+	pthread_mutex_lock(&mut); // Lock mutex.
+	rc = pthread_create(&thread1, NULL, e4_pthread_main1, (void *) argStruct);
+	if (rc) {
+		printf("ERROR; return code from pthread_create() is %d\n", rc);
+		exit(-1);
+	}
+	pthread_mutex_unlock(&mut); // Lock mutex.
+	pthread_mutex_lock(&mut); // Lock mutex.
+	rc = pthread_create(&thread2, NULL, e4_pthread_main2, (void *) argStruct);
+	if (rc) {
+		printf("ERROR; return code from pthread_create() is %d\n", rc);
+		exit(-1);
+	}
+	pthread_mutex_unlock(&mut); // Lock mutex.
+
+	// Join threads
+	pthread_join(thread1, NULL);
+	pthread_join(thread2, NULL);
+
+	// Finish
+	free(argStruct); // Free memory allocated for generic argument struct
+	pthread_mutex_destroy(&mut);
 }
 
+// Sender. This thread sends data
+void *e4_pthread_main1(void * argStruct) {
+	pin_thread_to_core(0); // Pin to the first core of the first CPU.
+
+	struct argStructType *args = (struct argStructType *) argStruct; 	// Unpack arguments
+
+	// Work with  shared data
+	int i = 0;
+	for (i = 0; i < args->n; ++i) {
+		args->testAr[i] = 3l;
+	}
+
+	return ((void *) 1);
+}
+
+// Received. This thread receives data.
+void *e4_pthread_main2(void * argStruct) {
+	int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
+	pin_thread_to_core(num_cores - 1); // Pin to the first core of the first CPU. Pin to the last available core.
+									   // We assume that there are two chips in the processor
+
+	struct argStructType *args = (struct argStructType *) argStruct; 	// Unpack arguments
+
+	// Work with  shared data
+	int i = 0;
+	long temp; // For assignment of values from the therad
+	for (i = 0; i < args->n; ++i) {
+		temp = args->testAr[i];
+	}
+
+	return ((void *) 1);
+}
 /*
  * EXPERIMENT 5
  *

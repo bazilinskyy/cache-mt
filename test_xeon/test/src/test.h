@@ -37,10 +37,6 @@
 #include <string.h>
 #include <sys/time.h>
 #include <sys/resource.h>
-// Pthread
-#include <pthread.h>
-#include <sched.h>
-#include <errno.h>
 // Custom includes
 #include "hr_timer.h"
 #include "conf.h"
@@ -55,8 +51,7 @@
 #endif
 
 int main(int argc, char *argv[]);
-void *pthread_main(void *params); // Main run in the pthread
-int pin_thread_to_core(int coreId); // Pin pthread to core
+void run_tests(); // Set up environment and run experiments.
 int set_highest_process_priority(void); // Set priority of the current to be the highest
 unsigned long long ** makeMatrixUnsignedLonglong(int x, int y);
 void initaliseMatrixUnsignedLonglongWithZeros(unsigned long long ** matrix, int x, int y);
