@@ -170,18 +170,18 @@ unsigned long get_page_fault_from_string(char * string, int choice) {
 }
 
 // Output time array into a CSV file. Type: 1 - clean, 2 - dirty
-void write_to_csv(unsigned long long *time, int type, int testId, int experimentsRun, unsigned long long interrupts[][TIMES_RUN_EXPERIMENT], unsigned long long pageFaultsMinor[][TIMES_RUN_EXPERIMENT],
+void write_to_csv(unsigned long long *time, int type, int testArg, int testId, int experimentsRun, unsigned long long interrupts[][TIMES_RUN_EXPERIMENT], unsigned long long pageFaultsMinor[][TIMES_RUN_EXPERIMENT],
 		unsigned long long pageFaultsMajor[][TIMES_RUN_EXPERIMENT], unsigned long long contextSwitches[][TIMES_RUN_EXPERIMENT]) {
 	// Open filestream
 	FILE *fp;
 	char fileName[100];
 	if (type == 1) {
 		// Create file name for a new csv file
-		snprintf(fileName, 100, "%s_%d.csv", CSV_FILE_CLEAN, testId);
+		snprintf(fileName, 100, "%s-%d-%d.csv", CSV_FILE_CLEAN, testArg, testId);
 		fp = fopen(fileName, "wb+");
 	} else {
 		// Create file name for a new csv file
-		snprintf(fileName, 100, "%s_%d.csv", CSV_FILE_DIRTY, testId);
+		snprintf(fileName, 100, "%s-%d-%d.csv", CSV_FILE_DIRTY, testArg, testId);
 		fp = fopen(fileName, "wb+");
 	}
 
