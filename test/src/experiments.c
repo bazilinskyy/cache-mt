@@ -40,6 +40,7 @@
 // Test 1 ()
 void experiment_1(int n) {
 	long *testAr = malloc(sizeof(long) * n * 2);
+	// test& = 0xFFFFFFD0; Align data
 	if (testAr == NULL) { // Array for manipulating data
 		printf("Error with allocating space for the array\n");
 		exit(1);

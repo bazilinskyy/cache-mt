@@ -241,6 +241,16 @@ void run_tests(int argc, char *argv[]) {
 				// Decide which experiment to run
 				if (experiment_id == 1) {
 					experiment_1(n);
+				} else if (experiment_id == 2) {
+					experiment_2(n);
+				} else if (experiment_id == 3) {
+					experiment_2(n);
+				} else if (experiment_id == 4) {
+					experiment_2(n);
+				} else if (experiment_id == 5) {
+					experiment_2(n);
+				} else if (experiment_id == 6) {
+					experiment_2(n);
 				}
 
 				// ******** FINISH EXPERIMENT ********
