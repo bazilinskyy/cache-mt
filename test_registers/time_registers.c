@@ -11,18 +11,57 @@ uint64_t rdtsc();
 
 int main(int argc, const char ** argv) {
 	int k;
-	register long x = 10;
-	long y = 0;
-	printf("Test with registers\n");
-	for (k = 0; k < 100; ++k) {
+
+	printf("Control experiment for latency of registers. A tempo variable is putputted to avoid compiler optimisation.\n");
+
+	printf("Int\n");
+	for (k = 0; k < 10; ++k) {
+		register int x = 10;
+		int y = 0;
 		unsigned long long time1, time2;
 		usleep(100); // To wait until the process is scheduled
 		time1 = rdtsc();
 		x = y;
 		time2 = rdtsc();
-		printf("%d. %llu\n", k, time2 - time1);
+		printf("%d. %llu %d\n", k, time2 - time1, x);
 	}
-	return x; // Return x to trick the compiler optimizer.
+
+	printf("Double\n");
+	for (k = 0; k < 10; ++k) {
+		register double x = 10;
+		double y = 0;
+		unsigned long long time1, time2;
+		usleep(100); // To wait until the process is scheduled
+		time1 = rdtsc();
+		x = y;
+		time2 = rdtsc();
+		printf("%d. %llu %f\n", k, time2 - time1, x);
+	}
+
+	printf("Long\n");
+	for (k = 0; k < 10; ++k) {
+		register long x = 10l;
+		long y = 0l;
+		unsigned long long time1, time2;
+		usleep(100); // To wait until the process is scheduled
+		time1 = rdtsc();
+		x = y;
+		time2 = rdtsc();
+		printf("%d. %llu %lu\n", k, time2 - time1, x);
+
+	}
+
+	printf("Long Long\n");
+	for (k = 0; k < 10; ++k) {
+		register long long x = 10ll;
+		long long y = 0ll;
+		unsigned long long time1, time2;
+		usleep(100); // To wait until the process is scheduled
+		time1 = rdtsc();
+		x = y;
+		time2 = rdtsc();
+		printf("%d. %llu %llu\n", k, time2 - time1, x);
+	}
 }
 
 uint64_t rdtsc() {
