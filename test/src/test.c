@@ -198,13 +198,15 @@ void run_tests(int argc, char *argv[]) {
 				} else if (experiment_id == 2) {
 					experiment_2(n);
 				} else if (experiment_id == 3) {
-					experiment_2(n);
+					experiment_3(n);
 				} else if (experiment_id == 4) {
-					experiment_2(n);
+					experiment_4(n);
 				} else if (experiment_id == 5) {
-					experiment_2(n);
+					experiment_5(n);
 				} else if (experiment_id == 6) {
-					experiment_2(n);
+					experiment_6(n);
+				} else if (experiment_id == 0) {
+					experiment_0();
 				}
 				timeAfter = rdtsc();
 				// Decide which experiment to run
@@ -244,13 +246,13 @@ void run_tests(int argc, char *argv[]) {
 				} else if (experiment_id == 2) {
 					experiment_2(n);
 				} else if (experiment_id == 3) {
-					experiment_2(n);
+					experiment_3(n);
 				} else if (experiment_id == 4) {
-					experiment_2(n);
+					experiment_4(n);
 				} else if (experiment_id == 5) {
-					experiment_2(n);
+					experiment_5(n);
 				} else if (experiment_id == 6) {
-					experiment_2(n);
+					experiment_6(n);
 				}
 
 				// ******** FINISH EXPERIMENT ********

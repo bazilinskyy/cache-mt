@@ -55,6 +55,7 @@ struct argStructType {
 };
 
 // Main functions for running experiments.
+void experiment_0();
 void experiment_1(int n);
 void experiment_2(int n);
 void experiment_3(int n);

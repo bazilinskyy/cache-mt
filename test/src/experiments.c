@@ -32,9 +32,23 @@
 #include "experiments.h"
 
 /*
- * EXPERIMENT 2
+ * EXPERIMENT 0
  *
- * Measuring cache latency.
+ * Measuring latncy of registers.
+ */
+
+// Test 0 (Control)
+void experiment_0() {
+	printf ("Test with registers\n");
+	register long x = 10;
+	long y = 0;
+	x = y;
+}
+
+/*
+ * EXPERIMENT 0
+ *
+ * Measuring cycle-level latency.
  */
 
 // Test 1 ()
