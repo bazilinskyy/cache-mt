@@ -50,10 +50,10 @@
 #define PIN_TO_CPU 0
 #define TIMES_RUN_TEST 1
 #define TIMES_RUN_EXPERIMENT 10
-// Every time reads a file it generates 1
-#define ALLOWED_INTERRUPTS 2
+//#define CONSIDER_TIMEOUT
+#define ALLOWED_INTERRUPTS 0
 #define ALLOWED_CONTEXT_SWITCHES 0
-#define ALLOWED_PAGEFAULTS_MINOR 7
+#define ALLOWED_PAGEFAULTS_MINOR 3 // Every time reads a file one interrupt is generated
 #define ALLOWED_PAGEFAULTS_MAJOR 0
 
 // Output

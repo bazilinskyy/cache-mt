@@ -308,6 +308,7 @@ void *e4_pthread_main1(void * argStruct) {
 // Received. This thread receives data.
 void *e4_pthread_main2(void * argStruct) {
 	int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
+	//printf ("NUM CORES: %d\n", num_cores);
 	pin_thread_to_core(num_cores - 1); // Pin to the first core of the first CPU. Pin to the last available core.
 									   // We assume that there are two chips in the processor
 

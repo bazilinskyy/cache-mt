@@ -198,13 +198,15 @@ void run_tests(int argc, char *argv[]) {
 				} else if (experiment_id == 2) {
 					experiment_2(n);
 				} else if (experiment_id == 3) {
-					experiment_2(n);
+					experiment_3(n);
 				} else if (experiment_id == 4) {
-					experiment_2(n);
+					experiment_4(n);
 				} else if (experiment_id == 5) {
-					experiment_2(n);
+					experiment_5(n);
 				} else if (experiment_id == 6) {
-					experiment_2(n);
+					experiment_6(n);
+				} else if (experiment_id == 0) {
+					experiment_0();
 				}
 				timeAfter = rdtsc();
 				// Decide which experiment to run
@@ -241,6 +243,16 @@ void run_tests(int argc, char *argv[]) {
 				// Decide which experiment to run
 				if (experiment_id == 1) {
 					experiment_1(n);
+				} else if (experiment_id == 2) {
+					experiment_2(n);
+				} else if (experiment_id == 3) {
+					experiment_3(n);
+				} else if (experiment_id == 4) {
+					experiment_4(n);
+				} else if (experiment_id == 5) {
+					experiment_5(n);
+				} else if (experiment_id == 6) {
+					experiment_6(n);
 				}
 
 				// ******** FINISH EXPERIMENT ********
@@ -302,7 +314,18 @@ void run_tests(int argc, char *argv[]) {
 				// Disregard experiment if comparison of it with MIN and MAX makes it invalid
 				unsigned long long minTime = n * 1; // Lower bound for the duration of the run
 				unsigned long long maxTime = n * 100000; // Upper bound for the duration of the run
-				if (tempTime < minTime || tempTime > maxTime) { // Disregard this run if it does not meet timing requirements
+
+				// Decide if timing requirements should be considered.
+#ifdef CONSIDER_TIMEOUT
+				int timeout = 1;
+#else
+				int timeout = 0;
+#endif
+
+				if (timeout && (tempTime < minTime || tempTime > maxTime)) { // Disregard this run if it does not meet timing requirements
+#ifdef DETAILED_DEBUG
+					printf("TIMEOUT: %llu\n", tempTime);
+#endif
 					continue;
 				} else if (pageFaultsMinorAfter - pageFaultsMinorBefore > ALLOWED_PAGEFAULTS_MINOR) { // Disregard this run if minor pagefaults were detected
 #ifdef DETAILED_DEBUG
@@ -335,7 +358,7 @@ void run_tests(int argc, char *argv[]) {
 			}
 			// Calculate average time of running the experiment
 			time[(int) i] = average_time(currentTime, experimentsRunSuccessfully); // 0 denotes a failed experiment (number of successful runs = 0)
-			//printf("time: %llu aver: %llu\n ", time[(int) i], average_time(currentTime, experimentsRunSuccessfully));
+//			printf("time: %llu aver: %llu\n ", time[(int) i], average_time(currentTime, experimentsRunSuccessfully));
 
 			// TODO bug with time showing as 0 starting from the 2nd test on Mac.
 //			if (testId == 1)

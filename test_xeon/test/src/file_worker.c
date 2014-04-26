@@ -201,7 +201,7 @@ void write_to_csv(unsigned long long *time, int type, int testArg, int testId, i
 	int i = 0;
 	long n = 1;
 	for (i = 0; i < experimentsRun; ++i) {
-		fprintf(fp, "\n%lu,%llu", n * sizeof(long), time[i - 1]);
+		fprintf(fp, "\n%lu,%llu", n * sizeof(long), time[i]);
 		int j = 0;
 		for (j = 0; j < TIMES_RUN_EXPERIMENT; ++j) {
 			//printf("%d.%d %llu %llu %llu %llu\n", interrupts[i][j], pageFaultsMinor[i][j], pageFaultsMajor[i][j], contextSwitches[i][j]);

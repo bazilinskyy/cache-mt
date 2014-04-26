@@ -32,14 +32,29 @@
 #include "experiments.h"
 
 /*
- * EXPERIMENT 2
+ * EXPERIMENT 0
  *
- * Measuring cache latency.
+ * Measuring latncy of registers.
+ */
+
+// Test 0 (Control)
+void experiment_0() {
+	printf ("Test with registers\n");
+	register long x = 10;
+	long y = 0;
+	x = y;
+}
+
+/*
+ * EXPERIMENT 0
+ *
+ * Measuring cycle-level latency.
  */
 
 // Test 1 ()
 void experiment_1(int n) {
 	long *testAr = malloc(sizeof(long) * n * 2);
+	// test& = 0xFFFFFFD0; Align data
 	if (testAr == NULL) { // Array for manipulating data
 		printf("Error with allocating space for the array\n");
 		exit(1);
