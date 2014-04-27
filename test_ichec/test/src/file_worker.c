@@ -122,7 +122,7 @@ unsigned long get_page_fault(struct proc_stats statsData, int choice) {
 		return statsData.minflt;
 //		return statsData->cminflt);
 
-	} else if (choice == 2) {
+	} else {
 		return statsData.majflt;
 //	    return statsData->cmajflt;
 	}
@@ -159,7 +159,7 @@ unsigned long get_page_fault_from_string(char * string, int choice) {
 		return statsData.minflt;
 //		return statsData->cminflt);
 
-	} else if (choice == 2) {
+	} else {
 		return statsData.majflt;
 //	    return statsData->cmajflt;
 	}
@@ -170,18 +170,18 @@ unsigned long get_page_fault_from_string(char * string, int choice) {
 }
 
 // Output time array into a CSV file. Type: 1 - clean, 2 - dirty
-void write_to_csv(unsigned long long *time, int type, int testId, int experimentsRun, unsigned long long interrupts[][TIMES_RUN_EXPERIMENT], unsigned long long pageFaultsMinor[][TIMES_RUN_EXPERIMENT],
+void write_to_csv(unsigned long long *time, int type, int testArg, int testId, int experimentsRun, unsigned long long interrupts[][TIMES_RUN_EXPERIMENT], unsigned long long pageFaultsMinor[][TIMES_RUN_EXPERIMENT],
 		unsigned long long pageFaultsMajor[][TIMES_RUN_EXPERIMENT], unsigned long long contextSwitches[][TIMES_RUN_EXPERIMENT]) {
 	// Open filestream
 	FILE *fp;
 	char fileName[100];
 	if (type == 1) {
 		// Create file name for a new csv file
-		snprintf(fileName, 100, "%s_%d.csv", CSV_FILE_CLEAN, testId);
+		snprintf(fileName, 100, "%s-%d-%d.csv", CSV_FILE_CLEAN, testArg, testId);
 		fp = fopen(fileName, "wb+");
 	} else {
 		// Create file name for a new csv file
-		snprintf(fileName, 100, "%s_%d.csv", CSV_FILE_DIRTY, testId);
+		snprintf(fileName, 100, "%s-%d-%d.csv", CSV_FILE_DIRTY, testArg, testId);
 		fp = fopen(fileName, "wb+");
 	}
 
@@ -201,7 +201,7 @@ void write_to_csv(unsigned long long *time, int type, int testId, int experiment
 	int i = 0;
 	long n = 1;
 	for (i = 0; i < experimentsRun; ++i) {
-		fprintf(fp, "\n%lu,%llu", n * sizeof(long), time[i - 1]);
+		fprintf(fp, "\n%lu,%llu", n * sizeof(long), time[i]);
 		int j = 0;
 		for (j = 0; j < TIMES_RUN_EXPERIMENT; ++j) {
 			//printf("%d.%d %llu %llu %llu %llu\n", interrupts[i][j], pageFaultsMinor[i][j], pageFaultsMajor[i][j], contextSwitches[i][j]);

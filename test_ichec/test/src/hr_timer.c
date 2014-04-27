@@ -101,11 +101,18 @@ unsigned long long rdtsc_old(int CPUID) {
 uint64_t rdtsc() {
 	uint32_t lo, hi;
 	/* We cannot use "=A", since this would use %rax on x86_64 */
+//	asm volatile (
+//			"CPUID\n\t"/*serialize*/
+//			"RDTSC\n\t"/*read the clock*/
+//			"mov %%edx, %0\n\t"
+//			"mov %%eax, %1\n\t": "=r" (hi), "=r"
+//			(lo):: "%rax", "%rbx", "%rcx", "%rdx");
+
 	asm volatile (
-			/*"CPUID\n\t"/*serialize*/
-			"RDTSC\n\t"/*read the clock*/
+			"RDTSCP\n\t"/*read the clock*/
 			"mov %%edx, %0\n\t"
-			"mov %%eax, %1\n\t": "=r" (hi), "=r"
+			"mov %%eax, %1\n\t"
+			"CPUID\n\t": "=r" (hi), "=r"
 			(lo):: "%rax", "%rbx", "%rcx", "%rdx");
 	return (uint64_t) hi << 32 | lo;
 }

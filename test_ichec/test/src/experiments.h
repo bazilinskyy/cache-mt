@@ -32,12 +32,45 @@
 #ifndef EXPERIMENTS_H_
 #define EXPERIMENTS_H_
 
+#define _GNU_SOURCE
 #include "conf.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+// Pthread
+#include <sched.h>
+#include <errno.h>
+#include <pthread.h>
+#include <unistd.h>
 
+pthread_mutex_t mut; // Mutex used for thread synchronisation.
+
+/*
+ * Structure used for a wrapper function used in pthread_create.
+ */
+struct argStructType {
+	int experimentId;
+	int n; // Size of data handled in the experiment.
+	long * testAr; // Pointer to a shared between threads structure
+};
+
+// Main functions for running experiments.
+void experiment_0();
 void experiment_1(int n);
+void experiment_2(int n);
+void experiment_3(int n);
+void experiment_4(int n);
+void experiment_5(int n);
+void experiment_6(int n);
 
+// Functions to be run from inside of pthreads.
+void *e2_pthread_main1(void * argStruct);
+void *e2_pthread_main2(void * argStruct);
+void *e3_pthread_main1(void * argStruct);
+void *e3_pthread_main2(void * argStruct);
+void *e4_pthread_main1(void * argStruct);
+void *e4_pthread_main2(void * argStruct);
+
+int pin_thread_to_core(int coreId); // Pin pthread to core
 
 #endif /* EXPERIMENTS_H_ */

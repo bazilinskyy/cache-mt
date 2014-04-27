@@ -59,31 +59,17 @@ int main(int argc, char *argv[]) {
 	set_highest_process_priority();
 #endif
 
-	// TODO fix pthreads on Mac OS
-#ifndef __APPLE__
-	pthread_t thread1;
-	int rc;
+	// Run tests
+	run_tests(argc, argv);
 
-	// Run in pthread
-	rc = pthread_create(&thread1, NULL, pthread_main, (void *)NULL);
-	if (rc) {
-		printf("ERROR; return code from pthread_create() is %d\n", rc);
-		exit(-1);
-	}
-	pthread_join(thread1, NULL);
-#else
-	pthread_main((void *) 1);
-#endif
 	// Everything is good, return Success code
 	return EXIT_SUCCESS;
 }
 
 // Function run in the thread
-void *pthread_main(void *params) {
+void run_tests(int argc, char *argv[]) {
 	int i = 0;
 	long n;
-
-	int threadId = (int) params; // Get the thread ID
 
 	// Set up thread affinity.
 #if PROCESS_AFFINITY == PIN_TO_ONE_CPU
@@ -150,7 +136,7 @@ void *pthread_main(void *params) {
 			for (expId = 0; expId < TIMES_RUN_EXPERIMENT; ++expId) { // Run experiments in the test
 
 #ifdef DETAILED_DEBUG
-				printf("* Test: %d Experiment: %d\n", n, expId + 1);
+				printf("* Test: %d Experiment: %d\n", (int) n, (int) expId + 1);
 #endif
 
 				// Values for gethering data about the environment
@@ -167,7 +153,7 @@ void *pthread_main(void *params) {
 				// Strings for storing contents of the files
 				char *interruptsBeforeString;
 				char *pageFaultsBeforeString;
-				char *contextSwitchesBeforeString;
+				// char *contextSwitchesBeforeString;
 
 				// Get process ID
 				int processId = getpid();
@@ -195,7 +181,7 @@ void *pthread_main(void *params) {
 //				char fileNameStatus[100];
 //				snprintf(fileNameStatus, 100, "%s%s", fileName, "/status");
 //				contextSwitchesBeforeString = file_to_string(fileNameStatus);
-				contextSwitchesBeforeString = "0";
+				//contextSwitchesBeforeString = "0";
 #else
 				//TODO read for Mac OS
 #endif
@@ -206,15 +192,23 @@ void *pthread_main(void *params) {
 				unsigned long long timeBefore, timeAfter;
 
 				// ******** RUN EXPERIMENT ***********
-				int j;
-				for (j = 0; j < 2; j++) {
-					//usleep(10);
-					timeBefore = rdtsc();
-					if (experiment_id == 1) {
-						experiment_1(n);
-					}
-					timeAfter = rdtsc();
+				timeBefore = rdtsc();
+				if (experiment_id == 1) {
+					experiment_1(n);
+				} else if (experiment_id == 2) {
+					experiment_2(n);
+				} else if (experiment_id == 3) {
+					experiment_3(n);
+				} else if (experiment_id == 4) {
+					experiment_4(n);
+				} else if (experiment_id == 5) {
+					experiment_5(n);
+				} else if (experiment_id == 6) {
+					experiment_6(n);
+				} else if (experiment_id == 0) {
+					experiment_0();
 				}
+				timeAfter = rdtsc();
 				// Decide which experiment to run
 
 				// ******** FINISH EXPERIMENT ********
@@ -249,6 +243,16 @@ void *pthread_main(void *params) {
 				// Decide which experiment to run
 				if (experiment_id == 1) {
 					experiment_1(n);
+				} else if (experiment_id == 2) {
+					experiment_2(n);
+				} else if (experiment_id == 3) {
+					experiment_3(n);
+				} else if (experiment_id == 4) {
+					experiment_4(n);
+				} else if (experiment_id == 5) {
+					experiment_5(n);
+				} else if (experiment_id == 6) {
+					experiment_6(n);
 				}
 
 				// ******** FINISH EXPERIMENT ********
@@ -310,30 +314,41 @@ void *pthread_main(void *params) {
 				// Disregard experiment if comparison of it with MIN and MAX makes it invalid
 				unsigned long long minTime = n * 1; // Lower bound for the duration of the run
 				unsigned long long maxTime = n * 100000; // Upper bound for the duration of the run
-				if (tempTime < minTime || tempTime > maxTime) { // Disregard this run if it does not meet timing requirements
+
+				// Decide if timing requirements should be considered.
+#ifdef CONSIDER_TIMEOUT
+				int timeout = 1;
+#else
+				int timeout = 0;
+#endif
+
+				if (timeout && (tempTime < minTime || tempTime > maxTime)) { // Disregard this run if it does not meet timing requirements
+#ifdef DETAILED_DEBUG
+					printf("TIMEOUT: %llu\n", tempTime);
+#endif
 					continue;
 				} else if (pageFaultsMinorAfter - pageFaultsMinorBefore > ALLOWED_PAGEFAULTS_MINOR) { // Disregard this run if minor pagefaults were detected
 #ifdef DETAILED_DEBUG
-				printf("PFMIN. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, pageFaultsMinorAfter - pageFaultsMinorBefore,
-						ALLOWED_PAGEFAULTS_MINOR);
+					printf("PFMIN. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, pageFaultsMinorAfter - pageFaultsMinorBefore,
+					ALLOWED_PAGEFAULTS_MINOR);
 #endif
 					continue;
 				} else if (pageFaultsMajorAfter - pageFaultsMajorBefore > ALLOWED_PAGEFAULTS_MAJOR) { // Disregard this run if major pagefaults were detected
 #ifdef DETAILED_DEBUG
-				printf("PFMAJ. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, pageFaultsMajorAfter - pageFaultsMajorBefore,
-						ALLOWED_PAGEFAULTS_MAJOR);
+					printf("PFMAJ. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, pageFaultsMajorAfter - pageFaultsMajorBefore,
+					ALLOWED_PAGEFAULTS_MAJOR);
 #endif
 					continue;
 				} else if (contextSwitchesAfter - contextSwitchesBefore > ALLOWED_CONTEXT_SWITCHES) { // Disregard this run if voluntary context switches were detected
 #ifdef DETAILED_DEBUG
-				printf("CS. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, contextSwitchesAfter - contextSwitchesBefore,
-						ALLOWED_CONTEXT_SWITCHES);
+					printf("CS. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, contextSwitchesAfter - contextSwitchesBefore,
+					ALLOWED_CONTEXT_SWITCHES);
 #endif
 					continue;
 				} else if (interruptsAfter - interruptsBefore > ALLOWED_INTERRUPTS) { // Disregard this run if interrupts were detected
 #ifdef DETAILED_DEBUG
-				printf("INT. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, interruptsAfter - interruptsBefore,
-						ALLOWED_INTERRUPTS);
+					printf("INT. TEST: %ld. EXP: %d DIFF: %llu LIMIT: %d\n", n, expId + 1, interruptsAfter - interruptsBefore,
+					ALLOWED_INTERRUPTS);
 #endif
 					continue;
 				} else { // Everything it fine, record this run as successful
@@ -343,7 +358,7 @@ void *pthread_main(void *params) {
 			}
 			// Calculate average time of running the experiment
 			time[(int) i] = average_time(currentTime, experimentsRunSuccessfully); // 0 denotes a failed experiment (number of successful runs = 0)
-			//printf("time: %llu aver: %llu\n ", time[(int) i], average_time(currentTime, experimentsRunSuccessfully));
+//			printf("time: %llu aver: %llu\n ", time[(int) i], average_time(currentTime, experimentsRunSuccessfully));
 
 			// TODO bug with time showing as 0 starting from the 2nd test on Mac.
 //			if (testId == 1)
@@ -378,8 +393,8 @@ void *pthread_main(void *params) {
 
 #ifdef OUTPUT_TO_FILE
 		// Write to file
-		write_to_csv(time, 1, testId, experimentsRun, interrupts, pageFaultsMinor, pageFaultsMajor, contextSwitches);
-		write_to_csv(timeDirty, 2, testId, experimentsRun, interrupts, pageFaultsMinor, pageFaultsMajor, contextSwitches);
+		write_to_csv(time, 1, experiment_id, testId, experimentsRun, interrupts, pageFaultsMinor, pageFaultsMajor, contextSwitches);
+		write_to_csv(timeDirty, 2, experiment_id, testId, experimentsRun, interrupts, pageFaultsMinor, pageFaultsMajor, contextSwitches);
 #endif
 
 	} // End of the test loop.
@@ -405,27 +420,6 @@ void *pthread_main(void *params) {
 //		free((void *) contextSwitches[i]);
 //	}
 //	free(contextSwitches);
-
-	return (void *) 1;
-}
-
-// Pin thread to a particular core
-int pin_thread_to_core(int coreId) {
-#ifndef __APPLE__
-	int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
-	if (coreId < 0 || coreId >= num_cores)
-	return EINVAL;
-
-	cpu_set_t cpuset;
-	CPU_ZERO(&cpuset);
-	CPU_SET(coreId, &cpuset);
-
-	pthread_t current_thread = pthread_self();
-	return pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
-#else
-	// TODO set affinity on Mac.
-	return -1;
-#endif
 }
 
 // Set priority of the current to be the highest
