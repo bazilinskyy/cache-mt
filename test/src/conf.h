@@ -39,11 +39,11 @@
 
 // Configure test
 #define MORE_EXPERIMENTS // Run a large number of experiments (refer to test_env.c)
-#define TIMING CLOCK_GETTIME // 1 for RDTSC or 2 for clock_gettime
+#define TIMING RDTSC // 1 for RDTSC or 2 for clock_gettime
 //#define USE_RDTSCP // Use RDTSCP instead of RDTSC
 #define START_AFTER TIMER_TICK // 1 for TIMER_TICK or 2 for TIME_INTERRUPT. Used with clock_gettime
 // Configure experiment (each test consists of a number of experiments == TIMES_RUN_EXPERIMENT)
-#define MAX_POWER 20
+#define MAX_POWER 24
 #define SET_HIGHEST_PRIORITY
 #define WARM_CACHE
 #define WARM_STRINGS_WITH_FILES

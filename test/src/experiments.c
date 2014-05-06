@@ -42,7 +42,7 @@ int rc;
 
 // Test 0 (Control)
 void experiment_0() {
-	printf ("Test with registers\n");
+	printf("Test with registers\n");
 	register long x = 10;
 	long y = 0;
 	x = y;
@@ -56,15 +56,9 @@ void experiment_0() {
 
 // Test 1 ()
 void experiment_1(int n) {
-	long *testAr = malloc(sizeof(long) * n * 2);
-	//printf("The base address is %X\n", (unsigned long) testAr);
-	// test& = 0xFFFFFFD0; Align data
-	//printf("The base address is %X\n", (unsigned long) testAr);
+	// Array for manipulating data
+	long *testAr = align_long_array(sizeof(long) * n); // Align array
 
-	if (testAr == NULL) { // Array for manipulating data
-		printf("Error with allocating space for the array\n");
-		exit(1);
-	}
 	long testLong = 0; // 4 bytes of data
 
 	int i;
@@ -96,11 +90,8 @@ void experiment_1(int n) {
  *
  */
 void experiment_2(int n) {
-	long *testAr = malloc(sizeof(long) * n);
-	if (testAr == NULL) { // Array for manipulating data
-		printf("Error with allocating space for the array\n");
-		exit(1);
-	}
+	// Array for manipulating data
+	long *testAr = align_long_array(sizeof(long) * n); // Align array
 
 	// Wrap information that has to be passed to a pthread
 	struct argStructType * argStruct = malloc(sizeof(struct argStructType));
@@ -141,7 +132,6 @@ void *e2_pthread_main1(void * argStruct) {
 		exit(-1);
 	}
 
-
 	// Work with  shared data
 	int i = 0;
 	for (i = 0; i < args->n; ++i) {
@@ -177,11 +167,8 @@ void *e2_pthread_main2(void * argStruct) {
  *
  */
 void experiment_3(int n) {
-	long *testAr = malloc(sizeof(long) * n);
-	if (testAr == NULL) { // Array for manipulating data
-		printf("Error with allocating space for the array\n");
-		exit(1);
-	}
+	// Array for manipulating data
+	long *testAr = align_long_array(sizeof(long) * n); // Align array
 
 	// Wrap information that has to be passed to a pthread
 	struct argStructType * argStruct = malloc(sizeof(struct argStructType));
@@ -222,7 +209,6 @@ void *e3_pthread_main1(void * argStruct) {
 		exit(-1);
 	}
 
-
 	// Work with  shared data
 	int i = 0;
 	for (i = 0; i < args->n; ++i) {
@@ -258,11 +244,8 @@ void *e3_pthread_main2(void * argStruct) {
  *
  */
 void experiment_4(int n) {
-	long *testAr = malloc(sizeof(long) * n);
-	if (testAr == NULL) { // Array for manipulating data
-		printf("Error with allocating space for the array\n");
-		exit(1);
-	}
+	// Array for manipulating data
+	long *testAr = align_long_array(sizeof(long) * n); // Align array
 
 	// Wrap information that has to be passed to a pthread
 	struct argStructType * argStruct = malloc(sizeof(struct argStructType));
@@ -293,6 +276,7 @@ void experiment_4(int n) {
 	pthread_join(thread2, NULL);
 
 	// Finish
+	free(testAr);
 	free(argStruct); // Free memory allocated for generic argument struct
 	pthread_mutex_destroy(&mut);
 }
@@ -310,7 +294,6 @@ void *e4_pthread_main1(void * argStruct) {
 		printf("ERROR; return code from pthread_create() is %d\n", rc);
 		exit(-1);
 	}
-
 
 	// Work with  shared data
 	int i = 0;
@@ -350,7 +333,7 @@ void *e4_pthread_main2(void * argStruct) {
 int pin_thread_to_core(int coreId) {
 	int num_cores = sysconf(_SC_NPROCESSORS_ONLN);
 	if (coreId < 0 || coreId >= num_cores)
-	return EINVAL;
+		return EINVAL;
 
 	cpu_set_t cpuset;
 	CPU_ZERO(&cpuset);
@@ -358,4 +341,16 @@ int pin_thread_to_core(int coreId) {
 
 	pthread_t current_thread = pthread_self();
 	return pthread_setaffinity_np(current_thread, sizeof(cpu_set_t), &cpuset);
+}
+
+// Return a pointer to an aligned array of longs
+long * align_long_array(int size) {
+	long x = malloc(size + 32);
+	if (x == NULL) { // Array for manipulating data
+		printf("Error with allocating space for the array\n");
+		exit(1);
+	}
+
+	return x; // TODO correct alignment
+//	return (unsigned long *) ((unsigned long) (x + 32) & 0xFFFFFFE0);
 }

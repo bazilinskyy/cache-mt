@@ -71,6 +71,7 @@ void *e3_pthread_main2(void * argStruct);
 void *e4_pthread_main1(void * argStruct);
 void *e4_pthread_main2(void * argStruct);
 
+long * align_long_array(int size); // Return a pointer to an aligned array of longs
 int pin_thread_to_core(int coreId); // Pin pthread to core
 
 #endif /* EXPERIMENTS_H_ */

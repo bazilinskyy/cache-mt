@@ -116,7 +116,7 @@ void run_tests(int argc, char *argv[]) {
 
 		// Run experiments
 		int experimentsRun = 0;
-		for (n = 1.0; n < pow(2.0, (double) MAX_POWER);) {
+		for (n = 0.0; n < pow(2.0, (double) MAX_POWER);) {
 			experimentsRun++;
 
 #ifdef DEBUG
@@ -379,7 +379,7 @@ void run_tests(int argc, char *argv[]) {
 		// Output results
 #ifdef SHOW_RESULTS
 		printf("\n%d. RESULTS Clean - %d:\n", testId, experimentsRun);
-		long n = 1;
+		long n = 0;
 //		 See bug above: bug with time showing as 0 starting from the 2nd test on Mac.
 //		if (testId == 1)
 //			printf("%llu\n ", time[1]);

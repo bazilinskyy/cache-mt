@@ -124,7 +124,18 @@ void run_tests(int argc, char *argv[]) {
 #endif
 
 #ifdef WARM_CACHE //Warm up cache
-			experiment_1(0); // Call experiment function once to warm up cache
+			// Call experiment function once to warm up cache
+			if (experiment_id == 1) {
+				experiment_1(n);
+			} else if (experiment_id == 2) {
+				experiment_2(n);
+			} else if (experiment_id == 3) {
+				experiment_3(n);
+			} else if (experiment_id == 4) {
+				experiment_4(n);
+			} else if (experiment_id == 0) {
+				experiment_0();
+			}
 #endif
 #ifdef WARM_STRINGS_WITH_FILES // Create two copies of each string used for storing files to fill in memory with this data.
 			warm_strings_with_files();
@@ -201,10 +212,6 @@ void run_tests(int argc, char *argv[]) {
 					experiment_3(n);
 				} else if (experiment_id == 4) {
 					experiment_4(n);
-				} else if (experiment_id == 5) {
-					experiment_5(n);
-				} else if (experiment_id == 6) {
-					experiment_6(n);
 				} else if (experiment_id == 0) {
 					experiment_0();
 				}
@@ -249,10 +256,8 @@ void run_tests(int argc, char *argv[]) {
 					experiment_3(n);
 				} else if (experiment_id == 4) {
 					experiment_4(n);
-				} else if (experiment_id == 5) {
-					experiment_5(n);
-				} else if (experiment_id == 6) {
-					experiment_6(n);
+				} else if (experiment_id == 0) {
+					experiment_0();
 				}
 
 				// ******** FINISH EXPERIMENT ********
