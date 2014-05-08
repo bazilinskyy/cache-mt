@@ -88,26 +88,26 @@ void run_tests(int argc, char *argv[]) {
 	}
 
 	// Record information about interrupts page faults and context switches for all iterations of all experiments
-	unsigned long long interrupts[MAX_POWER * 10][TIMES_RUN_EXPERIMENT];
-	unsigned long long pageFaultsMinor[MAX_POWER * 10][TIMES_RUN_EXPERIMENT];
-	unsigned long long pageFaultsMajor[MAX_POWER * 10][TIMES_RUN_EXPERIMENT];
-	unsigned long long contextSwitches[MAX_POWER * 10][TIMES_RUN_EXPERIMENT];
+	unsigned long long interrupts[MAX_POWER * 10][TIMES_RUN_SUB_EXPERIMENT];
+	unsigned long long pageFaultsMinor[MAX_POWER * 10][TIMES_RUN_SUB_EXPERIMENT];
+	unsigned long long pageFaultsMajor[MAX_POWER * 10][TIMES_RUN_SUB_EXPERIMENT];
+	unsigned long long contextSwitches[MAX_POWER * 10][TIMES_RUN_SUB_EXPERIMENT];
 
 	// Record information about time of execution of the experiment
-	unsigned long long *currentTime = malloc(sizeof(unsigned long long) * TIMES_RUN_EXPERIMENT); // Record times of experiments in the run.
+	unsigned long long *currentTime = malloc(sizeof(unsigned long long) * TIMES_RUN_SUB_EXPERIMENT); // Record times of experiments in the run.
 	if (time == NULL) {
 		printf("Error with allocating space for the array\n");
 		exit(1);
 	}
 	// Record information about dirty (not exluding runs with interrupts, page faults, and context switches) time of execution of the experiment
-	unsigned long long *currentTimeDirty = malloc(sizeof(unsigned long long) * TIMES_RUN_EXPERIMENT); // Record times of experiments in the run.
+	unsigned long long *currentTimeDirty = malloc(sizeof(unsigned long long) * TIMES_RUN_SUB_EXPERIMENT); // Record times of experiments in the run.
 	if (time == NULL) {
 		printf("Error with allocating space for the array\n");
 		exit(1);
 	}
 
 	int testId = 0; // ID of the test. Used for output.
-	for (testId = 0; testId < TIMES_RUN_TEST; ++testId) { // Run tests=
+	for (testId = 0; testId < TIMES_RUN_EXPERIMENT; ++testId) { // Run tests=
 
 		// Reset arrays
 		memcpy(&time[0], &(typeof(time) ) { 0 }, sizeof time);
@@ -141,10 +141,10 @@ void run_tests(int argc, char *argv[]) {
 			warm_strings_with_files();
 #endif
 
-			// Run each experiment for TIMES_RUN_EXPERIMENT times
+			// Run each experiment for TIMES_RUN_SUB_EXPERIMENT times
 			int expId = 0; // The ID of the experiment
 			int experimentsRunSuccessfully = 0; // Record how many times the experiment was run successfully
-			for (expId = 0; expId < TIMES_RUN_EXPERIMENT; ++expId) { // Run experiments in the test
+			for (expId = 0; expId < TIMES_RUN_SUB_EXPERIMENT; ++expId) { // Run experiments in the test
 
 #ifdef DETAILED_DEBUG
 				printf("* Test: %d Experiment: %d\n", (int) n, (int) expId + 1);
@@ -239,7 +239,6 @@ void run_tests(int argc, char *argv[]) {
 
 				while (interrupts1 == interrupts2) {
 					interrupts2 = search_in_file("/proc/interrupts", "LOC:", 1);
-					printf("%llu %llu\n", interrupts1, interrupts2);
 				}
 				// Calculate the start time
 				struct timespec start;
@@ -368,7 +367,7 @@ void run_tests(int argc, char *argv[]) {
 			// TODO bug with time showing as 0 starting from the 2nd test on Mac.
 //			if (testId == 1)
 //				printf("%llu\n ", time[(int) i]);
-			timeDirty[(int) i] = average_time(currentTimeDirty, TIMES_RUN_EXPERIMENT); // 0 denotes a failed experiment (number of successful runs = 0)
+			timeDirty[(int) i] = average_time(currentTimeDirty, TIMES_RUN_SUB_EXPERIMENT); // 0 denotes a failed experiment (number of successful runs = 0)
 			i++; // Iterate for easier access to array
 
 			// Determine next value for n based on the current value
@@ -388,7 +387,7 @@ void run_tests(int argc, char *argv[]) {
 			n = calculate_n(n);
 		}
 
-		n = 1;
+		n = 0;
 		printf("\n%d. RESULTS Dirty - %d:\n", testId, experimentsRun);
 		for (i = 1; i <= experimentsRun; ++i) {
 			printf("%d. %lu - %llu\n", i, n * sizeof(long), timeDirty[i - 1]); // Assuming that we write longs.

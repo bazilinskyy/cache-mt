@@ -345,12 +345,15 @@ int pin_thread_to_core(int coreId) {
 
 // Return a pointer to an aligned array of longs
 long * align_long_array(int size) {
+#ifdef ALIGN_DATA
 	long x = malloc(size + 32);
 	if (x == NULL) { // Array for manipulating data
 		printf("Error with allocating space for the array\n");
 		exit(1);
 	}
+	return (unsigned long *) ((unsigned long) (x + 32) & 0xFFFFFFE0);
 
+#else
 	return x; // TODO correct alignment
-//	return (unsigned long *) ((unsigned long) (x + 32) & 0xFFFFFFE0);
+#endif
 }
