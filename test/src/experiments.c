@@ -37,24 +37,19 @@ int rc;
 /*
  * EXPERIMENT 0
  *
- * Measuring latncy of registers.
+ * Measuring latency of registers.
  */
-
-// Test 0 (Control)
 void experiment_0() {
-	printf("Test with registers\n");
 	register long x = 10;
 	long y = 0;
 	x = y;
 }
 
 /*
- * EXPERIMENT 0
+ * EXPERIMENT 1
  *
  * Measuring cycle-level latency.
  */
-
-// Test 1 ()
 void experiment_1(int n) {
 	// Array for manipulating data
 	long *testAr = align_long_array(sizeof(long) * n); // Align array
@@ -68,22 +63,6 @@ void experiment_1(int n) {
 	}
 	free(testAr);
 }
-
-//TODO fix pthreads on Mac OS. OLD CODE for pthreads.
-//#ifndef __APPLE__
-//	pthread_t thread1;
-//	int rc;
-//
-//	// Run in pthread
-//	rc = pthread_create(&thread1, NULL, pthread_main, (void *)NULL);
-//	if (rc) {
-//		printf("ERROR; return code from pthread_create() is %d\n", rc);
-//		exit(-1);
-//	}
-//	pthread_join(thread1, NULL);
-//#else
-//	pthread_main((void *) 1);
-//#endif
 
 /*
  * EXPERIMENT 2
@@ -143,6 +122,7 @@ void *e2_pthread_main1(void * argStruct) {
 	return ((void *) 1);
 }
 
+// Receiver. This thread receives data
 void *e2_pthread_main2(void * argStruct) {
 	pin_thread_to_core(0); // Pin to the first core of the first CPU.
 

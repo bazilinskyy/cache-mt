@@ -49,9 +49,9 @@ pthread_mutex_t mut; // Mutex used for thread synchronisation.
  * Structure used for a wrapper function used in pthread_create.
  */
 struct argStructType {
-	int experimentId;
-	int n; // Size of data handled in the experiment.
-	long * testAr; // Pointer to a shared between threads structure
+	int experimentId;	// ID of an experiment.
+	int n; 				// Size of data handled in the experiment.
+	long * testAr; 		// Pointer to a shared between threads structure
 };
 
 // Main functions for running experiments.
