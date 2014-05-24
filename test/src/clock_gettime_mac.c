@@ -55,7 +55,7 @@
 			tp->tv_sec = diff * MT_NANO;
 			tp->tv_nsec = diff - (tp->tv_sec * MT_GIGA);
 		}
-		else // other clk_ids are mapped to the coresponding mach clock_service
+		else
 		{
 			clock_serv_t cclock;
 			mach_timespec_t mts;

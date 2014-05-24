@@ -326,13 +326,15 @@ int pin_thread_to_core(int coreId) {
 // Return a pointer to an aligned array of longs
 long * align_long_array(int size) {
 #ifdef ALIGN_DATA
+    int cacheLine = 64 * 2;
+	long x = malloc(size + cacheLine);
 	if (x == NULL) { // Array for manipulating data
-		printf("Error with allocating space for the array\n");
+		printf("Error with allocating space.\n");
 		exit(1);
 	}
-	return (unsigned long *) ((unsigned long) (x + 32) & 0xFFFFFFE0);
-
+	return (unsigned long *) ((unsigned long long)
+	    (x + cacheLine) & 0xFFFFFFE0);
 #else
-	return malloc(size); // TODO correct alignment
+	return malloc(size);
 #endif
 }
