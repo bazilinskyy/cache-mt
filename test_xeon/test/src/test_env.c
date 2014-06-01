@@ -116,8 +116,9 @@ int warm_strings_with_files(void) {
 // Calculate how many bytes are to be written during the experiment
 long calculate_n(long n) {
 #ifdef MORE_EXPERIMENTS // Run a lot of experiments
-
-	if (n < 100) {
+	if (n == 0) {
+		n = 1;
+	} else if (n < 100) {
 		n *= 2.0;
 	} else if (n > 100 && n < 1000) {
 		n += 20;

@@ -36,6 +36,7 @@
 #include <math.h>
 #include <time.h>
 #include <pthread.h>
+#include <limits.h>
 #ifdef __APPLE__
 	#include "clock_gettime_mac.h"
 #elif __linux // For future use
@@ -72,8 +73,8 @@ int get_time_res(struct timespec *timeStruct);
 // From http://stackoverflow.com/questions/13950290/clock-gettime-nanoseconds-calculation
 unsigned long long calculate_time_ns(struct timespec start, struct timespec end);
 unsigned long long rdtsc_old(int CPUID); //  Get time with rdtsc, if it is enabled in the kernel
-unsigned long long average_time(unsigned long long *time, int timesRun); // Calculate average time of running experiment
-
+unsigned long long average_time(unsigned long long *time, int timesRun); // Calculate average time of running an experiment
+unsigned long long min_time(unsigned long long *time, int timesRun); // Calculate the minimum time of running an experiment
 // Functions used for testing
 void test_clock_gettime(void);
 void test_clock_getres(void);

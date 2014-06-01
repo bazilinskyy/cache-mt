@@ -47,10 +47,11 @@
 #define SET_HIGHEST_PRIORITY
 #define WARM_CACHE
 #define WARM_STRINGS_WITH_FILES
+//#define ALIGN_DATA // Align arrays that are used in inter-thread communcation
 #define PROCESS_AFFINITY NA // PIN_TO_ONE_CPU
 #define PIN_TO_CPU 0
-#define TIMES_RUN_TEST 1
-#define TIMES_RUN_EXPERIMENT 10
+#define TIMES_RUN_EXPERIMENT 1
+#define TIMES_RUN_SUB_EXPERIMENT 10
 //#define CONSIDER_TIMEOUT
 #define ALLOWED_INTERRUPTS 0
 #define ALLOWED_CONTEXT_SWITCHES 0

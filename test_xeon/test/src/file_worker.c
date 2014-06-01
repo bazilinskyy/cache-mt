@@ -170,8 +170,8 @@ unsigned long get_page_fault_from_string(char * string, int choice) {
 }
 
 // Output time array into a CSV file. Type: 1 - clean, 2 - dirty
-void write_to_csv(unsigned long long *time, int type, int testArg, int testId, int experimentsRun, unsigned long long interrupts[][TIMES_RUN_EXPERIMENT], unsigned long long pageFaultsMinor[][TIMES_RUN_EXPERIMENT],
-		unsigned long long pageFaultsMajor[][TIMES_RUN_EXPERIMENT], unsigned long long contextSwitches[][TIMES_RUN_EXPERIMENT]) {
+void write_to_csv(unsigned long long *time, int type, int testArg, int testId, int experimentsRun, unsigned long long interrupts[][TIMES_RUN_SUB_EXPERIMENT], unsigned long long pageFaultsMinor[][TIMES_RUN_SUB_EXPERIMENT],
+		unsigned long long pageFaultsMajor[][TIMES_RUN_SUB_EXPERIMENT], unsigned long long contextSwitches[][TIMES_RUN_SUB_EXPERIMENT]) {
 	// Open filestream
 	FILE *fp;
 	char fileName[100];
@@ -194,7 +194,7 @@ void write_to_csv(unsigned long long *time, int type, int testArg, int testId, i
 	// Write headers
 	fprintf(fp, "N,Time");
 	int j = 0;
-	for (j = 0; j < TIMES_RUN_EXPERIMENT; ++j) {
+	for (j = 0; j < TIMES_RUN_SUB_EXPERIMENT; ++j) {
 		fprintf(fp, ",%d.INT,%d.PFMIN,%d.PFMAJ", j+1, j+1, j+1);
 	}
 	// Write timing information
@@ -203,7 +203,7 @@ void write_to_csv(unsigned long long *time, int type, int testArg, int testId, i
 	for (i = 0; i < experimentsRun; ++i) {
 		fprintf(fp, "\n%lu,%llu", n * sizeof(long), time[i]);
 		int j = 0;
-		for (j = 0; j < TIMES_RUN_EXPERIMENT; ++j) {
+		for (j = 0; j < TIMES_RUN_SUB_EXPERIMENT; ++j) {
 			//printf("%d.%d %llu %llu %llu %llu\n", interrupts[i][j], pageFaultsMinor[i][j], pageFaultsMajor[i][j], contextSwitches[i][j]);
 			fprintf(fp, ",%llu,%llu,%llu", interrupts[i][j], pageFaultsMinor[i][j], pageFaultsMajor[i][j]);
 		}

@@ -170,7 +170,7 @@ unsigned long get_page_fault_from_string(char * string, int choice) {
 }
 
 // Output time array into a CSV file. Type: 1 - clean, 2 - dirty
-void write_to_csv(unsigned long long *time, int type, int testArg, int testId, int experimentsRun, unsigned long long interrupts[][TIMES_RUN_SUB_EXPERIMENT], unsigned long long pageFaultsMinor[][TIMES_RUN_SUB_EXPERIMENT],
+void write_to_csv(unsigned long long *time, unsigned long long *timeMin, int type, int testArg, int testId, int experimentsRun, unsigned long long interrupts[][TIMES_RUN_SUB_EXPERIMENT], unsigned long long pageFaultsMinor[][TIMES_RUN_SUB_EXPERIMENT],
 		unsigned long long pageFaultsMajor[][TIMES_RUN_SUB_EXPERIMENT], unsigned long long contextSwitches[][TIMES_RUN_SUB_EXPERIMENT]) {
 	// Open filestream
 	FILE *fp;
@@ -192,7 +192,7 @@ void write_to_csv(unsigned long long *time, int type, int testArg, int testId, i
 
 	// Write to file
 	// Write headers
-	fprintf(fp, "N,Time");
+	fprintf(fp, "N,Time,TimMin");
 	int j = 0;
 	for (j = 0; j < TIMES_RUN_SUB_EXPERIMENT; ++j) {
 		fprintf(fp, ",%d.INT,%d.PFMIN,%d.PFMAJ", j+1, j+1, j+1);
@@ -201,7 +201,7 @@ void write_to_csv(unsigned long long *time, int type, int testArg, int testId, i
 	int i = 0;
 	long n = 1;
 	for (i = 0; i < experimentsRun; ++i) {
-		fprintf(fp, "\n%lu,%llu", n * sizeof(long), time[i]);
+		fprintf(fp, "\n%lu,%llu,%llu", n * sizeof(long), time[i], timeMin[i]);
 		int j = 0;
 		for (j = 0; j < TIMES_RUN_SUB_EXPERIMENT; ++j) {
 			//printf("%d.%d %llu %llu %llu %llu\n", interrupts[i][j], pageFaultsMinor[i][j], pageFaultsMajor[i][j], contextSwitches[i][j]);

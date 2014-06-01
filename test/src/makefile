@@ -52,6 +52,8 @@ endif
 
 %.o: %.c $(DEPS)
 	$(CC) -c -g -o $@ $< $(CFLAGS) $(LIBS)
+	# Create files with assembly code
+	#$(CC) -S -g $< $(CFLAGS) $(LIBS) 
 
 test: $(OBJ)
 	$(CC) -o $@ $^ $(LIBS)

@@ -1,3 +1,5 @@
+// gcc test_time_int_pf.c -o test -lrt && ./test
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -80,7 +82,7 @@ int main(int argc, const char ** argv) {
 	}
 
 	// Caculate the average duration of an interrupt
-	printf("INTERRUPTS\n\ntime,num\n");
+	printf("INTERRUPTS\ntime,num\n");
 	int i = 0;
 	for (i = 0; i < run; ++i) {
 		unsigned long long interruptsBefore;
@@ -110,7 +112,7 @@ int main(int argc, const char ** argv) {
 	printf("1 interrupt takes (average from %d runs): %llu\n", run, average_time(time, run));
 
 	// Caculate the average duration of a page fault
-	printf("\nPAGE FAULTS\n\ntime,num\n");
+	printf("\nPAGE FAULTS\ntime,num\n");
 	for (i = 0; i < run; ++i) {
 		unsigned long long pfBefore;
 		unsigned long long pfAfter;
@@ -125,7 +127,7 @@ int main(int argc, const char ** argv) {
 			pfBefore = get_page_fault(stat_file, 1);
 		}
 
-		get_time_ns(&start);// Record time before causing the interrupt
+		get_time_ns(&start);// Record time before causing a page fault
 
 		// Create page faults
 		do {
@@ -133,15 +135,15 @@ int main(int argc, const char ** argv) {
 			pfAfter= get_page_fault(stat_file, 1);
 		}while (pfAfter - pfBefore == 0);
 
-		get_time_ns(&stop); // Record time after causing the interrupt
+		get_time_ns(&stop); // Record time after causing a page fault
 
-		int numPf = pfAfter - pfBefore;// How many interrupts occurred
-		unsigned long long timeWithPf = calculate_time_ns(start, stop);// Record time with interrupts
+		int numPf = pfAfter - pfBefore;// How many minor page faults occurred
+		unsigned long long timeWithPf = calculate_time_ns(start, stop);// Record time with page faults
 
 		printf("%d,%llu\n", timeWithPf, numPf);
-		time[i] = timeWithPf / numPf;// Record time difference over a number of interrupts
+		time[i] = timeWithPf / numPf;// Record time difference over a number of page faults
 	}
-	printf("1 interrupt takes (average from %d runs): %llu\n", run, average_time(time, run));
+	printf("1 page fault takes (average from %d runs): %llu\n", run, average_time(time, run));
 
 	free(time);
 	return sum;

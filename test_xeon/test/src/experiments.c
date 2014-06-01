@@ -37,24 +37,19 @@ int rc;
 /*
  * EXPERIMENT 0
  *
- * Measuring latncy of registers.
+ * Measuring latency of registers.
  */
-
-// Test 0 (Control)
 void experiment_0() {
-	printf("Test with registers\n");
 	register long x = 10;
 	long y = 0;
 	x = y;
 }
 
 /*
- * EXPERIMENT 0
+ * EXPERIMENT 1
  *
  * Measuring cycle-level latency.
  */
-
-// Test 1 ()
 void experiment_1(int n) {
 	// Array for manipulating data
 	long *testAr = align_long_array(sizeof(long) * n); // Align array
@@ -68,22 +63,6 @@ void experiment_1(int n) {
 	}
 	free(testAr);
 }
-
-//TODO fix pthreads on Mac OS. OLD CODE for pthreads.
-//#ifndef __APPLE__
-//	pthread_t thread1;
-//	int rc;
-//
-//	// Run in pthread
-//	rc = pthread_create(&thread1, NULL, pthread_main, (void *)NULL);
-//	if (rc) {
-//		printf("ERROR; return code from pthread_create() is %d\n", rc);
-//		exit(-1);
-//	}
-//	pthread_join(thread1, NULL);
-//#else
-//	pthread_main((void *) 1);
-//#endif
 
 /*
  * EXPERIMENT 2
@@ -143,6 +122,7 @@ void *e2_pthread_main1(void * argStruct) {
 	return ((void *) 1);
 }
 
+// Receiver. This thread receives data
 void *e2_pthread_main2(void * argStruct) {
 	pin_thread_to_core(0); // Pin to the first core of the first CPU.
 
@@ -345,12 +325,16 @@ int pin_thread_to_core(int coreId) {
 
 // Return a pointer to an aligned array of longs
 long * align_long_array(int size) {
-	long x = malloc(size + 32);
+#ifdef ALIGN_DATA
+    int cacheLine = 64 * 2;
+	long x = malloc(size + cacheLine);
 	if (x == NULL) { // Array for manipulating data
-		printf("Error with allocating space for the array\n");
+		printf("Error with allocating space.\n");
 		exit(1);
 	}
-
-	return x; // TODO correct alignment
-//	return (unsigned long *) ((unsigned long) (x + 32) & 0xFFFFFFE0);
+	return (unsigned long *) ((unsigned long long)
+	    (x + cacheLine) & 0xFFFFFFE0);
+#else
+	return malloc(size);
+#endif
 }

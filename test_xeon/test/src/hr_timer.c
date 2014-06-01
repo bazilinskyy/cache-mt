@@ -83,7 +83,7 @@ unsigned long long average_time(unsigned long long *time, int timesRun) {
 
 /*
  * Use RDTSC to measure time at nanosecond accuracy (if it is not disabled)
- * CPUID == 1 - use CPUID; CPUID == 1 - do not use CPUID
+ * CPUID == 1 - use CPUID; CPUID == 0 - do not use CPUID
 */
 unsigned long long rdtsc_old(int CPUID) {
 	unsigned long a, b;

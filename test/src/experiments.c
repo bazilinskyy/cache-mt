@@ -117,6 +117,7 @@ void *e2_pthread_main1(void * argStruct) {
 		args->testAr[i] = 3l;
 	}
 
+	pthread_yield();
 	pthread_mutex_unlock(&mut); // Lock mutex.
 
 	return ((void *) 1);
@@ -195,6 +196,7 @@ void *e3_pthread_main1(void * argStruct) {
 		args->testAr[i] = 3l;
 	}
 
+	pthread_yield();
 	pthread_mutex_unlock(&mut); // Lock mutex.
 
 	return ((void *) 1);
@@ -281,6 +283,7 @@ void *e4_pthread_main1(void * argStruct) {
 		args->testAr[i] = 3l;
 	}
 
+	pthread_yield();
 	pthread_mutex_unlock(&mut); // Lock mutex.
 
 	return ((void *) 1);

@@ -32,12 +32,8 @@ IFLAGS =-I
 WFLAG1 = -Wall
 WFLAG2 = -Werror
 WFLAG3 = -Wextra
-#WFLAGS = $(WFLAG1) $(WFLAG2) $(WFLAG3)
 WFLAGS = $(WFLAG1)
 OFLAGS = -g -O3
-#SFLAG1 = -std=c99
-#SFLAG2 = -m64
-SFLAGS = $(SFLAG1) $(SFLAG2)
 DFLAGS = # -Doptions
 UFLAGS = # Set on make command line only
 CFLAGS = $(SFLAGS) $(DFLAGS) $(IFLAGS) $(OFLAGS) $(WFLAGS) $(UFLAGS)
@@ -55,9 +51,9 @@ ifeq ($(UNAME_S),Darwin)
 endif
 
 %.o: %.c $(DEPS)
-	$(CC) -c -g -o $@ $< $(CFLAGS) $(LIBS)
+	# $(CC) -c -g -o $@ $< $(CFLAGS) $(LIBS)
+	$(CC) -S -g $< $(CFLAGS) $(LIBS)
 
-# Changed from $(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 test: $(OBJ)
 	$(CC) -o $@ $^ $(LIBS)
 

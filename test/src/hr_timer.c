@@ -81,6 +81,20 @@ unsigned long long average_time(unsigned long long *time, int timesRun) {
 	return avTime / timesRun;
 }
 
+// Calculate the minimum time of running the experiment
+unsigned long long min_time(unsigned long long *time, int timesRun) {
+	if (timesRun == 0) // avoid division
+		return 0;
+	// Loop through times of all runs of the experiment
+	int i;
+	unsigned long long minTime = INT_MAX;
+	for (i = 0; i < timesRun; ++i) {
+		if (minTime > time[i])
+			minTime = time[i];
+	}
+	return minTime;
+}
+
 /*
  * Use RDTSC to measure time at nanosecond accuracy (if it is not disabled)
  * CPUID == 1 - use CPUID; CPUID == 0 - do not use CPUID

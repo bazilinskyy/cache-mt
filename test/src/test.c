@@ -86,6 +86,16 @@ void run_tests(int argc, char *argv[]) {
 		printf("Error with allocating space for the array\n");
 		exit(1);
 	}
+	unsigned long long *timeMin = malloc(sizeof(unsigned long long) * MAX_POWER * 10); // Record time for clean runs.
+	if (time == NULL) {
+		printf("Error with allocating space for the array\n");
+		exit(1);
+	}
+	unsigned long long *timeMinDirty = malloc(sizeof(unsigned long long) * MAX_POWER * 10); // Record time for dirty runs.
+	if (timeDirty == NULL) {
+		printf("Error with allocating space for the array\n");
+		exit(1);
+	}
 
 	// Record information about interrupts page faults and context switches for all iterations of all experiments
 	unsigned long long interrupts[MAX_POWER * 10][TIMES_RUN_SUB_EXPERIMENT];
@@ -302,10 +312,11 @@ void run_tests(int argc, char *argv[]) {
 #if TIMING == RDTSC
 				unsigned long long tempTime = timeAfter - timeBefore; // Calculate how much time this run took
 #elif TIMING == CLOCK_GETTIME
-						unsigned long long tempTime = calculate_time_ns(start, stop); // Calculate how much time this run took
+				unsigned long long tempTime = calculate_time_ns(start, stop); // Calculate how much time this run took
 #endif
 				// Record dirty time.
 				currentTimeDirty[expId] = tempTime; // Record how much time this iteration took
+				//printf("%llu\n", tempTime);
 
 				// Record information about interrupts, page faults, context switches
 				interrupts[experimentsRun - 1][expId] = interruptsAfter - interruptsBefore;
@@ -362,12 +373,13 @@ void run_tests(int argc, char *argv[]) {
 			}
 			// Calculate average time of running the experiment
 			time[(int) i] = average_time(currentTime, experimentsRunSuccessfully); // 0 denotes a failed experiment (number of successful runs = 0)
+			timeMin[(int) i] = min_time(currentTime, experimentsRunSuccessfully); // 0 denotes a failed experiment (number of successful runs = 0)
 //			printf("time: %llu aver: %llu\n ", time[(int) i], average_time(currentTime, experimentsRunSuccessfully));
 
-			// TODO bug with time showing as 0 starting from the 2nd test on Mac.
 //			if (testId == 1)
 //				printf("%llu\n ", time[(int) i]);
 			timeDirty[(int) i] = average_time(currentTimeDirty, TIMES_RUN_SUB_EXPERIMENT); // 0 denotes a failed experiment (number of successful runs = 0)
+			timeMinDirty[(int) i] = min_time(currentTimeDirty, TIMES_RUN_SUB_EXPERIMENT); // 0 denotes a failed experiment (number of successful runs = 0)
 			i++; // Iterate for easier access to array
 
 			// Determine next value for n based on the current value
@@ -383,22 +395,22 @@ void run_tests(int argc, char *argv[]) {
 //		if (testId == 1)
 //			printf("%llu\n ", time[1]);
 		for (i = 1; i <= experimentsRun; ++i) {
-			printf("%d. %lu - %llu\n", i, n * sizeof(long), time[i - 1]);
+			printf("%d. %lu - %llu - %llu\n", i, n * sizeof(long), time[i - 1], timeMin[i - 1]);
 			n = calculate_n(n);
 		}
 
 		n = 0;
 		printf("\n%d. RESULTS Dirty - %d:\n", testId, experimentsRun);
 		for (i = 1; i <= experimentsRun; ++i) {
-			printf("%d. %lu - %llu\n", i, n * sizeof(long), timeDirty[i - 1]); // Assuming that we write longs.
+			printf("%d. %lu - %llu - %llu\n", i, n * sizeof(long), timeDirty[i - 1], timeMinDirty[i - 1]); // Assuming that we write longs.
 			n = calculate_n(n);
 		}
 #endif
 
 #ifdef OUTPUT_TO_FILE
 		// Write to file
-		write_to_csv(time, 1, experiment_id, testId, experimentsRun, interrupts, pageFaultsMinor, pageFaultsMajor, contextSwitches);
-		write_to_csv(timeDirty, 2, experiment_id, testId, experimentsRun, interrupts, pageFaultsMinor, pageFaultsMajor, contextSwitches);
+		write_to_csv(time, timeMin, 1, experiment_id, testId, experimentsRun, interrupts, pageFaultsMinor, pageFaultsMajor, contextSwitches);
+		write_to_csv(timeDirty, timeMin, 2, experiment_id, testId, experimentsRun, interrupts, pageFaultsMinor, pageFaultsMajor, contextSwitches);
 #endif
 
 	} // End of the test loop.
