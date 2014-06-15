@@ -2,7 +2,7 @@
  ============================================================================================
  Name        : experiments.c
  Author      : Pavlo Bazilinskyy
- Version     : 0.1
+ Version     : 1.0
  Copyright   : Copyright (c) 2014, Pavlo Bazilinskyy <pavlo.bazilinskyy@gmail.com>
  School of Computer Science, National University of Ireland, Maynooth
 
@@ -25,7 +25,6 @@
  THE SOFTWARE.
 
  Description : The header for the experiments.
- Target		 : MacBook Air with i7 and Xeon 5130
  ============================================================================================
  */
 

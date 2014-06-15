@@ -40,7 +40,7 @@ static int cycle = 0; 				// Counter of how many files have been stored in resul
  * Based on code from Stephen Brown.
  */
 int read_stat(char * filename, int pid, struct proc_stats *s) {
-#ifndef __APPLE__
+#ifndef __APPLE__ // Does not work on Mac OS
 	const char *format = "%d %s %c %d %d %d %d %d %lu %lu %lu %lu %lu %lu %lu %ld %ld %ld %ld %ld %ld %lu %lu %ld %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %d %d %lu %lu %llu";
 	FILE *fp;
 
@@ -252,7 +252,7 @@ unsigned long long search_in_file(char *f, char *str, int find_numeric) {
 	FILE *fp;			// File pointer.
 	char temp[512];		// Buffer for storing contents of a file.
 
-	// Open file.
+	// Open file
 	if ((fp = fopen(f, "r")) == NULL) {
 		printf("Error: unable to open %s: %s\n", f, strerror(errno));
 		return (-1);

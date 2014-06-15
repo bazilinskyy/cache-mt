@@ -1,13 +1,48 @@
+/*
+ ============================================================================================
+ Name        : pagefaults_fopen.c
+ Author      : Pavlo Bazilinskyy
+ Version     : 1.0
+ Copyright   : Copyright (c) 2014, Pavlo Bazilinskyy <pavlo.bazilinskyy@gmail.com>
+ School of Computer Science, National University of Ireland, Maynooth
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ THE SOFTWARE.
+
+ Description: Test different scenarios involving opening files to attempt to predict occurance
+ 			  of minor page faults.
+ Run instructions: compile with gcc. No special flags needed.
+ ============================================================================================
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 
-unsigned long long get_page_fault(int choice);
-char * file_to_string(char *f);
-
-// Based on code from Stephen Brown
-struct proc_stats {
+unsigned long long get_page_fault(int choice); // Function to get a counter of page faults
+char * file_to_string(char *f); // Return contents of the file f as a string.
+ 
+ /*
+ * Struct for information from the stat file.
+ * Based on code from Stephen Brown.
+ */
+struct proc_stats {		// Type of data stored
 	int pid;			// %d
 	char comm[256];		// %s
 	char state;			// %c
@@ -52,18 +87,20 @@ struct proc_stats {
 	unsigned long long delayacct_blkio_ticks;	// %llu
 };
 
+/*
+ * The main entry point of the programme.
+ */
 int main(int argc, const char ** argv) {
-	unsigned long long pageFaultsB = get_page_fault(1);
+	unsigned long long pageFaultsB = get_page_fault(1); // 1 - minor page faults
 
-	// Read file
-	FILE *fp;
+	FILE *fp; // Pointer to a file
 
-	// Open file.
+	// Open file
 	if ((fp = fopen("/proc/interrupts", "r")) == NULL) {
 		return (-1);
 	}
 
-	//Close the file if still open.
+	// Close file if still open.
 	if (fp) {
 		fclose(fp);
 	}
@@ -75,12 +112,12 @@ int main(int argc, const char ** argv) {
 
 	pageFaultsB = get_page_fault(1);
 
-	// Open file.
+	// Open file
 	if ((fp = fopen("/proc/interrupts", "r")) == NULL) {
 		return (-1);
 	}
 
-	//Close the file if still open.
+	// Close file if still open.
 	if (fp) {
 		fclose(fp);
 	}
@@ -92,7 +129,7 @@ int main(int argc, const char ** argv) {
 
 	pageFaultsB = get_page_fault(1);
 
-	// Open file.
+	// Open file
 	if ((fp = fopen("/proc/iomem", "r")) == NULL) {
 		return (-1);
 	}
@@ -137,9 +174,12 @@ int main(int argc, const char ** argv) {
 	printf("/proc/interrupts changed: Before: %llu After: %llu\n", pageFaultsB, pageFaultsA);
 }
 
-// Based on code from Stephen Brown
+/*
+ * Read information from the stat file (including data on detected page faults).
+ * Based on code from Stephen Brown.
+ */
 int read_stat(char * filename, int pid, struct proc_stats *s) {
-#ifndef __APPLE__
+#ifndef __APPLE__ // Does not work on Mac OS
 	const char *format =
 			"%d %s %c %d %d %d %d %d %lu %lu %lu %lu %lu %lu %lu %ld %ld %ld %ld %ld %ld %lu %lu %ld %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu %d %d %lu %lu %llu";
 	FILE *fp;
@@ -170,7 +210,10 @@ int read_stat(char * filename, int pid, struct proc_stats *s) {
 #endif
 }
 
-// 1 - minor, 2 - major
+/*
+ * Read counts of page faults from a proc_stats struct.
+ * choice: 1 - minor, 2 - major
+ */
 unsigned long long get_page_fault(int choice) {
 #ifndef __APPLE__
 	struct proc_stats statsData;
@@ -184,11 +227,8 @@ unsigned long long get_page_fault(int choice) {
 
 	if (choice == 1) {
 		return statsData.minflt;
-//		return statsData->cminflt);
-
 	} else if (choice == 2) {
 		return statsData.majflt;
-//	    return statsData->cmajflt;
 	}
 
 #else
@@ -196,12 +236,15 @@ unsigned long long get_page_fault(int choice) {
 #endif
 }
 
-static char result[8][8 * 1024]; // For storing contents of the file.
-static int cycle = 0; // Counter of how many files have been stored in result.
+static char result[8][8 * 1024]; 	// For storing contents of the file.
+static int cycle = 0; 				// Counter of how many files have been stored in result.
 
+/*
+ * Save contents of a file in a string.
+ */
 char * file_to_string(char *f) {
-	FILE *fp;
-	char temp[512];
+	FILE *fp;			// File pointer
+	char temp[512];		// Buffer for storing contents of a file
 
 	cycle++;
 	if (cycle == 8)
