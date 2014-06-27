@@ -1,0 +1,42 @@
+
+% Thesis Abstract -----------------------------------------------------
+
+% \renewenvironment{abstract}
+%  {\small
+%   \begin{center}
+%   \bfseries \abstractname\vspace{-.5em}\vspace{0pt}
+%   \end{center}
+%   \list{}{
+%     \setlength{\leftmargin}{.5cm}%
+%     \setlength{\rightmargin}{\leftmargin}%
+%   }%
+%   \item\relax}
+%  {\endlist}
+
+%\begin{abstractslong}    %uncommenting this line, gives a different abstract heading
+\begin{abstracts}        %this creates the heading for the abstract page
+
+This thesis answers the question whether a scheduler needs to take into account where communicating threads in multi-threaded applications are executed. The impact of cache on data-sharing in multi-threaded environments is measured. This work investigates a common base--case scenario in the telecommunication industry, where a programme has one thread that writes data and one thread that reads data. A taxonomy of inter-thread communication is defined. Furthermore, a mathematical model that describes inter-thread communication is presented. Two cycle--level experiments were designed to measure latency of CPU registers, cache and main memory. These results were utilised to quantify the model. Three application--level experiments were used to verify the model by comparing predictions of the model and data received in the real-life setting. The model broadens the applicability of experimental results, and it describes three types of communication outlined in the taxonomy. Storing communicating data across all levels of cache does have an impact on the speed of data--intense multi-threaded applications. Scheduling threads in a sender--receiver scenario to different dies in a multi-chip processor decreases speed of execution of such programmes by up to 37\%. Pinning such threads to different cores in the same chip results in up to 5\% decrease in speed of execution. The findings of this study show how threads need to be scheduled by a cache-aware scheduler. This project extends the author's previous work, which investigated cache interference.
+
+% \begin{description}
+%   \item[Category:] \hfill \\
+%   B.4.1 [Input/output and Data Communications]: Data Communications Devices - \textit{Processors}
+%   \item[General terms:] \hfill \\
+%   Measurement, Performance, Reliability, Experimentation.
+%   \item[Keywords:] \hfill \\
+%   cache, multi-core, multi-threaded, environment, system, hardware, processor, CPU, systems, speed, latency, throughput, scheduler, cache-aware, level 1, level 2, level 3, main memory, experiment.
+% \end{description}
+% \vspace{1.8cm}
+\pagebreak
+
+\textbf{Category:} B.4.1 [Input/output and Data Communications]: Data Communications Devices - \textit{Processors}
+
+\textbf{General terms:} Measurement, Performance, Reliability, Experimentation.
+
+\textbf{Keywords:} cache, multi-core, multi-threaded, environment, processor, CPU, speed, latency, throughput, scheduler, cache-aware, level 1, level 2, level 3, main memory, experiment, model, taxonomy.
+
+\end{abstracts}
+%\end{abstractlongs}
+
+
+% ---------------------------------------------------------------------- 

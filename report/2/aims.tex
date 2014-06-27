@@ -1,0 +1,23 @@
+% this file is called up by thesis.tex
+% content in this file will be fed into the main document
+
+\chapter{Aims of the project} % top level followed by section, subsection
+
+
+% ----------------------- contents from here ------------------------
+
+\section{Final aim}
+
+The main objective of this project is to investigate the impact of memory-based communication between threads that reside on different threads in applications run on systems that have various levels of multi-core inter-process communication. Such analysis is intended to help estimate at what stage does it produce specific value to allocate an application on different cores.
+
+Specifically, a mathematical model of multi-core cache communication for both single-ship and multi-chip systems is developed. Performance of tested systems is evaluated though estimating latency (for test cases with relatively small sizes of exchanged data) and throughput of data (test cases with relatively large amounts of data passed between threads). Latency of data traveling through different configurations of levels of cache and computer memory is measured. A number of test cases where data needs to pass through different configurations of levels of cache and computer memory are taken into account. To that extend a series of test programmes that inherit different properties of software and hardware systems (e.g. I/O intensive, require large computational power) are designed and tested. Results received from experiments are then used to fine-tune the model. Also, received results are to be compared with information provided in official specifications of used in experiments hardware.
+
+It is believed that outcomes of this study may be beneficial for optimising usage of computer resources by giving guidelines on whether a certain application should be run on multiple cores / chips or not. The final version of the aforementioned model is to be presented in the end of this study. Applications of results of this study for optimising existing and future industry-led projects are also evaluated.
+
+\section{Secondary aims}
+
+Additionally, other existing approaches to handling multi-threaded computation, such as GPU programming, are investigated. Within the scope of this study a conclusion if such research could also be beneficial for optimizing multi-threaded programmes run on those systems is given.
+
+% ---------------------------------------------------------------------------
+% ----------------------- end of thesis sub-document ------------------------
+% ---------------------------------------------------------------------------

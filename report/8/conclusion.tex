@@ -1,0 +1,48 @@
+
+% this file is called up by thesis.tex
+% content in this file will be fed into the main document
+
+\chapter{Conclusions and Future Work} % top level followed by section, subsection
+
+% ----------------------- paths to graphics ------------------------
+
+% change according to folder and file names
+\ifpdf
+    \graphicspath{{8/figures/PNG/}{8/figures/PDF/}{8/figures/}}
+\else
+    \graphicspath{{8/figures/EPS/}{8/figures/}}
+\fi
+
+% ----------------------- contents from here ------------------------
+
+This project evaluated the impact of cache on inter-thread communication in multi-threaded environments. Then, it assessed whether a scheduler needs to take such impact into account, when receiving threads are scheduled. This study involved creation of a model that describes inter-thread communication. Additionally, a taxonomy of such communication in multi-core systems was developed. Five experiments were designed to provide information necessary to quantify and verify the model. Two workstations that are powered by multi-chip processors Intel Xeon 5130 and Intel Xeon E5-2695 v2 were chosen for executing the experiments. The processors have different memory hierarchies, which allowed to receive results that permitted to test the validity of the model in different environments.
+
+A scenario described in the thesis, where a ``sending" thread (producer) writes data and a ``receiving" thread (consumer) reads data is possible in a real-life setting. The findings show that in such situation \textit{scheduling the receiving thread on a separate chip decreases the speed of execution of a multi-threaded programme} (by up to 37\% on Xeon 5130 and by up to 15\% on Xeon E5-2695 v2). \textit{Scheduling both threads on different cores of the same chip does not give any noticeable advantages}, i.e. the execution time is close to the base-case scenario where both threads are run on a single core (5\% difference on Xeon 5130 and 1\% difference on Xeon E5-2695 v2). Therefore, the fundamental conclusion may be defined as: \textit{in ``sender" - ``receiver" programmes, a scheduler needs to take where a receiving thread is scheduled into account}.
+
+For both the Xeon 5130 and the Xeon E5-2695 v2, the model was able to describe throughput of inter-thread communication. The model is capable of outlining patterns of latency and throughput for all three types of communication as described in the taxonomy: 1) where two threads that have been scheduled to the same core exchange data; 2) when two threads that reside on two cores on the same die communicate with each other; 3) where two threads that have been put on two different chips exchange data.
+
+The proposed model predicts close to linear nature for all levels of memory that it describes. Conducting experiments showed that in reality inter-thread communication is much more complicated and requires further modelling and analysis. Modelling cache behaviour is difficult \cite{Putigny2014}. Due to unavailability of detailed documentation of the underlying systems in modern-day processors, the performance model needs to abstract multiple aspects of the work of modern-day CPUs. Very little work on modelling of cache behaviour is done in the scientific community. Most only discuss simulations and provide no background analysis \cite{Heidelberger1990,Archibald1986,Zhao2011}. This thesis shows how difficult it is to model such behaviour.
+
+Data measured in the experiments can be considered dependable due to its nature, the experiments were run directly on the hardware. Because of the time limitation, formal methods could not be used to verify dependability of the experimental environment and achieved results.
+
+\section{Limitations}
+
+The accuracy of measured data can be improved, if the experiments were run as real-time process, which would have involved recompiling the Linux kernel in the given setting. The laboratory set-up used for conducting the experiments did not permit to do that easily. Also, it is believed that utilisation of the parallelised version of the \textit{RDTSC} instruction -- \textit{RDTSCP} -- or deterministic performance counters \cite{Weaver2013} will improve accuracy of measuring time. It will increase the level of dependability of achieved results, and it may permit usage of results that were measured in Experiment 1 (the overhead from the OS could not be eliminated, and the results were too ``noisy" to be used). The accuracy and precision of results could be improved if direct access to the servers was granted.
+
+This work discusses write-back caches. The reported results and predictions of the model will not hold for write-through caches (another commonly-used cache architecture), since the underlying behaviour of such caches is fundamentally different. When a write-through cache is used, data is written to caches and main memory, as opposed to just caches; it is not discussed in the model.
+
+Further, the proposed model ignores the aspect of cache associativity. It describes behaviour of only direct mapped caches. Adding support for fully associative and n-way set associative caches will improve the applicability of the model and the accuracy of scheduling decisions made based on its predictions.
+
+\section{Future Work}
+
+The key aim of any future work should focus on performing a similar study in a more complicated environment. This project focused on the case where a receiving threads runs immediately after a sending thread. The model may be used as a base for development of a more complete mathematical description of the processes that take place when multiple threads exchange information in a multi-core environment. Future work needs to extend reported results by performing experiments with thousands or millions of receiving and sending threads. A scenario that may commonly be seen in the Openet's area of expertise: solutions for analytics of telecommunications systems. The model also needs to be refined to provide more precise predictions that yield more accurate scheduling decisions. The refinement may include support for a larger number of memory hierarchies, prefetching, instruction parallelism, as well as other advanced techniques employed in modern-day processors. Such refinement will allow to create a more general model that will be applicable to a larger range of hardware.
+
+Further work may also involve testing the model with other scenarios of inter-thread communication and finishing the cross-platform support of the experimental environment (receiving data on different systems will be beneficial for development of a scheduler that can be run on different platforms). Additionally, the described experiments can be run in set ups that have distinctly different, to what is used in the study, hardware. One may decide to choose processors from other than Intel manufactures (e.g. AMD), since they often organise computer memory differently.
+
+Then, to improve dependability of the system and data that is measured in the experiments, a number of tools that are used in the industry and research may be used \cite{Woodcock2009}. In particular, VeriFast\footnote{\url{http://people.cs.kuleuven.be/~bart.jacobs/verifast/}} may be utilised in the project, as it is currently one of the front-runners in the industry \cite{Philippaerts2013} that has support for semi-automatic verification of software written in C. It will allow to prove that the code behind the experimental environment and the experiments is reliable and bug-free, which in turn will increase the dependability of received results.
+
+The author plans to continue work on this project, fine-tune the proposed model by performing the described experiments in other settings and develop a cache-aware scheduler that could be deployed to Linux-based systems. Such further work will allow to measure the applicability of such scheduler and see whether the results correlate to what is reported in the thesis.
+
+% ---------------------------------------------------------------------------
+%: ----------------------- end of thesis sub-document ------------------------
+% ---------------------------------------------------------------------------
