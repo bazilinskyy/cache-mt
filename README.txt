@@ -1,7 +1,7 @@
-Impact of cache on data-sharingin multi-threaded programmes
+# Impact of cache on data-sharingin multi-threaded programmes
+
 DESEM Dissertation
 Author: Pavlo Bazilinskyy - 12250063
-
 
 The source code is located in the folder "code". The experimental environment and experiments are located in the folder "code/src". Additional testing programmes are located in other sub-folders of the "code" folder. Both the main programme used to conduct experiments and all testing programmes are discussed in detail in the report (may be found in folder "report"), in particular in chapters 4 and 5.
 
