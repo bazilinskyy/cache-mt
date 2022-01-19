@@ -1,4 +1,4 @@
-# Impact of cache on data-sharingin multi-threaded programmes
+# Impact of cache on data-sharing in multi-threaded programmes
 
 ## MSc thesis
 This project is source code for my [MSc thesis](https://bazilinskyy.github.io/papers/bazilinskyy2014impact.pdf). The joint degree was obtained at [St Andrews Unviversity](https://www.st-andrews.ac.uk)/[Maynooth University](https://www.maynoothuniversity.ie).
